@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Rhapsody Video Player</title>
+	<!-- harness's styles 
+	-->
+	<link href="assets/css/main.css" media="screen" rel="stylesheet" type="text/css" />
+	<!-- player's styles -->
+	<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.8/themes/base/jquery-ui.css" media="screen" rel="stylesheet" type="text/css" />
+	<link href="assets/css/rhapVideo.css" media="screen" rel="stylesheet" type="text/css" />
+	<!-- player's libraries -->
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script>
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.8/jquery-ui.min.js"></script>
+	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
+	<script type="text/javascript" src="assets/js/rhapVideo.js"></script>
+</head>
+<body>
+<h1 class="header"><img src="assets/images/header_logo.jpg"/><span>Video Player</span></h1>
+	<!-- // BEGIN VIDEO PLAYER MARKUP /// -->
+	<div style="margin: 0 auto;width:640px">
+		<video width="640" height="264" poster="http://lamtran.com/oceans-clip.png" >
+	        <source src="http://lamtran.com/oceans-clip.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"' />
+	        <source src="http://lamtran.com/oceans-clip.webm" type='video/webm; codecs="vp8, vorbis"' />
+	        <source src="http://lamtran.com/oceans-clip.ogv" type='video/ogg; codecs="theora, vorbis"' />
+	        <source src="rtmp://lamtran.com:1935/vod/oceans-clip" type='video/mp4; codecs="vp6"' />
+	   </video>
+	</div>
+   <!-- /////////////////// END VIDEO PLAYER MARK UP // -->
+</body>
+</html>

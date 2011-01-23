@@ -1,0 +1,173 @@
+.rhapVideoContainer{
+    margin: 0 auto;
+    position: relative;
+}
+.rhapVideoControls{
+    bottom: 15px;
+    color: #FFFFFF;
+    height: 43px;
+    left: 11px;
+    margin: 0;
+    opacity: 0.95;
+    padding: 0;
+    position: absolute;
+    right: 11px;
+    -moz-border-radius: 5px 5px 5px 5px;
+    background-color: rgba(0,0,0,.3);
+}
+.rhapVideoPlayControl{
+	left: 14px;
+    width: 32px;	
+    height: 32px;
+    
+	/*
+    -moz-box-shadow: 1px 1px 2px #000000;
+    background-image: -moz-linear-gradient(center bottom , #8896A7, #253036);
+    -moz-border-radius:17px;
+    */
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    text-align: center;
+    top: 5px;
+}
+.rhapVideoPlayControlCanvas{
+	position: absolute;
+	top:0;
+	left:0;	
+}
+.rhapVideoPlayControl span{
+    display: block;
+    font-size: 0;
+    line-height: 0;
+}
+.rhapVideoPlayControl.paused span{
+	border-bottom: 5px solid transparent;
+    border-left: 10px solid #FFFFFF;
+    border-top: 5px solid transparent;
+    height: 0;
+    margin: 8px 0 0 8px;
+    width: 0;	
+}
+.rhapVideoPlayControl.playing span{
+	border-color: -moz-use-text-color #FFFFFF;
+    border-style: none solid;
+    border-width: 0 3px;
+    height: 10px;
+    margin: 8px auto 0;
+    width: 3px;
+}
+.rhapVideoPlayControl.disabled span{
+	border-bottom: 5px solid transparent;
+    border-left: 10px solid #CCCCCC;
+    border-top: 5px solid transparent;
+    height: 0;
+    margin: 8px 0 0 8px;
+    width: 0;	
+}
+.bigPlayButton{
+    position: absolute;
+    opacity: 0.9;
+  	border-radius: 5px; 
+  	-webkit-border-radius: 5px; 
+  	-moz-border-radius: 5px;
+	/*
+	background: -moz-linear-gradient(left, #FFFFFF, #000000);
+	*/
+	background-color: #0B151A;
+	box-shadow: 4px 4px 8px #000; 
+	-webkit-box-shadow: 4px 4px 8px #000; 
+	-moz-box-shadow: 4px 4px 8px #000;
+}
+.bigPlayButton:hover,.rhapVideoVolumeButton:hover{
+	cursor: pointer;	
+}
+.rhapVideoVolumeBox:hover .rhapVideoVolumeSlider{
+	display:block;
+}
+.rhapVideoTimer{
+	/*
+	position: absolute;	
+	background: -moz-linear-gradient(left 90deg, #FFFFFF, #000000);
+	*/
+	width: 45px;
+	height: 20px;
+}
+.rhapVideoSeekBar{
+	position: absolute;
+	left: 58px;
+	top: 16px;
+}
+.rhapVideoVolumeBox{
+	bottom: 7px;
+    position: absolute;
+    padding-top: 16px;
+    right: 72px;
+}
+.rhapVideoVolumeSlider{
+	height: 39px;
+    left: 5px;
+    top: -5px;
+    width: 5px;
+    display:none;
+}
+.rhapVideoBufferBar{
+	background: -moz-linear-gradient(center top -90deg, #2A4669, #1C334E) repeat scroll left 0 #1F3744;
+	height: 100%;
+	width:0;
+	-moz-border-radius: 4px 4px 4px 4px;
+}
+/** override jquery ui styles **/
+.rhapVideoSeekBar .ui-slider-handle {
+    margin-left: -0.1em;
+}
+.rhapVideoSeekBar .ui-slider-handle {
+    width: 7px;
+}
+.ui-slider-handle.ui-corner-all {
+    -moz-border-radius: 1px 1px 1px 1px;
+}
+.rhapVideoSeekBar {
+    height: 9px;
+}
+.rhapVideoSeekBar.ui-widget-content{
+    border: 1px solid #000000;
+    background: -moz-linear-gradient(center top -90deg, #4E4E57, #323336) repeat scroll left 0 #1F3744;
+}
+.rhapVideoVolumeSlider.ui-widget-content{
+	background: -moz-linear-gradient(left, #4E4E57, #323336) repeat scroll left 0 #1F3744;
+	border: 1px solid #000000;
+}
+.rhapVideoSeekBar .ui-slider-range{
+	-moz-border-radius: 4px 3px 2px 4px;
+	-webkit-border-radius: 4px 3px 2px 4px;
+}
+.rhapVideoVolumeSlider .ui-slider-range{
+	-moz-border-radius: 4px 3px 2px 4px;
+	-webkit-border-radius: 4px 3px 2px 4px;
+}
+.rhapVideoVolumeSlider .ui-slider-handle{
+	-moz-border-radius: 21px 21px 21px 21px;
+	-webkit-border-radius: 21px;
+    height: 11px;
+    left: -4px;
+    width: 11px;
+}
+.rhapVideoSeekBar .ui-slider-handle {
+    height: 18px;
+}
+.rhapVideoSeekBar .ui-slider-handle.ui-state-default{
+	border: 1px solid #4D4D4D;
+}
+.rhapVideoVolumeSlider .ui-slider-handle.ui-state-default{
+	border: 1px solid #000000;
+}
+.rhapVideoSeekBar .ui-state-default{
+	background: -moz-linear-gradient(center top -90deg, #FFFFFF, #000000) repeat scroll left 0 #1F3744;
+}
+.rhapVideoSeekBar .ui-widget-header{
+	background: -moz-linear-gradient(center top -90deg, #56B0E2, #3D7FA1) repeat scroll left 0 #1F3744;
+}
+.rhapVideoVolumeSlider .ui-widget-header{
+	background: -moz-linear-gradient(center top -90deg, #008AC9, #0074A5) repeat scroll left 0 #1F3744;
+}

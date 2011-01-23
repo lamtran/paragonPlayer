@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<player width="320" height="480">
+	<skin>
+		<element id="controlsPane" prop="backgroundColor" value="#ff0000"/>
+		<element id="controlsPane" prop="backgroundAlpha" value="1.0"/>
+	</skin>
+	<videos>
+		<video current="true" config="" thumbnail="assets/videos/trick_tip_josh.jpg">
+			<playback server="rtmp://lamtran.com/vod">
+				<path>lam/test</path>
+			</playback>
+		</video>
+		<video current="false" config="" thumbnail="assets/videos/trick_tip_josh.jpg">
+			<playback server="">
+				<path>assets/videos/cloud_vs_the_emperor.flv</path>
+			</playback>
+		</video>
+		<video current="false" config="config1.xml" thumbnail="assets/videos/trick_tip_josh.jpg">
+			<playback server="rtmp://alpha.add-a-trick.com/vod">
+				<path>lam/test</path>
+			</playback>
+		</video>
+	</videos>
+</player>

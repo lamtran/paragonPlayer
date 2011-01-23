@@ -1,0 +1,83 @@
+/* CSS file */
+body{
+	background: #EBEBEB;	
+	margin:0;
+	font-family:"Trebuchet MS",Arial,sans-serif;
+}
+h1.header{
+	background: url(../images/logo_bg.jpg) repeat-x;	
+	text-align: center;
+}
+h2.configHeader{
+	background: url(../images/header_bg.jpg) repeat-x;
+	padding: 10px;	
+}
+h1.header span{
+	left:20px;
+	position:relative;
+	top:-16px;
+}
+#config{
+	position:absolute;
+	right:7px;
+	top:38px;
+}
+#configSection{
+	padding-bottom: 16px;	
+}
+#configSection table{
+	display:block;
+	margin:0 auto;
+	width:458px;
+	text-align: left;
+	border-collapse: collapse;
+}
+#configSection table tr td{
+	border-bottom: 1px solid #ccc;
+	padding-top: 6px;
+	padding-bottom: 6px;
+}
+#configSection table tr.submit td, #configSection table tr.options td{
+	border-bottom: 0;	
+}
+#configSection label{
+	width: 80px;	
+	margin-left: 5px;
+}
+#configSection input{
+	width: 100%;	
+}
+#configSection input.checkbox{
+	width: auto;	
+}
+#configSection .options label{
+	display:inline-block;
+	width:87px;
+}
+#configSection .options input{
+	margin-right:39px;
+}
+#configSection .optional input.checkbox{
+	width: auto;	
+	left: 0;
+}
+#configSection .optional .wrapper{
+	padding-bottom: 5px;
+}
+#configSection .optional .wrapper label{
+	display:inline-block;
+	width:112px;
+}
+#configSection .optional .wrapper input{
+	left:4px;
+	position:relative;
+	width:321px;
+}
+#configSection .optional{
+	padding:0;
+	margin:0;
+}
+#configSection .optional td{
+	padding:0;
+	margin:0;	
+}

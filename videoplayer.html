@@ -1,0 +1,118 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Rhapsody Video Player</title>
+	<link href="css/main.css" media="screen" rel="stylesheet" type="text/css" />
+	<script type="text/javascript" src="js/prototype.js"></script>
+</head>
+<body>
+<h1 class="header"><img src="images/header_logo.jpg"/><span>Video Player</span></h1>
+<a href="#" id="config">Configurations</a>
+<div id="videoplayerWrapper"></div>
+<a href="#" id="embed">Embed Code</a>
+<p id="embedcode" style="display:none"></p>
+<div id="configSection">
+	<h2 class="configHeader">Configurations</h2>
+	<form id="configForm">
+		<table>
+			<tbody>
+				<tr>
+					<td><label for="width">Width:</label></td>
+					<td><input id="width" name="width"/></td>
+					<td><label for="height">Height:</label></td>
+					<td><input id="height" name="height"/></td>
+				</tr>
+				<tr>
+					<td colspan="1"><label for="path">Video Path:</label></td>
+					<td colspan="3"><input type="text" id="path" name="path"/></td>
+				</tr>
+				<tr class="options">
+					<td colspan="4">
+						<label for="isStreaming">Stream Url:</label><input id="isStreaming" type="checkbox" class="checkbox"/>
+						<label for="isAd">Ad Url:</label><input id="isAd" type="checkbox" class="checkbox"/>
+						<label for="isImageUrl">Image Url:</label><input id="isImageUrl" type="checkbox" class="checkbox"/>
+						<label for="isLogo">Logo Url:</label><input id="isLogo" type="checkbox" class="checkbox"/>
+						<label for="isAutoplay">Autoplay:</label><input id="isAutoplay" type="checkbox" class="checkbox"/>
+						<label for="isTransparent">Transparent:</label><input id="isTransparent" type="checkbox" class="checkbox"/>
+						<label for="isShowFps">Show FPS:</label><input id="isShowFps" type="checkbox" class="checkbox"/>
+						<label for="isFramerate">Set FPS:</label><input id="isFramerate" type="checkbox" class="checkbox"/>
+						<label for="isAnalyticsDebug">GA Debug:</label><input id="isAnalyticsDebug" type="checkbox" class="checkbox"/>
+						<label for="isAnalytics">GA Code:</label><input id="isAnalytics" type="checkbox" class="checkbox"/>
+					</td>
+				</tr>
+				<tr class="optional">
+					<td colspan="4">
+						<div id="isStreamingWrapper" style="display:none" class="wrapper">
+							<label for="server"><a href="#">Streaming Url:</a></label><input id="isStreamingValue" type="text"/>
+						</div>
+						<div id="isAdWrapper" style="display:none" class="wrapper">
+							<label for="isAdValue"><a href="#">Ad Url:</a></label><input id="isAdValue" type="text"/>
+						</div>
+						<div id="isImageUrlWrapper" style="display:none" class="wrapper">
+							<label for="isImageUrlValue"><a href="#">Image Url:</a></label><input id="isImageUrlValue" type="text"/>
+						</div>
+						<div id="isLogoWrapper" style="display:none" class="wrapper">
+							<label for="isLogoValue"><a href="#">Logo Url:</a></label><input id="isLogoValue" type="text"/>
+						</div>
+						<div id="isFramerateWrapper" style="display:none" class="wrapper">
+							<label for="isFramerateValue"><a href="#">Framerate:</a></label><input id="isFramerateValue" type="text"/>
+						</div>
+						<div id="isAnalyticsWrapper" style="display:none" class="wrapper">
+							<label for="isAnalyticsValue"><a href="#">GA Code:</a></label><input id="isAnalyticsValue" type="text"/>
+						</div>
+					</td>
+				</tr>
+				<tr class="submit">
+					<td colspan="1">
+						<label>Test Data:</label>
+					</td>
+					<td colspan="1">
+						<select id="testData">
+							<option value="blank"></option>
+							<option value="prog_no_ad">Progressive, no ad</option>
+							<option value="stream_no_ad">Streaming, no ad</option>
+							<option value="stream_ad">Streaming, ad</option>
+							<option value="prog_ad">Progressive, ad</option>
+						</select>
+					</td>
+					<td colspan="2"><input type="submit" value="Update Player" id="submitBtn"/></td>
+				</tr>
+			</tbody>
+		</table>
+	</form>
+	<div style="">
+		<h2>Resources</h2>
+		<ul style="list-style:none">
+			<li><a href="http://www.communitymx.com/content/article.cfm?page=3&cid=EBD77" target="_blank">FLV Data Rate and Bandwidth</a></li>
+			<li><a href="http://help.encoding.com/idx.php/6/038/Encoding/article/What-are-the-best-Flash-video-frame-dimensions.html" target="_blank">Aspect Ratio</a></li>
+		</ul>
+		<h2>Project</h2>
+		<ul style="list-style:none">
+			<li><a href="videoplayer.zip">Download</a></li>
+			<li><a href="http://svn.dev.prognet.com/repos/np/app/rhapsodyflex/SlimVideoPlayer/" target="_blank">Source</a></li>
+		</ul>
+	</div>
+</div>
+<script type="text/javascript">
+	var config = {
+		'swfPath':'SlimVideoPlayer.swf',
+		'id':'videoplayer',
+		'width':640,
+		'height':480,
+		'server':'rtmp://flashplay.rbn.com/a41/d1/rstone/rstone/',
+		'path':'download/flash/RSGG/KnuxFinal',
+		'adurl':'http://ad.doubleclick.net/adx/real.rhap/;type=newvideoplayer;sz=150x120',
+ 		'parent':'videoplayerWrapper'
+	}
+	document.observe('dom:loaded',function(e){
+		var page = new Page();
+		page.init(config);
+	});
+</script>
+<script type="text/javascript" src="js/swfobject.js"></script>
+<script type="text/javascript" src="js/scriptaculous/scriptaculous.js"></script>
+<script type="text/javascript" src="js/scriptaculous/effects.js"></script>
+<script type="text/javascript" src="js/scriptaculous/controls.js"></script>
+<script type="text/javascript" src="js/definitions.js"></script>	
+</body>
+</html>

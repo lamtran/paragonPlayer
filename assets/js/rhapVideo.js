@@ -171,6 +171,19 @@ function drawPauseLeftBar(context, width,height){
 		y3:y3
 	};
 }
+function drawRoundRect(ctx, x, y, width, height, radius) {
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + width - radius, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+  ctx.lineTo(x + width, y + height - radius);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  ctx.lineTo(x + radius, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
+}
 function drawPauseRightBar(context, width,height){
 	var barWidth = width/6;
 	var barHeight = 14;
@@ -213,7 +226,7 @@ function RhapVideo(){
 	// constants
 	/* @const */ var swfLocation = 'http://blog.rhapsody.com/video/SlimVideoPlayer.swf';
 	
-	var video, parent, controls, playPause, playPauseCanvas, seekBar, timer, volumeSlider, volumeBtn;
+	var video, parent, controls, playPause, playPauseCanvas, seekBar, timer, volumeSlider, volumeBtn, fullScreenBtn;
 	var bigPlayButton, seekBarHandle;
 	var seekSliding, seekValue=-1, videoVolume, savedVolumeBeforeMute;
 	
@@ -279,27 +292,29 @@ function RhapVideo(){
 			});
 			//detecting progressive or streaming
 			var server,path;
-			if(endsWith(flv,'.flv')){
-				//progressive
-				path = flv;
-			}else{
-				//streaming
-				server = flv.substr(0,flv.lastIndexOf('/'));
-				path = flv.substring(flv.lastIndexOf('/'),flv.length);
+			if(flv){
+				if(endsWith(flv,'.flv')){
+					//progressive
+					path = flv;
+				}else{
+					//streaming
+					server = flv.substr(0,flv.lastIndexOf('/'));
+					path = flv.substring(flv.lastIndexOf('/'),flv.length);
+				}
+				if(server!=null){
+					flashvars['server']=server;
+				}
+				flashvars['path']=path;
+				if(video.poster!=null){
+					flashvars['imageurl']=video.poster;
+				}
+				parent.append($j('<div id="replaceMe"><p><a href="http://www.adobe.com/go/getflashplayer"><img src="http://www.adobe.com/images/shared/download_buttons/get_flash_player.gif" alt="Get Adobe Flash player" /></a></p></div>'));
+				swfobject.embedSWF(swfLocation, 'replaceMe', video.width, video.height, "9.0.0", false, flashvars, params, attributes);
+				$j(video).remove();
+				setTimeout(function(){
+					video = document.getElementById(attributes.id);
+				},10);
 			}
-			if(server!=null){
-				flashvars['server']=server;
-			}
-			flashvars['path']=path;
-			if(video.poster!=null){
-				flashvars['imageurl']=video.poster;
-			}
-			parent.append($j('<div id="replaceMe"><p><a href="http://www.adobe.com/go/getflashplayer"><img src="http://www.adobe.com/images/shared/download_buttons/get_flash_player.gif" alt="Get Adobe Flash player" /></a></p></div>'));
-			swfobject.embedSWF(swfLocation, 'replaceMe', video.width, video.height, "9.0.0", false, flashvars, params, attributes);
-			$j(video).remove();
-			setTimeout(function(){
-				video = document.getElementById(attributes.id);
-			},10);
 		}
 	};
 	/**
@@ -308,7 +323,7 @@ function RhapVideo(){
 	this._drawControls = function(video){
 		var scope = this;
 		var seekBarLeftOffset = 38;
-		var seekBarRightMargin = 150;
+		var seekBarRightMargin = 132;
 		parent.append($j(
 			'<div class="rhapVideoControls">'+
 				'<a href="#" class="rhapVideoPlayControl paused disabled"><span>Play</span><canvas width="32" height="32" class="rhapVideoPlayControlCanvas"/></a>'+
@@ -317,6 +332,8 @@ function RhapVideo(){
 					'<div class="rhapVideoVolumeSlider"></div>'+
 					'<canvas width="24" height="18" class="rhapVideoVolumeButton"/>'+
 				'</div>'+
+				'<canvas width="24" height="18" class="rhapVideoFullScreenButton"/>'+
+				'<canvas width="24" height="18" class="rhapVideoMoreButton"/>'+
 			'</div>'));
 		//get newly created elements
 		controls = $j('.rhapVideoControls',parent);
@@ -377,6 +394,9 @@ function RhapVideo(){
 			}
 		});
 		this._drawVolumeBtn(volumeBtn);
+		
+		fullScreenBtn = $j('.rhapVideoFullScreenButton',controls);
+		this._drawFullScreenBtn(fullScreenBtn);
 	};
 	/**
 	 * @description set up event handlers for html5 video element
@@ -387,6 +407,11 @@ function RhapVideo(){
 		var upGradientStops = {upGradientStops:['#5F6367','#1D1E25']};
 		/* @const */ var WAITING_STATE = 2;
 		var scope = this;
+		$j(parent).hover(function(){
+			$j(controls).show();
+		},function(){
+			$j(controls).hide();
+		});
 		$j(bigPlayButton).click(function(){
 			$j(this).hide();
 			video.play();
@@ -500,27 +525,61 @@ function RhapVideo(){
 		return supportsVideo(v) &&
 			(supportsH264Codec(v) || supportsVp8Codec(v)  || supportsTheoraCodec(v));
 	};
+	this._drawFullScreenBtn = function(fullScreenBtn){
+		var canvas = fullScreenBtn[0];
+		var context = canvas.getContext('2d');
+		var width = 20;
+		var height = 15;
+		var radius = 5;
+		var sides = 5;
+		context.fillStyle='#ffffff';
+		context.lineWidth = 1;
+		context.strokeStyle= '#ffffff';
+		drawRoundRect(context,width/4+0,height/4+1,width/2-0,height/2-2,2);
+		context.fill(); 
+		context.stroke();
+		
+		context.beginPath();
+		context.moveTo(radius, 0);
+		context.lineTo(sides, 0);
+		context.lineTo(0, sides);
+		context.lineTo(0, radius);
+		context.quadraticCurveTo(0, 0, radius,0);
+		context.closePath();
+		context.fill();
+		context.stroke();
+		
+		context.beginPath();
+		context.moveTo(width-radius, 0);
+		context.lineTo(width-sides, 0);
+		context.lineTo(width, sides);
+		context.lineTo(width, radius);
+		context.quadraticCurveTo(width, 0, width-radius,0);
+		context.closePath();
+		context.fill();
+		context.stroke();
+		
+		context.beginPath();
+		context.moveTo(width, height-radius);
+		context.lineTo(width, height-sides);
+		context.lineTo(width-sides, height);
+		context.lineTo(width-radius, height);
+		context.quadraticCurveTo(width, height, width,height-radius);
+		context.closePath();
+		context.fill();
+		context.stroke();
+		
+		context.beginPath();
+		context.moveTo(0, height-radius);
+		context.lineTo(0, height-sides);
+		context.lineTo(sides, height);
+		context.lineTo(radius, height);
+		context.quadraticCurveTo(0, height, 0,height-radius);
+		context.closePath();
+		context.fill();
+		context.stroke();
+	};
 	this._drawVolumeBtn = function(volumeBtn){
-		/*
-		//4.779,0 1.916,2.586 1.916,2.592 0,2.592 0,6.635 1.936,6.635 4.779,9.166
-		graphics.clear();
-		graphics.beginFill(0xFFFFFF,1);
-		graphics.moveTo(4.779,0);
-		graphics.lineTo(1.916,2.586);
-		graphics.lineTo(1.916,2.592);
-		graphics.lineTo(0,2.592);
-		graphics.lineTo(0,6.635);
-		graphics.lineTo(1.936,6.635);
-		graphics.lineTo(4.779,9.166);
-		graphics.endFill();
-		
-		graphics.lineStyle(1,0xFFFFFF);
-		graphics.moveTo(6,2);
-		graphics.curveTo(8,6,6,7);
-		
-		graphics.moveTo(8,1);
-		graphics.curveTo(12,6,8,8);
-		*/
 		var canvas = volumeBtn[0];
 		var context = canvas.getContext('2d');
 		var width = 10;
@@ -534,12 +593,6 @@ function RhapVideo(){
 		context.lineTo(width,height);
 		context.closePath();
 		
-//		context.moveTo(width+2,height/2);
-//		context.arc(width+2,2,3,0,Math.PI/4,false);
-//		context.moveTo(width+2,2);
-//		context.arc(width+12,2,43,0,Math.PI,false);
-		
-		
 		context.fillStyle='#ffffff';
 		context.lineWidth = 1;
 		context.strokeStyle= '#ffffff';
@@ -547,12 +600,12 @@ function RhapVideo(){
 		context.stroke(); 
 		
 		context.lineWidth = 1;
-		context.moveTo(width+4, 3);
-		context.arc(width+4,height/2+1,4,-(Math.PI/2-Math.PI/4),(Math.PI-Math.PI/2),false);
-		context.stroke(); 
-		
+		context.moveTo(width+4,3);
+		context.quadraticCurveTo(width+6,height/2,width+4,height-3);
+		context.stroke();
+
 		context.moveTo(width+6, 1);
-		context.arc(width+6,height/2+1,6,-(Math.PI/2-Math.PI/4),(Math.PI-Math.PI/2),false);
+		context.quadraticCurveTo(width+12,height/2,width+6,height-1);
 		context.stroke();
 	};
 	this._drawTimerLabel = function(timer, width, boxHeight,text){

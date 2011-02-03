@@ -14,6 +14,7 @@
     right: 11px;
     -moz-border-radius: 5px 5px 5px 5px;
     background-color: rgba(0,0,0,.3);
+    display:none;
 }
 .rhapVideoPlayControl{
 	left: 14px;
@@ -98,11 +99,15 @@
 	left: 58px;
 	top: 16px;
 }
-.rhapVideoVolumeBox{
-	bottom: 7px;
-    position: absolute;
+.rhapVideoVolumeBox, .rhapVideoFullScreenButton{
+	bottom: 6px;
     padding-top: 16px;
-    right: 72px;
+    position: absolute;
+    right: 55px;
+}
+.rhapVideoFullScreenButton{
+	right: 28px;	
+	bottom: 10px;
 }
 .rhapVideoVolumeSlider{
 	height: 39px;

@@ -149,6 +149,26 @@
 	width:0;
 	-moz-border-radius: 4px 4px 4px 4px;
 }
+.rhapVideoMoreControls{
+	-moz-border-radius: 5px 5px 5px 5px;
+    background-color: rgba(0,0,0,.3);
+    position: absolute;
+    display:none;
+    overflow: hidden;
+    right: 10px;
+    bottom: 64px;
+}
+.rhapVideoMoreControls ul{
+	list-style: none;	
+	margin:0;
+	padding:10px;
+}
+.rhapVideoMoreControls a{
+	text-decoration: none;	
+	color: #fff;
+}
+
+
 /** override jquery ui styles **/
 .rhapVideoSeekBar .ui-slider-handle {
     margin-left: -0.1em;

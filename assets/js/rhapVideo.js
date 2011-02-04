@@ -228,7 +228,8 @@ function RhapVideo(){
 	
 	var video, parent, controls, playPause, playPauseCanvas, seekBar, timer, volumeSlider, volumeBtn, fullScreenBtn;
 	var bigPlayButton, seekBarHandle, rhapVideoMoreButton;
-	var seekSliding, seekValue=-1, videoVolume, savedVolumeBeforeMute;
+	var seekSliding, seekValue=-1, videoVolume, savedVolumeBeforeMute, isFullScreen = false, isShowMore = false;
+	var rhapVideoMoreControls;
 	
 	/**
 	 * @description Initialize the video class
@@ -335,8 +336,18 @@ function RhapVideo(){
 				'<canvas width="24" height="18" class="rhapVideoFullScreenButton"/>'+
 				'<canvas width="24" height="18" class="rhapVideoMoreButton"/>'+
 			'</div>'));
+		parent.append($j(
+			'<div class="rhapVideoMoreControls">'+
+				'<ul>'+
+					'<li><a href="#">more</a></li>'+
+					'<li><a href="#">cc</a></li>'+
+					'<li><a href="#">share</a></li>'+
+				'</ul>'+
+			'</div>'
+		));
 		//get newly created elements
 		controls = $j('.rhapVideoControls',parent);
+		rhapVideoMoreControls = $j('.rhapVideoMoreControls',parent);
 		playPause = $j('.rhapVideoPlayControl',controls);
 		playPauseCanvas = $j('.rhapVideoPlayControlCanvas',playPause)[0];
 		
@@ -414,6 +425,7 @@ function RhapVideo(){
 			$j(controls).show();
 		},function(){
 			$j(controls).hide();
+			showLess();
 		});
 		$j(bigPlayButton).click(function(){
 			$j(this).hide();
@@ -513,16 +525,47 @@ function RhapVideo(){
 			video.muted = !video.muted;
 		});
 		$j(fullScreenBtn).click(function(){
-			$j(parent).addClass('rhapVideoFullscreen');
-			console.log('hiii');
+			if(!isFullScreen){
+				isFullScreen = true;
+				$j(parent).addClass('rhapVideoFullscreen');
+			}else{
+				isFullScreen = false;
+				$j(parent).removeClass('rhapVideoFullscreen');
+			}
 			var seekBarLeftOffset = 38;
 			var seekBarRightMargin = 132;
-			console.log('video width now: ' + parseInt($j(video).css('width')));
-			console.log('width css: ' + $j(video).css('width'));
 			var w = parseInt($j(video).css('width'));
-			console.log('total: ' +w-seekBarLeftOffset-seekBarRightMargin);
 			seekBar.css({'width':w-seekBarLeftOffset-seekBarRightMargin});
 		});
+		$j(rhapVideoMoreButton).click(function(){
+			if(!isShowMore){
+				showMore();
+			}else{
+				showLess();
+			}
+		});
+		var showMore = function(){
+			console.log('show moreeeee');
+			isShowMore = true;
+			scope._drawMoreBtn(rhapVideoMoreButton,'down');
+			if(rhapVideoMoreControls.css('display')=='block'){
+				console.log('its visivle');
+			}else{
+				console.log('its not visible');
+			}
+			rhapVideoMoreControls.slideUp();
+		};
+		var showLess = function(){
+			console.log('show lesssss');
+			isShowMore = false;
+			scope._drawMoreBtn(rhapVideoMoreButton,'up');
+			if(rhapVideoMoreControls.css('display')=='block'){
+				console.log('its visivle');
+			}else{
+				console.log('its not visible');
+			}
+			rhapVideoMoreControls.slideDown();
+		};
 		//private helpers
 		var showPausedState = function(){
 			$j(bigPlayButton).show();
@@ -545,8 +588,8 @@ function RhapVideo(){
 		}
 		var canvas = rhapVideoMoreButton[0];
 		var context = canvas.getContext('2d');
-		var width = 17;
-		var height = 17;
+		var width = 18;
+		var height = 18;
 		var directionOffset = direction=='up' ? height/3 +1: 2*height/3-1;
 		var yOffset = direction=='up' ? height/2 + 1: height/2 - 1;
 		context.fillStyle='#29ABE2';

@@ -227,7 +227,7 @@ function RhapVideo(){
 	/* @const */ var swfLocation = 'http://blog.rhapsody.com/video/SlimVideoPlayer.swf';
 	
 	var video, parent, controls, playPause, playPauseCanvas, seekBar, timer, volumeSlider, volumeBtn, fullScreenBtn;
-	var bigPlayButton, seekBarHandle;
+	var bigPlayButton, seekBarHandle, rhapVideoMoreButton;
 	var seekSliding, seekValue=-1, videoVolume, savedVolumeBeforeMute;
 	
 	/**
@@ -397,6 +397,9 @@ function RhapVideo(){
 		
 		fullScreenBtn = $j('.rhapVideoFullScreenButton',controls);
 		this._drawFullScreenBtn(fullScreenBtn);
+		
+		rhapVideoMoreButton = $j('.rhapVideoMoreButton',controls);
+		this._drawMoreBtn(rhapVideoMoreButton);
 	};
 	/**
 	 * @description set up event handlers for html5 video element
@@ -509,6 +512,17 @@ function RhapVideo(){
 			}
 			video.muted = !video.muted;
 		});
+		$j(fullScreenBtn).click(function(){
+			$j(parent).addClass('rhapVideoFullscreen');
+			console.log('hiii');
+			var seekBarLeftOffset = 38;
+			var seekBarRightMargin = 132;
+			console.log('video width now: ' + parseInt($j(video).css('width')));
+			console.log('width css: ' + $j(video).css('width'));
+			var w = parseInt($j(video).css('width'));
+			console.log('total: ' +w-seekBarLeftOffset-seekBarRightMargin);
+			seekBar.css({'width':w-seekBarLeftOffset-seekBarRightMargin});
+		});
 		//private helpers
 		var showPausedState = function(){
 			$j(bigPlayButton).show();
@@ -525,6 +539,34 @@ function RhapVideo(){
 		return supportsVideo(v) &&
 			(supportsH264Codec(v) || supportsVp8Codec(v)  || supportsTheoraCodec(v));
 	};
+	this._drawMoreBtn = function(rhapVideoMoreButton,direction){
+		if(direction==null){
+			direction = 'up';
+		}
+		var canvas = rhapVideoMoreButton[0];
+		var context = canvas.getContext('2d');
+		var width = 17;
+		var height = 17;
+		var directionOffset = direction=='up' ? height/3 +1: 2*height/3-1;
+		var yOffset = direction=='up' ? height/2 + 1: height/2 - 1;
+		context.fillStyle='#29ABE2';
+		context.lineWidth = 1;
+		context.strokeStyle= '#29ABE2';
+		context.beginPath();
+		context.arc(width/2, height/2, 8, 0, Math.PI * 2, true);
+		context.fill();
+		context.stroke();
+		context.closePath();
+
+		context.lineWidth = 3;
+		context.strokeStyle= '#0C303F';
+		context.beginPath();
+		context.moveTo(width/4,yOffset);
+		context.lineTo(width/2,directionOffset);
+		context.lineTo(3*width/4,yOffset);
+		context.stroke();
+		
+	};
 	this._drawFullScreenBtn = function(fullScreenBtn){
 		var canvas = fullScreenBtn[0];
 		var context = canvas.getContext('2d');
@@ -532,9 +574,9 @@ function RhapVideo(){
 		var height = 15;
 		var radius = 5;
 		var sides = 5;
-		context.fillStyle='#ffffff';
+		context.fillStyle='#29ABE2';
 		context.lineWidth = 1;
-		context.strokeStyle= '#ffffff';
+		context.strokeStyle= '#29ABE2';
 		drawRoundRect(context,width/4+0,height/4+1,width/2-0,height/2-2,2);
 		context.fill(); 
 		context.stroke();
@@ -593,9 +635,9 @@ function RhapVideo(){
 		context.lineTo(width,height);
 		context.closePath();
 		
-		context.fillStyle='#ffffff';
+		context.fillStyle='#29ABE2';
 		context.lineWidth = 1;
-		context.strokeStyle= '#ffffff';
+		context.strokeStyle= '#29ABE2';
 		context.fill(); 
 		context.stroke(); 
 		
@@ -846,7 +888,7 @@ $j(function(){
 	$j('video').each(function(index,video){
 		//wrap each video element in a div so we have context to build the controls
 		$j(video).wrap(function() {
-			  return '<div style="position:relative" />';
+			  return '<div class="rhapVideoWrapper" />';
 		});
 		new RhapVideo().init(video);
 	});

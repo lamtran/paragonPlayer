@@ -22,7 +22,7 @@
 	height: 100%; 
 	z-index: 1000;	
 }
-.rhapVideoFullscreen .rhapVideoControls{
+.rhapVideoFullscreen .rhapVideoControls, .rhapVideoFullscreen .rhapVideoMoreControls{
 	z-index: 1001;	
 }
 .rhapVideoControls{
@@ -88,6 +88,10 @@
     height: 0;
     margin: 8px 0 0 8px;
     width: 0;	
+}
+.rhapVideoSharePanel{
+	-moz-border-radius: 5px 5px 5px 5px;
+    background-color: rgba(0,0,0,.3);
 }
 .bigPlayButton{
     position: absolute;

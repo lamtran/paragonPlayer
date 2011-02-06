@@ -227,7 +227,7 @@
 		var video, parent, controls, playPause, playPauseCanvas, seekBar, timer, volumeSlider, volumeBtn, fullScreenBtn;
 		var bigPlayButton, seekBarHandle, rhapVideoMoreButton;
 		var seekSliding, seekValue=-1, videoVolume, savedVolumeBeforeMute, isFullScreen = false, isShowMore = false;
-		var rhapVideoMoreControls, rhapVideoSharePanel, rhapVideoShareBtn, rhapVideoShareUrl;
+		var rhapVideoMoreControls, rhapVideoSharePanel, rhapVideoShareBtn, rhapVideoShareUrl, rhapVideoSharePanelCloseButton;
 		
 		/**
 		 * @description Initialize the video class
@@ -347,16 +347,17 @@
 					'</div>'
 			));
 			parent.append($(
-					'<div class="rhapVideoSharePanel" title="Share">'+
-						'<a href="#" class="rhapVideoSharePanelCloseButton">Close</a>'+
+					'<div class="rhapVideoSharePanel">'+
 						'<div class="rhapVideoSharePanelContent">'+
 							'<h2>Share</h2>'+
 							'<span>Get URL:&nbsp;</span><input type="text" class="rhapVideoShareUrl"/>'+
 							'<ul>'+
 								'<li><a name="fb_share" type="button_count">Share</a></li>'+
 								'<li><a href="http://twitter.com/share" class="twitter-share-button" data-count="none">Tweet</a></li>'+
+								'<li><a title="Post to Google Buzz" class="google-buzz-button" href="http://www.google.com/buzz/post" data-button-style="small-button"></a></li>'+
 							'</ul>'+
 						'</div>'+
+						'<a href="#" class="rhapVideoSharePanelCloseButton">Close</a>'+
 					'</div>'
 			));
 			//get newly created elements
@@ -371,7 +372,8 @@
 				'top':'10px'
 			});
 			rhapVideoShareUrl = $('.rhapVideoShareUrl',rhapVideoSharePanel);
-			
+			rhapVideoSharePanelCloseButton = $('.rhapVideoSharePanelCloseButton',rhapVideoSharePanel);
+			rhapVideoSharePanelCloseButton.button();
 			playPause = $('.rhapVideoPlayControl',controls);
 			playPauseCanvas = $('.rhapVideoPlayControlCanvas',playPause)[0];
 			

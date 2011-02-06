@@ -109,12 +109,9 @@
 }
 
 .rhapVideoSharePanel a.rhapVideoSharePanelCloseButton {
-	color: #FFFFFF;
-	font-size: 12px;
 	position: absolute;
-	right: 8px;
-	text-decoration: none;
-	top: 2px;
+	right: 30px;
+	bottom: 29px;
 }
 
 .rhapVideoSharePanelContent {
@@ -331,26 +328,16 @@
 		repeat scroll left 0 #1F3744;
 }
 
-/** overwrite fb style 
-.FBConnectButton {
-	height: 15px;
-	float: left;
-	background-position-y: -251px;
-	background-position-x: -1px;
-	border-bottom: 1px solid #1a356e;
+/** overwrite jquery ui style */
+.ui-button-text{
+	font-size: 12px;	
 }
-
-.FBConnectButton_Text {
-	font-size: 8px;
-	height: 9px;
+/** overwrite fb style */
+.fb_share_size_Small .fb_share_count,.fb_share_size_Small .fb_share_count_right, .fb_share_size_Small .fb_share_count_nub_right {
+	display:none;
 }
-
-.fb_share_count_inner {
-	height: 9px;
+/** overwrite twitter style */
+.twitter-share-button {
 	position: relative;
+	top: 6px;
 }
-
-.fb_share_count .fb_share_count_right {
-	float: left;
-}
-*/

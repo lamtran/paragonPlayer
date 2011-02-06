@@ -1,229 +1,356 @@
-.rhapVideoContainer{
-    margin: 0 auto;
-    position: relative;
+.rhapVideoContainer {
+	margin: 0 auto;
+	position: relative;
 }
-.rhapVideoWrapper{
-	position: relative;	
+
+.rhapVideoWrapper {
+	position: relative;
 }
-.rhapVideoFullscreen { 
-	position: fixed; 
-	left: 0; 
-	top: 0; 
-	right: 0; 
-	bottom: 0; 
-	overflow: hidden; 
-	z-index: 1000; 
+
+.rhapVideoFullscreen {
+	position: fixed;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	overflow: hidden;
+	z-index: 1000;
 }
-.rhapVideoFullscreen video{
-	position: relative; 
-	top: 0; 
-	left: 0; 
-	width: 100%; 
-	height: 100%; 
-	z-index: 1000;	
+
+.rhapVideoFullscreen video {
+	position: relative;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 1000;
 }
-.rhapVideoFullscreen .rhapVideoControls, .rhapVideoFullscreen .rhapVideoMoreControls{
-	z-index: 1001;	
+
+.rhapVideoFullscreen .rhapVideoControls,.rhapVideoFullscreen .rhapVideoMoreControls
+	{
+	z-index: 1001;
 }
-.rhapVideoControls{
-    bottom: 15px;
-    color: #FFFFFF;
-    height: 43px;
-    left: 11px;
-    margin: 0;
-    opacity: 0.95;
-    padding: 0;
-    position: absolute;
-    right: 11px;
-    -moz-border-radius: 5px 5px 5px 5px;
-    background-color: rgba(0,0,0,.3);
-    display:none;
+
+.rhapVideoControls {
+	bottom: 15px;
+	color: #FFFFFF;
+	height: 43px;
+	left: 11px;
+	margin: 0;
+	opacity: 0.95;
+	padding: 0;
+	position: absolute;
+	right: 11px;
+	-moz-border-radius: 5px 5px 5px 5px;
+	background-color: rgba(0, 0, 0, .3);
+	display: none;
 }
-.rhapVideoPlayControl{
+
+.rhapVideoPlayControl {
 	left: 14px;
-    width: 32px;	
-    height: 32px;
-    
+	width: 32px;
+	height: 32px;
 	/*
     -moz-box-shadow: 1px 1px 2px #000000;
     background-image: -moz-linear-gradient(center bottom , #8896A7, #253036);
     -moz-border-radius:17px;
     */
-    margin: 0;
-    padding: 0;
-    position: absolute;
-    text-align: center;
-    top: 5px;
-}
-.rhapVideoPlayControlCanvas{
+	margin: 0;
+	padding: 0;
 	position: absolute;
-	top:0;
-	left:0;	
+	text-align: center;
+	top: 5px;
 }
-.rhapVideoPlayControl span{
-    display: block;
-    font-size: 0;
-    line-height: 0;
+
+.rhapVideoPlayControlCanvas {
+	position: absolute;
+	top: 0;
+	left: 0;
 }
-.rhapVideoPlayControl.paused span{
+
+.rhapVideoPlayControl span {
+	display: block;
+	font-size: 0;
+	line-height: 0;
+}
+
+.rhapVideoPlayControl.paused span {
 	border-bottom: 5px solid transparent;
-    border-left: 10px solid #FFFFFF;
-    border-top: 5px solid transparent;
-    height: 0;
-    margin: 8px 0 0 8px;
-    width: 0;	
+	border-left: 10px solid #FFFFFF;
+	border-top: 5px solid transparent;
+	height: 0;
+	margin: 8px 0 0 8px;
+	width: 0;
 }
-.rhapVideoPlayControl.playing span{
+
+.rhapVideoPlayControl.playing span {
 	border-color: -moz-use-text-color #FFFFFF;
-    border-style: none solid;
-    border-width: 0 3px;
-    height: 10px;
-    margin: 8px auto 0;
-    width: 3px;
+	border-style: none solid;
+	border-width: 0 3px;
+	height: 10px;
+	margin: 8px auto 0;
+	width: 3px;
 }
-.rhapVideoPlayControl.disabled span{
+
+.rhapVideoPlayControl.disabled span {
 	border-bottom: 5px solid transparent;
-    border-left: 10px solid #CCCCCC;
-    border-top: 5px solid transparent;
-    height: 0;
-    margin: 8px 0 0 8px;
-    width: 0;	
+	border-left: 10px solid #CCCCCC;
+	border-top: 5px solid transparent;
+	height: 0;
+	margin: 8px 0 0 8px;
+	width: 0;
 }
-.rhapVideoSharePanel{
+
+.rhapVideoSharePanel {
 	-moz-border-radius: 5px 5px 5px 5px;
-    background-color: rgba(0,0,0,.3);
+	background-color: rgba(0, 0, 0, .3);
+	display: none;
+	position: absolute;
 }
-.bigPlayButton{
-    position: absolute;
-    opacity: 0.9;
-  	border-radius: 5px; 
-  	-webkit-border-radius: 5px; 
-  	-moz-border-radius: 5px;
+
+.rhapVideoSharePanel a.rhapVideoSharePanelCloseButton {
+	color: #FFFFFF;
+	font-size: 12px;
+	position: absolute;
+	right: 8px;
+	text-decoration: none;
+	top: 2px;
+}
+
+.rhapVideoSharePanelContent {
+	background: -moz-linear-gradient(left, #6EC2E9, #01B4E8);
+	position: absolute;
+	left: 20px;
+	right: 20px;
+	top: 20px;
+	bottom: 20px;
+	-moz-border-radius: 5px 5px 5px 5px;
+	padding: 10px;
+	color: #fff;
+}
+
+.rhapVideoSharePanelContent h2 {
+	margin: 0;
+}
+
+.rhapVideoSharePanelContent input {
+	width: 100%;
+	background: #fff;
+	color: #000;
+	border: 0;
+	height: 20px;
+	-moz-border-radius: 5px 5px 5px 5px;
+}
+
+.rhapVideoSharePanelContent ul {
+	list-style: none;
+	margin: 0;
+	margin-top: 10px;
+	padding: 0;
+	-moz-border-radius: 5px 5px 5px 5px;
+}
+
+.rhapVideoSharePanelContent ul li {
+	display: inline-block;
+	margin: 7px;
+}
+
+.bigPlayButton {
+	position: absolute;
+	opacity: 0.9;
+	border-radius: 5px;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
 	/*
 	background: -moz-linear-gradient(left, #FFFFFF, #000000);
 	*/
 	background-color: #0B151A;
-	box-shadow: 4px 4px 8px #000; 
-	-webkit-box-shadow: 4px 4px 8px #000; 
+	box-shadow: 4px 4px 8px #000;
+	-webkit-box-shadow: 4px 4px 8px #000;
 	-moz-box-shadow: 4px 4px 8px #000;
 }
-.bigPlayButton:hover,.rhapVideoVolumeButton:hover,.rhapVideoMoreButton:hover,.rhapVideoFullScreenButton:hover{
-	cursor: pointer;	
+
+.bigPlayButton:hover,.rhapVideoVolumeButton:hover,.rhapVideoMoreButton:hover,.rhapVideoFullScreenButton:hover
+	{
+	cursor: pointer;
 }
-.rhapVideoVolumeBox:hover .rhapVideoVolumeSlider{
-	display:block;
+
+.rhapVideoVolumeBox:hover .rhapVideoVolumeSlider {
+	display: block;
 }
-.rhapVideoTimer{
-	/*
-	position: absolute;	
-	background: -moz-linear-gradient(left 90deg, #FFFFFF, #000000);
-	*/
+
+.rhapVideoVolumeButton {
+	
+}
+
+.rhapVideoTimer {
 	width: 45px;
 	height: 20px;
 }
-.rhapVideoSeekBar{
+
+.rhapVideoSeekBar {
 	position: absolute;
 	left: 58px;
 	top: 16px;
 }
-.rhapVideoVolumeBox, .rhapVideoFullScreenButton, .rhapVideoMoreButton{
+
+.rhapVideoVolumeBox,.rhapVideoFullScreenButton,.rhapVideoMoreButton {
 	bottom: 6px;
-    padding-top: 16px;
-    position: absolute;
-    right: 55px;
+	position: absolute;
+	right: 55px;
 }
-.rhapVideoFullScreenButton{
-	right: 28px;	
+
+.rhapVideoFullScreenButton {
+	right: 28px;
 	bottom: 10px;
 }
-.rhapVideoMoreButton{
-	right: 0px;	
+
+.rhapVideoMoreButton {
+	right: 0px;
 	bottom: 10px;
 }
-.rhapVideoVolumeSlider{
-	height: 39px;
-    left: 5px;
-    top: -5px;
-    width: 5px;
-    display:none;
+
+.rhapVideoVolumeBg {
+	background-color: transparent;
+	height: 24px;
+	left: -27px;
+	position: absolute;
+	top: -25px;
+	width: 67px;
 }
-.rhapVideoBufferBar{
-	background: -moz-linear-gradient(center top -90deg, #2A4669, #1C334E) repeat scroll left 0 #1F3744;
+
+.rhapVideoVolumeSlider {
+	margin: 0 auto;
+	width: 39px;
+	height: 5px;
+	top: 8px;
+	display: none;
+}
+
+.rhapVideoBufferBar {
+	background: -moz-linear-gradient(center top -90deg, #2A4669, #1C334E)
+		repeat scroll left 0 #1F3744;
 	height: 100%;
-	width:0;
+	width: 0;
 	-moz-border-radius: 4px 4px 4px 4px;
 }
-.rhapVideoMoreControls{
+
+.rhapVideoMoreControls {
 	-moz-border-radius: 5px 5px 5px 5px;
-    background-color: rgba(0,0,0,.3);
-    position: absolute;
-    display:none;
-    overflow: hidden;
-    right: 10px;
-    bottom: 64px;
+	background-color: rgba(0, 0, 0, .3);
+	position: absolute;
+	display: none;
+	overflow: hidden;
+	right: 10px;
+	bottom: 64px;
 }
-.rhapVideoMoreControls ul{
-	list-style: none;	
-	margin:0;
-	padding:10px;
+
+.rhapVideoMoreControls ul {
+	list-style: none;
+	margin: 0;
+	padding: 10px;
 }
-.rhapVideoMoreControls a{
-	text-decoration: none;	
+
+.rhapVideoMoreControls a {
+	text-decoration: none;
 	color: #fff;
 }
 
-
 /** override jquery ui styles **/
 .rhapVideoSeekBar .ui-slider-handle {
-    margin-left: -0.1em;
+	margin-left: -0.1em;
 }
+
 .rhapVideoSeekBar .ui-slider-handle {
-    width: 7px;
+	width: 7px;
 }
+
 .ui-slider-handle.ui-corner-all {
-    -moz-border-radius: 1px 1px 1px 1px;
+	-moz-border-radius: 1px 1px 1px 1px;
 }
+
 .rhapVideoSeekBar {
-    height: 9px;
+	height: 9px;
 }
-.rhapVideoSeekBar.ui-widget-content{
-    border: 1px solid #000000;
-    background: -moz-linear-gradient(center top -90deg, #4E4E57, #323336) repeat scroll left 0 #1F3744;
+
+.rhapVideoSeekBar.ui-widget-content {
+	border: 1px solid #000000;
+	background: -moz-linear-gradient(center top -90deg, #4E4E57, #323336)
+		repeat scroll left 0 #1F3744;
 }
-.rhapVideoVolumeSlider.ui-widget-content{
-	background: -moz-linear-gradient(left, #4E4E57, #323336) repeat scroll left 0 #1F3744;
+
+.rhapVideoVolumeSlider.ui-widget-content {
+	background: -moz-linear-gradient(left, #4E4E57, #323336) repeat scroll
+		left 0 #1F3744;
 	border: 1px solid #000000;
 }
-.rhapVideoSeekBar .ui-slider-range{
+
+.rhapVideoSeekBar .ui-slider-range {
 	-moz-border-radius: 4px 3px 2px 4px;
 	-webkit-border-radius: 4px 3px 2px 4px;
 }
-.rhapVideoVolumeSlider .ui-slider-range{
+
+.rhapVideoVolumeSlider .ui-slider-range {
 	-moz-border-radius: 4px 3px 2px 4px;
 	-webkit-border-radius: 4px 3px 2px 4px;
 }
-.rhapVideoVolumeSlider .ui-slider-handle{
+
+.rhapVideoVolumeSlider .ui-slider-handle {
 	-moz-border-radius: 21px 21px 21px 21px;
-	-webkit-border-radius: 21px;
-    height: 11px;
-    left: -4px;
-    width: 11px;
+	height: 11px;
+	margin-left: -4px;
+	width: 11px;
+	cursor: pointer;
+}
+
 }
 .rhapVideoSeekBar .ui-slider-handle {
-    height: 18px;
+	height: 18px;
 }
-.rhapVideoSeekBar .ui-slider-handle.ui-state-default{
+
+.rhapVideoSeekBar .ui-slider-handle.ui-state-default {
 	border: 1px solid #4D4D4D;
 }
-.rhapVideoVolumeSlider .ui-slider-handle.ui-state-default{
+
+.rhapVideoVolumeSlider .ui-slider-handle.ui-state-default {
 	border: 1px solid #000000;
 }
-.rhapVideoSeekBar .ui-state-default{
-	background: -moz-linear-gradient(center top -90deg, #FFFFFF, #000000) repeat scroll left 0 #1F3744;
+
+.rhapVideoSeekBar .ui-state-default {
+	background: -moz-linear-gradient(center top -90deg, #FFFFFF, #000000)
+		repeat scroll left 0 #1F3744;
 }
-.rhapVideoSeekBar .ui-widget-header{
-	background: -moz-linear-gradient(center top -90deg, #56B0E2, #3D7FA1) repeat scroll left 0 #1F3744;
+
+.rhapVideoSeekBar .ui-widget-header {
+	background: -moz-linear-gradient(center top -90deg, #56B0E2, #3D7FA1)
+		repeat scroll left 0 #1F3744;
 }
-.rhapVideoVolumeSlider .ui-widget-header{
-	background: -moz-linear-gradient(center top -90deg, #008AC9, #0074A5) repeat scroll left 0 #1F3744;
+
+.rhapVideoVolumeSlider .ui-widget-header {
+	background: -moz-linear-gradient(center top -90deg, #008AC9, #0074A5)
+		repeat scroll left 0 #1F3744;
 }
+
+/** overwrite fb style 
+.FBConnectButton {
+	height: 15px;
+	float: left;
+	background-position-y: -251px;
+	background-position-x: -1px;
+	border-bottom: 1px solid #1a356e;
+}
+
+.FBConnectButton_Text {
+	font-size: 8px;
+	height: 9px;
+}
+
+.fb_share_count_inner {
+	height: 9px;
+	position: relative;
+}
+
+.fb_share_count .fb_share_count_right {
+	float: left;
+}
+*/

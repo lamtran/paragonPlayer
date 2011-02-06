@@ -227,7 +227,7 @@
 		var video, parent, controls, playPause, playPauseCanvas, seekBar, timer, volumeSlider, volumeBtn, fullScreenBtn;
 		var bigPlayButton, seekBarHandle, rhapVideoMoreButton;
 		var seekSliding, seekValue=-1, videoVolume, savedVolumeBeforeMute, isFullScreen = false, isShowMore = false;
-		var rhapVideoMoreControls, rhapVideoSharePanel, rhapVideoShareBtn;
+		var rhapVideoMoreControls, rhapVideoSharePanel, rhapVideoShareBtn, rhapVideoShareUrl;
 		
 		/**
 		 * @description Initialize the video class
@@ -328,8 +328,10 @@
 					'<a href="#" class="rhapVideoPlayControl paused disabled"><span>Play</span><canvas width="32" height="32" class="rhapVideoPlayControlCanvas"/></a>'+
 					'<div class="rhapVideoSeekBar"></div>'+
 					'<div class="rhapVideoVolumeBox">'+
-					'<div class="rhapVideoVolumeSlider"></div>'+
-					'<canvas width="24" height="18" class="rhapVideoVolumeButton"/>'+
+						'<div class="rhapVideoVolumeBg">'+
+							'<div class="rhapVideoVolumeSlider"></div>'+
+						'</div>'+
+						'<canvas width="24" height="18" class="rhapVideoVolumeButton"/>'+
 					'</div>'+
 					'<canvas width="24" height="18" class="rhapVideoFullScreenButton"/>'+
 					'<canvas width="24" height="18" class="rhapVideoMoreButton"/>'+
@@ -337,15 +339,24 @@
 			parent.append($(
 					'<div class="rhapVideoMoreControls">'+
 					'<ul>'+
-					'<li><a href="#">more</a></li>'+
+					'<li><a href="#">related</a></li>'+
 					'<li><a href="#">cc</a></li>'+
+					'<li><a href="#" class="rhapVideoEmbedBtn">embed</a></li>'+
 					'<li><a href="#" class="rhapVideoShareBtn">share</a></li>'+
 					'</ul>'+
 					'</div>'
 			));
 			parent.append($(
 					'<div class="rhapVideoSharePanel" title="Share">'+
-					
+						'<a href="#" class="rhapVideoSharePanelCloseButton">Close</a>'+
+						'<div class="rhapVideoSharePanelContent">'+
+							'<h2>Share</h2>'+
+							'<span>Get URL:&nbsp;</span><input type="text" class="rhapVideoShareUrl"/>'+
+							'<ul>'+
+								'<li><a name="fb_share" type="button_count">Share</a></li>'+
+								'<li><a href="http://twitter.com/share" class="twitter-share-button" data-count="none">Tweet</a></li>'+
+							'</ul>'+
+						'</div>'+
 					'</div>'
 			));
 			//get newly created elements
@@ -353,6 +364,14 @@
 			rhapVideoMoreControls = $('.rhapVideoMoreControls',parent);
 			rhapVideoShareBtn = $('.rhapVideoShareBtn',rhapVideoMoreControls);
 			rhapVideoSharePanel = $('.rhapVideoSharePanel',parent);
+			rhapVideoSharePanel.css({
+				'width':(parseInt($(video).css('width'))-20)+'px',
+				'height':(parseInt($(video).css('height'))-80)+'px',
+				'left':'10px',
+				'top':'10px'
+			});
+			rhapVideoShareUrl = $('.rhapVideoShareUrl',rhapVideoSharePanel);
+			
 			playPause = $('.rhapVideoPlayControl',controls);
 			playPauseCanvas = $('.rhapVideoPlayControlCanvas',playPause)[0];
 			
@@ -392,7 +411,7 @@
 			volumeBtn = $('.rhapVideoVolumeButton', controls);
 			volumeSlider.slider({
 				value: 1,
-				orientation: "vertical",
+				orientation: "horizontal",
 				range: "min",
 				max: 1,
 				step: 0.05,
@@ -550,7 +569,11 @@
 				}
 			});
 			$(rhapVideoShareBtn).click(function(){
-				rhapVideoSharePanel.dialog();
+				rhapVideoSharePanel.slideDown('slow',function(){
+					rhapVideoShareUrl.select();
+				});
+				rhapVideoShareUrl.val(document.location);
+				showLess();
 			});
 			var showMore = function(){
 				isShowMore = true;
@@ -594,11 +617,9 @@
 			var yOffset = direction=='up' ? height/2 + 1: height/2 - 1;
 			context.fillStyle='#29ABE2';
 			context.lineWidth = 1;
-			context.strokeStyle= '#29ABE2';
 			context.beginPath();
 			context.arc(width/2, height/2, 8, 0, Math.PI * 2, true);
 			context.fill();
-			context.stroke();
 			context.closePath();
 			
 			context.lineWidth = 3;
@@ -608,7 +629,6 @@
 			context.lineTo(width/2,directionOffset);
 			context.lineTo(3*width/4,yOffset);
 			context.stroke();
-			
 		};
 		this._drawFullScreenBtn = function(fullScreenBtn){
 			var canvas = fullScreenBtn[0];
@@ -619,10 +639,8 @@
 			var sides = 5;
 			context.fillStyle='#29ABE2';
 			context.lineWidth = 1;
-			context.strokeStyle= '#29ABE2';
 			drawRoundRect(context,width/4+0,height/4+1,width/2-0,height/2-2,2);
 			context.fill(); 
-			context.stroke();
 			
 			context.beginPath();
 			context.moveTo(radius, 0);
@@ -632,7 +650,6 @@
 			context.quadraticCurveTo(0, 0, radius,0);
 			context.closePath();
 			context.fill();
-			context.stroke();
 			
 			context.beginPath();
 			context.moveTo(width-radius, 0);
@@ -642,7 +659,6 @@
 			context.quadraticCurveTo(width, 0, width-radius,0);
 			context.closePath();
 			context.fill();
-			context.stroke();
 			
 			context.beginPath();
 			context.moveTo(width, height-radius);
@@ -652,7 +668,6 @@
 			context.quadraticCurveTo(width, height, width,height-radius);
 			context.closePath();
 			context.fill();
-			context.stroke();
 			
 			context.beginPath();
 			context.moveTo(0, height-radius);
@@ -662,7 +677,6 @@
 			context.quadraticCurveTo(0, height, 0,height-radius);
 			context.closePath();
 			context.fill();
-			context.stroke();
 		};
 		this._drawVolumeBtn = function(volumeBtn){
 			var canvas = volumeBtn[0];
@@ -671,27 +685,27 @@
 			var height = 15;
 			context.beginPath();
 			context.moveTo(width,0);
+			context.lineTo(width-1,0);
 			context.lineTo(width/2,height/4);
 			context.lineTo(0,height/4);
 			context.lineTo(0,3*height/4);
 			context.lineTo(width/2,3*height/4);
+			context.lineTo(width-1,height);
 			context.lineTo(width,height);
 			context.closePath();
 			
 			context.fillStyle='#29ABE2';
 			context.lineWidth = 1;
-			context.strokeStyle= '#29ABE2';
 			context.fill(); 
-			context.stroke(); 
 			
 			context.lineWidth = 1;
-			context.moveTo(width+4,3);
-			context.quadraticCurveTo(width+6,height/2,width+4,height-3);
-			context.stroke();
+			context.moveTo(width+2,3);
+			context.quadraticCurveTo(width+4,height/2,width+2,height-3);
+			context.fill(); 
 			
-			context.moveTo(width+6, 1);
-			context.quadraticCurveTo(width+12,height/2,width+6,height-1);
-			context.stroke();
+			context.moveTo(width+4, 1);
+			context.quadraticCurveTo(width+9,height/2,width+4,height-1);
+			context.fill(); 
 		};
 		this._drawTimerLabel = function(timer, width, boxHeight,text){
 			var canvas = timer[0];

@@ -101,17 +101,20 @@
 	width: 0;
 }
 
-.rhapVideoSharePanel {
+.rhapVideoSharePanel, .rhapVideoEmbedPanel {
 	-moz-border-radius: 5px 5px 5px 5px;
 	background-color: rgba(0, 0, 0, .3);
 	display: none;
 	position: absolute;
 }
 
-.rhapVideoSharePanel a.rhapVideoSharePanelCloseButton {
+.rhapVideoSharePanel a.rhapVideoSharePanelCloseButton , .rhapVideoEmbedPanel a.rhapVideoEmbedPanelCloseButton{
 	position: absolute;
 	right: 30px;
 	bottom: 29px;
+}
+.rhapVideoEmbedCode{
+	width: 100%;	
 }
 
 .rhapVideoSharePanelContent {
@@ -322,7 +325,12 @@
 	background: -moz-linear-gradient(center top -90deg, #56B0E2, #3D7FA1)
 		repeat scroll left 0 #1F3744;
 }
-
+.rhapVideoDuration{
+	bottom: 14px;
+    position: absolute;
+    right: 87px;
+    font-size: 0.9em;	
+}
 .rhapVideoVolumeSlider .ui-widget-header {
 	background: -moz-linear-gradient(center top -90deg, #008AC9, #0074A5)
 		repeat scroll left 0 #1F3744;

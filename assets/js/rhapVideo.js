@@ -228,6 +228,7 @@
 		var bigPlayButton, seekBarHandle, rhapVideoMoreButton;
 		var seekSliding, seekValue=-1, videoVolume, savedVolumeBeforeMute, isFullScreen = false, isShowMore = false;
 		var rhapVideoMoreControls, rhapVideoSharePanel, rhapVideoShareBtn, rhapVideoShareUrl, rhapVideoSharePanelCloseButton;
+		var rhapVideoDuration, rhapVideoEmbedPanel, rhapVideoEmbedBtn, rhapVideoEmbedPanelCloseButton;
 		
 		/**
 		 * @description Initialize the video class
@@ -322,25 +323,26 @@
 		this._drawControls = function(video){
 			var scope = this;
 			var seekBarLeftOffset = 38;
-			var seekBarRightMargin = 132;
+			var seekBarRightMargin = 132;//172;
 			parent.append($(
 					'<div class="rhapVideoControls">'+
-					'<a href="#" class="rhapVideoPlayControl paused disabled"><span>Play</span><canvas width="32" height="32" class="rhapVideoPlayControlCanvas"/></a>'+
-					'<div class="rhapVideoSeekBar"></div>'+
-					'<div class="rhapVideoVolumeBox">'+
-						'<div class="rhapVideoVolumeBg">'+
-							'<div class="rhapVideoVolumeSlider"></div>'+
+						'<a href="#" class="rhapVideoPlayControl paused disabled"><span>Play</span><canvas width="32" height="32" class="rhapVideoPlayControlCanvas"/></a>'+
+						'<div class="rhapVideoSeekBar"></div>'+
+//						'<span class="rhapVideoDuration">00:00</span>'+
+						'<div class="rhapVideoVolumeBox">'+
+							'<div class="rhapVideoVolumeBg">'+
+								'<div class="rhapVideoVolumeSlider"></div>'+
+							'</div>'+
+							'<canvas width="24" height="18" class="rhapVideoVolumeButton"/>'+
 						'</div>'+
-						'<canvas width="24" height="18" class="rhapVideoVolumeButton"/>'+
-					'</div>'+
-					'<canvas width="24" height="18" class="rhapVideoFullScreenButton"/>'+
-					'<canvas width="24" height="18" class="rhapVideoMoreButton"/>'+
-			'</div>'));
+						'<canvas width="24" height="18" class="rhapVideoFullScreenButton"/>'+
+						'<canvas width="24" height="18" class="rhapVideoMoreButton"/>'+
+					'</div>'));
 			parent.append($(
 					'<div class="rhapVideoMoreControls">'+
 					'<ul>'+
 					'<li><a href="#">related</a></li>'+
-					'<li><a href="#">cc</a></li>'+
+					//'<li><a href="#">cc</a></li>'+
 					'<li><a href="#" class="rhapVideoEmbedBtn">embed</a></li>'+
 					'<li><a href="#" class="rhapVideoShareBtn">share</a></li>'+
 					'</ul>'+
@@ -360,12 +362,48 @@
 						'<a href="#" class="rhapVideoSharePanelCloseButton">Close</a>'+
 					'</div>'
 			));
+			parent.append($(
+					'<div class="rhapVideoEmbedPanel">'+
+						'<div class="rhapVideoSharePanelContent">'+
+							'<h2>Embed</h2>'+
+							'<textarea class="rhapVideoEmbedCode">'+
+								'<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/themes/flick/jquery-ui.css" media="screen" rel="stylesheet" type="text/css" />'+
+								'<link href="assets/css/rhapVideo.css" media="screen" rel="stylesheet" type="text/css" />'+
+								'<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script>'+
+								'<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.8/jquery-ui.min.js"></script>'+
+								'<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>'+
+								'<script src="http://static.ak.fbcdn.net/connect.php/js/FB.Share" type="text/javascript"></script>'+
+								'<script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>'+
+								'<script type="text/javascript" src="http://www.google.com/buzz/api/button.js"></script>'+
+								'<script type="text/javascript" src="assets/js/rhapVideo.js"></script>'+
+								'<video width="640" height="264" poster="http://lamtran.com/oceans-clip.png" >'+
+							        '<source src="http://lamtran.com/oceans-clip.mp4" type=\'video/mp4; codecs="avc1.42E01E, mp4a.40.2"\' />'+
+							        '<source src="http://lamtran.com/oceans-clip.webm" type=\'video/webm; codecs="vp8, vorbis"\' />'+
+							        '<source src="http://lamtran.com/oceans-clip.ogv" type=\'video/ogg; codecs="theora, vorbis"\' />'+
+							        '<source src="rtmp://lamtran.com:1935/vod/oceans-clip" type=\'video/mp4; codecs="vp6"\' />'+
+							   '</video>'+
+							'</textarea>'+
+						'</div>'+
+						'<a href="#" class="rhapVideoEmbedPanelCloseButton">Close</a>'+
+					'</div>'
+			));
 			//get newly created elements
 			controls = $('.rhapVideoControls',parent);
+//			rhapVideoDuration = $('.rhapVideoDuration',controls);
 			rhapVideoMoreControls = $('.rhapVideoMoreControls',parent);
 			rhapVideoShareBtn = $('.rhapVideoShareBtn',rhapVideoMoreControls);
 			rhapVideoSharePanel = $('.rhapVideoSharePanel',parent);
-			rhapVideoSharePanel.css({
+			rhapVideoEmbedPanel = $('.rhapVideoEmbedPanel',parent);
+			rhapVideoEmbedBtn = $('.rhapVideoEmbedBtn',rhapVideoMoreControls);
+			rhapVideoEmbedPanelCloseButton = $('.rhapVideoEmbedPanelCloseButton',rhapVideoEmbedPanel);
+			rhapVideoEmbedPanelCloseButton.button();
+			$(rhapVideoSharePanel).css({
+				'width':(parseInt($(video).css('width'))-20)+'px',
+				'height':(parseInt($(video).css('height'))-80)+'px',
+				'left':'10px',
+				'top':'10px'
+			});
+			$(rhapVideoEmbedPanel).css({
 				'width':(parseInt($(video).css('width'))-20)+'px',
 				'height':(parseInt($(video).css('height'))-80)+'px',
 				'left':'10px',
@@ -469,6 +507,7 @@
 				}
 				//timer.text(_timeFormat(currenttime));
 				scope._drawTimerLabel(timer,41,26,_timeFormat(currenttime));
+//				rhapVideoDuration.text(_timeFormat(video.duration-currenttime));
 			};
 			$(video).bind('timeupdate',function(){
 				seekUpdate();
@@ -577,6 +616,23 @@
 				rhapVideoShareUrl.val(document.location);
 				showLess();
 			});
+			$(rhapVideoSharePanelCloseButton).click(function(){
+				closeSharePanel();
+			});
+			$(rhapVideoEmbedPanelCloseButton).click(function(){
+				closeEmbedPanel();
+			});
+			$(rhapVideoEmbedBtn).click(function(){
+				rhapVideoEmbedPanel.slideDown('slow');
+				showLess();
+			});
+			var closeSharePanel = function(){
+				rhapVideoSharePanel.slideUp('slow',function(){
+				});
+			};
+			var closeEmbedPanel = function(){
+				rhapVideoEmbedPanel.slideUp('slow');
+			}
 			var showMore = function(){
 				isShowMore = true;
 				scope._drawMoreBtn(rhapVideoMoreButton,'down');

@@ -1,3 +1,8 @@
+ul.horizontalList li {
+	display:inline-block;
+	float:left;
+	margin:10px 10px;
+}
 .rhapVideoContainer {
 	margin: 0 auto;
 	position: relative;
@@ -5,6 +10,7 @@
 
 .rhapVideoWrapper {
 	position: relative;
+	background: #000;
 }
 
 .rhapVideoFullscreen {
@@ -42,6 +48,7 @@
 	position: absolute;
 	right: 11px;
 	-moz-border-radius: 5px 5px 5px 5px;
+	border-radius: 5px 5px 5px 5px;
 	background-color: rgba(0, 0, 0, .3);
 	display: none;
 }
@@ -52,7 +59,7 @@
 	height: 32px;
 	/*
     -moz-box-shadow: 1px 1px 2px #000000;
-    background-image: -moz-linear-gradient(center bottom , #8896A7, #253036);
+    background: -moz-linear-gradient(center bottom , #8896A7, #253036);
     -moz-border-radius:17px;
     */
 	margin: 0;
@@ -101,17 +108,24 @@
 	width: 0;
 }
 
-.rhapVideoSharePanel, .rhapVideoEmbedPanel {
+.rhapVideoSharePanel, .rhapVideoEmbedPanel, .rhapVideoRelatedPanel {
 	-moz-border-radius: 5px 5px 5px 5px;
+	border-radius: 5px 5px 5px 5px;
 	background-color: rgba(0, 0, 0, .3);
 	display: none;
 	position: absolute;
 }
 
-.rhapVideoSharePanel a.rhapVideoSharePanelCloseButton , .rhapVideoEmbedPanel a.rhapVideoEmbedPanelCloseButton{
+.rhapVideoSharePanel a.rhapVideoSharePanelCloseButton , .rhapVideoEmbedPanel a.rhapVideoEmbedPanelCloseButton,
+.rhapVideoRelatedPanel a.rhapVideoRelatedPanelCloseButton{
 	position: absolute;
 	right: 30px;
 	bottom: 29px;
+	display:none;
+}
+.rhapVideoRelatedPanel li a img{
+	width: 64px;
+	height: 64px;	
 }
 .rhapVideoEmbedCode{
 	width: 100%;	
@@ -119,12 +133,20 @@
 
 .rhapVideoSharePanelContent {
 	background: -moz-linear-gradient(left, #6EC2E9, #01B4E8);
+	background: -webkit-gradient(
+	    linear,
+	    left top,
+	    left bottom,
+	    color-stop(0.47, #6EC2E9),
+	    color-stop(1, #01B4E8)
+	);		
 	position: absolute;
 	left: 20px;
 	right: 20px;
 	top: 20px;
 	bottom: 20px;
 	-moz-border-radius: 5px 5px 5px 5px;
+	border-radius: 5px 5px 5px 5px;
 	padding: 10px;
 	color: #fff;
 }
@@ -140,6 +162,7 @@
 	border: 0;
 	height: 20px;
 	-moz-border-radius: 5px 5px 5px 5px;
+	border-radius: 5px 5px 5px 5px;
 }
 
 .rhapVideoSharePanelContent ul {
@@ -148,13 +171,30 @@
 	margin-top: 10px;
 	padding: 0;
 	-moz-border-radius: 5px 5px 5px 5px;
+	border-radius: 5px 5px 5px 5px;
 }
 
 .rhapVideoSharePanelContent ul li {
 	display: inline-block;
 	margin: 7px;
 }
-
+.toast{
+	display:none;
+	position: absolute;
+	opacity: 0.8;
+	background-color: #0B151A;
+	padding: 5px;
+	top: 0px;
+	left: 0px;
+	right:0;
+	bottom:0;
+	line-height: 240px;
+	text-align: center;
+}
+.toastMessage{
+	font-weight: bold;
+	color: white;
+}
 .bigPlayButton {
 	position: absolute;
 	opacity: 0.9;
@@ -230,9 +270,17 @@
 .rhapVideoBufferBar {
 	background: -moz-linear-gradient(center top -90deg, #2A4669, #1C334E)
 		repeat scroll left 0 #1F3744;
+	background: -webkit-gradient(
+	    linear,
+	    left top,
+	    left bottom,
+	    color-stop(0.47, #2A4669),
+	    color-stop(1, #1C334E)
+	);		
 	height: 100%;
 	width: 0;
 	-moz-border-radius: 4px 4px 4px 4px;
+	border-radius: 4px 4px 4px 4px;
 }
 
 .rhapVideoMoreControls {
@@ -267,6 +315,7 @@
 
 .ui-slider-handle.ui-corner-all {
 	-moz-border-radius: 1px 1px 1px 1px;
+	border-radius: 1px 1px 1px 1px;
 }
 
 .rhapVideoSeekBar {
@@ -277,26 +326,43 @@
 	border: 1px solid #000000;
 	background: -moz-linear-gradient(center top -90deg, #4E4E57, #323336)
 		repeat scroll left 0 #1F3744;
+	background: -webkit-gradient(
+	    linear,
+	    left top,
+	    left bottom,
+	    color-stop(1, rgb(78,78,87)),
+	    color-stop(1, rgb(50,51,54))
+	);
 }
 
 .rhapVideoVolumeSlider.ui-widget-content {
 	background: -moz-linear-gradient(left, #4E4E57, #323336) repeat scroll
 		left 0 #1F3744;
+	background: -webkit-gradient(
+	    linear,
+	    left top,
+	    left bottom,
+	    color-stop(0.47, #4E4E57),
+	    color-stop(1, #323336)
+	);		
 	border: 1px solid #000000;
 }
 
 .rhapVideoSeekBar .ui-slider-range {
 	-moz-border-radius: 4px 3px 2px 4px;
 	-webkit-border-radius: 4px 3px 2px 4px;
+	border-radius: 4px 3px 2px 4px;
 }
 
 .rhapVideoVolumeSlider .ui-slider-range {
 	-moz-border-radius: 4px 3px 2px 4px;
 	-webkit-border-radius: 4px 3px 2px 4px;
+	border-radius: 4px 3px 2px 4px;
 }
 
 .rhapVideoVolumeSlider .ui-slider-handle {
 	-moz-border-radius: 21px 21px 21px 21px;
+	border-radius: 21px 21px 21px 21px;
 	height: 11px;
 	margin-left: -4px;
 	width: 11px;
@@ -319,11 +385,26 @@
 .rhapVideoSeekBar .ui-state-default {
 	background: -moz-linear-gradient(center top -90deg, #FFFFFF, #000000)
 		repeat scroll left 0 #1F3744;
+	background: -webkit-gradient(
+	    linear,
+	    left top,
+	    left bottom,
+	    color-stop(0.47, #FFFFFF),
+	    color-stop(1, #000000)
+	);
 }
 
 .rhapVideoSeekBar .ui-widget-header {
 	background: -moz-linear-gradient(center top -90deg, #56B0E2, #3D7FA1)
 		repeat scroll left 0 #1F3744;
+	background: -webkit-gradient(
+	    linear,
+	    left top,
+	    left bottom,
+	    color-stop(0.47, rgb(86,177,226)),
+	    color-stop(1, rgb(61,128,161))
+	);
+			
 }
 .rhapVideoDuration{
 	bottom: 14px;
@@ -334,6 +415,13 @@
 .rhapVideoVolumeSlider .ui-widget-header {
 	background: -moz-linear-gradient(center top -90deg, #008AC9, #0074A5)
 		repeat scroll left 0 #1F3744;
+	background: -webkit-gradient(
+	    linear,
+	    left top,
+	    left bottom,
+	    color-stop(0.47, #008AC9),
+	    color-stop(1, #0074A5)
+	);
 }
 
 /** overwrite jquery ui style */

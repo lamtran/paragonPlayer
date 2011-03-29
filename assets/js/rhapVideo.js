@@ -27,6 +27,25 @@
 			this.id = $.generateId();
 		});
 	};
+	jQuery.fn.aPosition = function() {
+		thisLeft = this.offset().left;
+		thisTop = this.offset().top;
+		thisParent = this.parent();
+		parentLeft = thisParent.offset().left;
+		parentTop = thisParent.offset().top;
+		return {
+		left: thisLeft-parentLeft,
+		top: thisTop-parentTop
+		};
+	};
+	function printTimeRanges(tr) {
+		if (tr == null) return "undefined";
+		s= tr.length + ": ";
+		for (i=0; i<tr.length; i++) {
+		s += tr.start(i) + " - " + tr.end(i) + "; ";
+		}
+		return s;
+	}
 	/**
 	 * @description catch-all method to allow logging on all browsers
 	 * @static
@@ -72,6 +91,33 @@
 	function supportsTheoraCodec(v) {
 		if (!supportsVideo(v)) { return false; }
 		return $(v).has('source[type=\'video/ogg; codecs="theora, vorbis"\']').length>0 && v.canPlayType('video/ogg; codecs="theora, vorbis"');
+	}
+	function getSupportedVideoSource(v){
+		var match = {};
+		$(v).children().each(function(index,source){
+			if(supportsH264Codec(v)){
+				if(source.type=='video/mp4; codecs="vp6"'){
+					source['src'] = source.src;
+					source['type'] = source.type;
+					return false;
+				}
+			}
+			if(supportsVp8Codec(v)){
+				if(source.type=='video/webm; codecs="vp8, vorbis"'){
+					source['src'] = source.src;
+					source['type'] = source.type;
+					return false;
+				}
+			}
+			if(supportsTheoraCodec(v)){
+				if(source.type=='video/ogg; codecs="theora, vorbis"'){
+					match['src'] = source.src;
+					match['type'] = source.type;
+					return false;
+				}
+			}
+		});
+		return match;
 	}
 	/**
 	 * @description method to detect canvas element support in current browser
@@ -224,11 +270,13 @@
 		// constants
 		/* @const */ var swfLocation = 'http://blog.rhapsody.com/video/SlimVideoPlayer.swf';
 		
-		var video, parent, controls, playPause, playPauseCanvas, seekBar, timer, volumeSlider, volumeBtn, fullScreenBtn;
+		var video, parent, relatedVideos, controls, playPause, playPauseCanvas, seekBar, timer, volumeSlider, volumeBtn, fullScreenBtn, rhapVideoBufferBar;
 		var bigPlayButton, seekBarHandle, rhapVideoMoreButton;
 		var seekSliding, seekValue=-1, videoVolume, savedVolumeBeforeMute, isFullScreen = false, isShowMore = false;
 		var rhapVideoMoreControls, rhapVideoSharePanel, rhapVideoShareBtn, rhapVideoShareUrl, rhapVideoSharePanelCloseButton;
 		var rhapVideoDuration, rhapVideoEmbedPanel, rhapVideoEmbedBtn, rhapVideoEmbedPanelCloseButton;
+		var rhapVideoRelatedBtn, rhapVideoRelatedPanel, rhapVideoRelatedPanelCloseButton;
+		var toast;
 		
 		/**
 		 * @description Initialize the video class
@@ -245,11 +293,23 @@
 		 * 			config.sources.flv   {string} data containing information for flash playback
 		 * @return {RhapVideo} the video object
 		 */
-		this.init = function(videoElement){
+		this.init = function(videoElement,relateds){
 			video = videoElement;
 			parent = $(video).parent();
+			relatedVideos = relateds;
 			this._createVideoElement(video);
 			return this;
+		};
+		var _initialPositionTimer = function(){
+			if(timer.css('top')=='0px'){
+				timer.position({
+					my: "center bottom",
+					at: "center top",
+					of: seekBarHandle,
+					offset: '0 -3'
+				});
+				$(timer.css('top','-27px'));
+			}
 		};
 		var _positionTimer = function(){
 			timer.position({
@@ -328,7 +388,6 @@
 					'<div class="rhapVideoControls">'+
 						'<a href="#" class="rhapVideoPlayControl paused disabled"><span>Play</span><canvas width="32" height="32" class="rhapVideoPlayControlCanvas"/></a>'+
 						'<div class="rhapVideoSeekBar"></div>'+
-//						'<span class="rhapVideoDuration">00:00</span>'+
 						'<div class="rhapVideoVolumeBox">'+
 							'<div class="rhapVideoVolumeBg">'+
 								'<div class="rhapVideoVolumeSlider"></div>'+
@@ -341,7 +400,7 @@
 			parent.append($(
 					'<div class="rhapVideoMoreControls">'+
 					'<ul>'+
-					'<li><a href="#">related</a></li>'+
+					'<li><a href="#" class="rhapVideoRelatedBtn">related</a></li>'+
 					//'<li><a href="#">cc</a></li>'+
 					'<li><a href="#" class="rhapVideoEmbedBtn">embed</a></li>'+
 					'<li><a href="#" class="rhapVideoShareBtn">share</a></li>'+
@@ -387,16 +446,42 @@
 						'<a href="#" class="rhapVideoEmbedPanelCloseButton">Close</a>'+
 					'</div>'
 			));
+			parent.append($(
+					'<div class="toast">'+
+						'<span class="toastMessage">loading...</span>'+
+					'</div>'
+			));
+			var relatedVideoHtml = '';//'<li><a name="fb_share" type="button_count">Share</a></li>'+
+			for(var i=0;i<relatedVideos.length;i++){
+				var v = relatedVideos[i];
+				relatedVideoHtml+='<li><a href="'+v.src+'" data-width="'+v.width+'" data-height="'+v.height+'" data-type="'+v.type+'"><img src="'+v.poster+'"/></a></li>';
+			}
+			parent.append($(
+					'<div class="rhapVideoRelatedPanel">'+
+						'<div class="rhapVideoSharePanelContent">'+
+							'<h2>Related Videos</h2>'+
+							'<ul class="horizontalList">'+
+								relatedVideoHtml +
+							'</ul>'+
+						'</div>'+
+						'<a href="#" class="rhapVideoRelatedPanelCloseButton">Close</a>'+
+					'</div>'
+			));
 			//get newly created elements
 			controls = $('.rhapVideoControls',parent);
-//			rhapVideoDuration = $('.rhapVideoDuration',controls);
 			rhapVideoMoreControls = $('.rhapVideoMoreControls',parent);
 			rhapVideoShareBtn = $('.rhapVideoShareBtn',rhapVideoMoreControls);
 			rhapVideoSharePanel = $('.rhapVideoSharePanel',parent);
 			rhapVideoEmbedPanel = $('.rhapVideoEmbedPanel',parent);
+			rhapVideoRelatedPanel = $('.rhapVideoRelatedPanel',parent);
 			rhapVideoEmbedBtn = $('.rhapVideoEmbedBtn',rhapVideoMoreControls);
 			rhapVideoEmbedPanelCloseButton = $('.rhapVideoEmbedPanelCloseButton',rhapVideoEmbedPanel);
 			rhapVideoEmbedPanelCloseButton.button();
+			rhapVideoRelatedBtn = $('.rhapVideoRelatedBtn',rhapVideoMoreControls);
+			rhapVideoRelatedPanelCloseButton = $('.rhapVideoRelatedPanelCloseButton',rhapVideoRelatedPanel);
+			rhapVideoRelatedPanelCloseButton.button();
+			toast = $('.toast',parent);
+			toast.css('line-height',parent.height()+'px');
 			$(rhapVideoSharePanel).css({
 				'width':(parseInt($(video).css('width'))-20)+'px',
 				'height':(parseInt($(video).css('height'))-80)+'px',
@@ -404,6 +489,12 @@
 				'top':'10px'
 			});
 			$(rhapVideoEmbedPanel).css({
+				'width':(parseInt($(video).css('width'))-20)+'px',
+				'height':(parseInt($(video).css('height'))-80)+'px',
+				'left':'10px',
+				'top':'10px'
+			});
+			$(rhapVideoRelatedPanel).css({
 				'width':(parseInt($(video).css('width'))-20)+'px',
 				'height':(parseInt($(video).css('height'))-80)+'px',
 				'left':'10px',
@@ -439,6 +530,7 @@
 			//build the buffer bar
 			var sliderRange = $('.ui-slider-range',seekBar);
 			sliderRange.after('<div class="rhapVideoBufferBar"></div>');
+			rhapVideoBufferBar = $('.rhapVideoBufferBar',controls);
 			//build the timer label
 			seekBarHandle = $('.ui-slider-handle',seekBar);
 			seekBarHandle.after('<canvas width="41" height="26" class="rhapVideoTimer"/>');
@@ -476,6 +568,28 @@
 			rhapVideoMoreButton = $('.rhapVideoMoreButton',controls);
 			this._drawMoreBtn(rhapVideoMoreButton);
 		};
+		this._play = function(video){
+			this._fitSourceDimensions(video,function(){
+				video.play();
+			});
+		};
+		this._fitSourceDimensions = function(video,callback){
+			var parent = $(video).parent();
+			if(parent.width()!=video.videoWidth || parent.height()!=video.videoHeight){
+				$(video).hide();
+				parent.animate({
+				    width: video.videoWidth,
+				    height: video.videoHeight
+				  }, 500, function() {
+				    // Animation complete.
+					  $(video).css({'width':video.videoWidth,'height':video.videoHeight});
+					  $(video).show();
+					  callback();
+				  });
+			}else{
+				callback();
+			}
+		};
 		/**
 		 * @description set up event handlers for html5 video element
 		 * @private
@@ -493,7 +607,8 @@
 			});
 			$(bigPlayButton).click(function(){
 				$(this).hide();
-				video.play();
+				//video.play();
+				scope._play(video);
 			});
 			var seekUpdate = function() {
 				var currenttime = video.currentTime;
@@ -505,29 +620,43 @@
 						seekBar.slider('value', currenttime);
 					}
 				}
-				//timer.text(_timeFormat(currenttime));
 				scope._drawTimerLabel(timer,41,26,_timeFormat(currenttime));
-//				rhapVideoDuration.text(_timeFormat(video.duration-currenttime));
+				if(video.buffered && video.buffered.end()<=video.duration && rhapVideoBufferBar.width()!=rhapVideoBufferBar.parent().width()){
+					rhapVideoBufferBar.width(Math.floor(video.buffered.end()/video.duration*100)+'%');
+				}
 			};
 			$(video).bind('timeupdate',function(){
 				seekUpdate();
 			}); 
 			$(video).bind('durationchange',function(){
-				var video_duration = video.duration;
-				seekBar.slider("option","max",video_duration);
+				seekBar.slider("option","max",video.duration);
 			}); 
 			$(video).bind('loadstart',function(){
+				toast.css('line-height',parent.height()+'px');
+				toast.show();
 			}); 
 			$(video).bind('waiting',function(){
 				playPause.addClass('disabled');
 			});
 			$(video).bind('canplay',function(){
+				toast.hide();
 				playPause.removeClass('disabled');
+				$('body').trigger('canplay');
 			});
 			$(video).bind('pause',function(){
 				showPausedState();
 				scope._drawPlayButton(upGradientStops);
 			});
+			function progressHandler(e){
+			      if(e.total && e.loaded){
+			           // percentage of video loaded
+			          var proportion =  Math.floor(( e.loaded / e.total * 100));
+			          rhapVideoBufferBar.width(proportion+'%');
+			      } else {
+			           // do nothing because we're autobuffering.
+			      }
+			}
+			video.addEventListener('progress',progressHandler,false);
 			$(video).bind('play',function() {
 				$(bigPlayButton).hide();
 				playPause.removeClass('paused');
@@ -543,10 +672,12 @@
 				//only play if video's state is passed waiting for data
 				if(video.readyState>video.HAVE_CURRENT_DATA){
 					if (video.ended || video.paused) {
-						video.play();
+						scope._play(video);
 					} else {
 						video.pause();
 					}
+				}else{
+					alert('problem fetching video stream...');
 				}
 			});
 			$(playPause).hover(function(){
@@ -609,9 +740,12 @@
 					showLess();
 				}
 			});
+			/*****************
+			 * SHARE **/
 			$(rhapVideoShareBtn).click(function(){
 				rhapVideoSharePanel.slideDown('slow',function(){
 					rhapVideoShareUrl.select();
+					rhapVideoSharePanelCloseButton.show();
 				});
 				rhapVideoShareUrl.val(document.location);
 				showLess();
@@ -619,20 +753,56 @@
 			$(rhapVideoSharePanelCloseButton).click(function(){
 				closeSharePanel();
 			});
+			var closeSharePanel = function(){
+				rhapVideoSharePanelCloseButton.hide();
+				rhapVideoSharePanel.slideUp('slow');
+			};
+			/*******************
+			 * EMBEDDED **/
+			$(rhapVideoEmbedBtn).click(function(){
+				rhapVideoEmbedPanel.slideDown('slow',function(){
+					rhapVideoEmbedPanelCloseButton.show();
+				});
+				showLess();
+			});
 			$(rhapVideoEmbedPanelCloseButton).click(function(){
 				closeEmbedPanel();
 			});
-			$(rhapVideoEmbedBtn).click(function(){
-				rhapVideoEmbedPanel.slideDown('slow');
+			var closeEmbedPanel = function(){
+				rhapVideoEmbedPanelCloseButton.hide();
+				rhapVideoEmbedPanel.slideUp('slow');
+			};
+			/*******************
+			 * RELATED **/
+			$(rhapVideoRelatedBtn).click(function(){
+				rhapVideoRelatedPanel.slideDown('slow',function(){
+					rhapVideoRelatedPanelCloseButton.show();
+				});
 				showLess();
 			});
-			var closeSharePanel = function(){
-				rhapVideoSharePanel.slideUp('slow',function(){
-				});
+			$(rhapVideoRelatedPanelCloseButton).click(function(){
+				closeRelatedPanel();
+			});
+			var closeRelatedPanel = function(){
+				rhapVideoRelatedPanelCloseButton.hide();
+				rhapVideoRelatedPanel.slideUp('slow');
 			};
-			var closeEmbedPanel = function(){
-				rhapVideoEmbedPanel.slideUp('slow');
-			}
+			$("*", rhapVideoRelatedPanel).click(function(e){
+				e.preventDefault();
+			    var domEl = $(this).get(0);
+			    if(domEl.nodeName=='IMG'){
+			    	closeRelatedPanel();
+			    	var link = $(domEl).parent();
+			    	video.src = link.attr('href');
+			    	video.type = link.attr('data-type');
+			    	$('body').bind('canplay',function(){
+			    		scope._play(video);
+			    	});
+			    	video.load();
+			    }
+			});
+			/*********************
+			 * HELPERS **/
 			var showMore = function(){
 				isShowMore = true;
 				scope._drawMoreBtn(rhapVideoMoreButton,'down');
@@ -956,7 +1126,7 @@
 		 */
 		this._drawLargePlayButton = function(video){
 			/* @const */ var bigButtonMaxWidth = 125;
-			/* @const */ var bigButtonMinWidth = 65;
+			/* @const */ var bigButtonMinWidth = 85;
 			// set button measurements 
 			var bigButtonWidth =  video.width*20/100;
 			bigButtonWidth = bigButtonWidth > bigButtonMaxWidth ? bigButtonMaxWidth : Math.max(bigButtonMinWidth, bigButtonWidth);
@@ -976,6 +1146,7 @@
 			var padding = 0;
 			
 			drawLargeTriangle(context,bigButtonWidth,bigButtonHeight,2);
+			
 			var halfWidth = bigButtonWidth / 2;
 			var halfHeight = bigButtonHeight / 2;
 			
@@ -1003,9 +1174,34 @@
 		$('video').each(function(index,video){
 			//wrap each video element in a div so we have context to build the controls
 			$(video).wrap(function() {
-				return '<div class="rhapVideoWrapper" />';
+				return '<div class="rhapVideoWrapper" style="height:'+video.height+'px;width:'+video.width+'"/>';//style="height:'+video.height+'px"
 			});
-			new RhapVideo().init(video);
+			var relateds = [];
+			var mainSource = getSupportedVideoSource(video);
+			relateds.push({
+				poster: video.poster,
+				width: video.width,
+				height: video.height,
+				src: mainSource.src,
+				type: mainSource.type
+			});
+			
+			$('.rhapRelatedVideo',video).each(function(index,relatedVideo){
+				var related = $(relatedVideo);
+				var poster = related.attr('data-poster');
+				var width = related.attr('data-width');
+				var height = related.attr('data-height');
+				var src = related.attr('data-src');
+				var type = related.attr('data-type');
+				relateds.push({
+					poster: poster,
+					width: width,
+					height: height,
+					src: src,
+					type: type
+				});
+			});
+			new RhapVideo().init(video,relateds);
 		});
 	});
 })(jQuery);

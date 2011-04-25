@@ -277,6 +277,8 @@
 		var rhapVideoDuration, rhapVideoEmbedPanel, rhapVideoEmbedBtn, rhapVideoEmbedPanelCloseButton;
 		var rhapVideoRelatedBtn, rhapVideoRelatedPanel, rhapVideoRelatedPanelCloseButton;
 		var toast;
+		var seekBarLeftOffset = 38;
+		var seekBarRightMargin = 132;//172;
 		
 		/**
 		 * @description Initialize the video class
@@ -377,13 +379,15 @@
 				}
 			}
 		};
+		this._setSeekBarWidth = function(video){
+			var w = video.videoWidth ? video.videoWidth : video.width;
+			seekBar.css({'width':w-seekBarLeftOffset-seekBarRightMargin});
+		};
 		/**
 		 * @description the video controls - play, pause, progress, etc.
 		 */
 		this._drawControls = function(video){
 			var scope = this;
-			var seekBarLeftOffset = 38;
-			var seekBarRightMargin = 132;//172;
 			parent.append($(
 					'<div class="rhapVideoControls">'+
 						'<a href="#" class="rhapVideoPlayControl paused disabled"><span>Play</span><canvas width="32" height="32" class="rhapVideoPlayControlCanvas"/></a>'+
@@ -510,7 +514,7 @@
 				upGradientStops:['#5F6367','#1D1E25']
 			});
 			seekBar = $('.rhapVideoSeekBar', controls);
-			seekBar.css({'width':video.width-seekBarLeftOffset-seekBarRightMargin});
+			this._setSeekBarWidth(video);
 			//timeline controls
 			seekBar.slider({
 				value: 0,
@@ -575,6 +579,7 @@
 		};
 		this._fitSourceDimensions = function(video,callback){
 			var parent = $(video).parent();
+			var scope = this;
 			if(parent.width()!=video.videoWidth || parent.height()!=video.videoHeight){
 				$(video).hide();
 				parent.animate({
@@ -583,12 +588,21 @@
 				  }, 500, function() {
 				    // Animation complete.
 					  $(video).css({'width':video.videoWidth,'height':video.videoHeight});
+					  scope._setSeekBarWidth(video);
 					  $(video).show();
 					  callback();
 				  });
 			}else{
 				callback();
 			}
+		};
+		this._wireBigPlayButton = function(){
+			var scope = this;
+			$(bigPlayButton).click(function(){
+				$(this).hide();
+				//video.play();
+				scope._play(video);
+			});
 		};
 		/**
 		 * @description set up event handlers for html5 video element
@@ -605,19 +619,31 @@
 				$(controls).hide();
 				showLess();
 			});
-			$(bigPlayButton).click(function(){
-				$(this).hide();
-				//video.play();
-				scope._play(video);
-			});
+			this._wireBigPlayButton();
 			var seekUpdate = function() {
 				var currenttime = video.currentTime;
 				if(!seekSliding && video.readyState>video.HAVE_CURRENT_DATA) {
-					if(seekValue!=-1){
+					if(seekValue>0){
 						seekBar.slider('value', seekValue);
-						seekValue = -1;
+						if(seekValue>currenttime){
+							seekValue = -1;
+						}else{
+							seekValue = -2;
+						}
 					}else{
-						seekBar.slider('value', currenttime);
+						var t = currenttime;
+						if(seekValue==-1){
+							if(currenttime<seekBar.slider('value')){
+								t = seekBar.slider('value');
+							}
+							seekValue=-3;
+						}else if(seekValue==-2){
+							if(currenttime>seekBar.slider('value')){
+								t = seekBar.slider('value');
+							}
+							seekValue=-3;
+						}
+						seekBar.slider('value', t);
 					}
 				}
 				scope._drawTimerLabel(timer,41,26,_timeFormat(currenttime));
@@ -819,7 +845,9 @@
 			};
 			//private helpers
 			var showPausedState = function(){
-				$(bigPlayButton).show();
+				//$(bigPlayButton).show();
+				scope._drawLargePlayButton(video);
+				scope._wireBigPlayButton();
 				playPause.removeClass('playing');
 				playPause.addClass('paused');
 				playPause.children().text('Play');
@@ -1127,14 +1155,16 @@
 		this._drawLargePlayButton = function(video){
 			/* @const */ var bigButtonMaxWidth = 125;
 			/* @const */ var bigButtonMinWidth = 85;
+			var videoWidth = (video.videoWidth ? video.videoWidth : video.width);
+			var videoHeight = (video.videoHeight ? video.videoHeight : video.height);
 			// set button measurements 
-			var bigButtonWidth =  video.width*20/100;
+			var bigButtonWidth =  videoWidth*20/100;
 			bigButtonWidth = bigButtonWidth > bigButtonMaxWidth ? bigButtonMaxWidth : Math.max(bigButtonMinWidth, bigButtonWidth);
 			var bigButtonHeight = bigButtonWidth*.7;
 			// draw and position it 
 			$(video).after($('<canvas class="bigPlayButton" width="'+bigButtonWidth+'px" height="'+bigButtonHeight+'px"></canvas>'));
-			var bigButtonX = video.width/2-bigButtonWidth/2;
-			var bigButtonY = video.height/2-bigButtonHeight/2;
+			var bigButtonX = videoWidth/2-bigButtonWidth/2;
+			var bigButtonY = videoHeight/2-bigButtonHeight/2;
 			bigPlayButton = $(video).next()[0];
 			$(bigPlayButton).css({
 				'left':bigButtonX+'px',

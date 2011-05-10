@@ -5,7 +5,7 @@
 	 * 			be referenced by tests.  Do not call _xxx functions directly.
 	 */
 	
-	/** global utils 
+	/** global utils
 	 * ***********************************************************/
 	/**
 	 * @description method to check if a string starts with another string
@@ -647,8 +647,8 @@
 					}
 				}
 				scope._drawTimerLabel(timer,41,26,_timeFormat(currenttime));
-				if(video.buffered && video.buffered.end()<=video.duration && rhapVideoBufferBar.width()!=rhapVideoBufferBar.parent().width()){
-					rhapVideoBufferBar.width(Math.floor(video.buffered.end()/video.duration*100)+'%');
+				if(video.buffered && video.buffered.end(video.buffered.length-1)<=video.duration && rhapVideoBufferBar.width()!=rhapVideoBufferBar.parent().width()){
+					rhapVideoBufferBar.width(Math.floor(video.buffered.end(video.buffered.length-1)/video.duration*100)+'%');
 				}
 			};
 			$(video).bind('timeupdate',function(){
@@ -750,9 +750,16 @@
 				if(!isFullScreen){
 					isFullScreen = true;
 					$(parent).addClass('rhapVideoFullscreen');
+					$(parent).css({'width':'auto','height':'auto'});
+					$(video).width('100%');
+					$(video).height('100%');
 				}else{
 					isFullScreen = false;
+					console.log('video width: ' + video.videoWidth);
 					$(parent).removeClass('rhapVideoFullscreen');
+					$(parent).css({'width':video.videoWidth+'px','height':video.videoHeight+'px'});
+					$(video).width(video.videoWidth+'px');
+					$(video).height(video.videoHeight+'px');
 				}
 				var seekBarLeftOffset = 38;
 				var seekBarRightMargin = 132;
@@ -1204,7 +1211,7 @@
 		$('video').each(function(index,video){
 			//wrap each video element in a div so we have context to build the controls
 			$(video).wrap(function() {
-				return '<div class="rhapVideoWrapper" style="height:'+video.height+'px;width:'+video.width+'"/>';//style="height:'+video.height+'px"
+				return '<div class="rhapVideoWrapper" style="height:'+video.height+'px;width:'+video.width+'px"/>';//style="height:'+video.height+'px"
 			});
 			var relateds = [];
 			var mainSource = getSupportedVideoSource(video);

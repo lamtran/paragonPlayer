@@ -279,6 +279,7 @@
 		var toast;
 		var seekBarLeftOffset = 38;
 		var seekBarRightMargin = 132;//172;
+		var isHideVideoArea = false;
 		
 		/**
 		 * @description Initialize the video class
@@ -499,10 +500,10 @@
 				'top':'10px'
 			});
 			$(rhapVideoRelatedPanel).css({
-				'width':(parseInt($(video).css('width'))-20)+'px',
-				'height':(parseInt($(video).css('height'))-80)+'px',
-				'left':'10px',
-				'top':'10px'
+				'width':'716px',//(parseInt($(video).css('width'))-20)+'px',
+				'height':'261px',//(parseInt($(video).css('height'))-80)+'px',
+				'left': parseInt($(video).css('width'))/2-716/2 + 'px', //'10px',
+				'top':'-0px'
 			});
 			rhapVideoShareUrl = $('.rhapVideoShareUrl',rhapVideoSharePanel);
 			rhapVideoSharePanelCloseButton = $('.rhapVideoSharePanelCloseButton',rhapVideoSharePanel);
@@ -604,6 +605,18 @@
 				scope._play(video);
 			});
 		};
+		this._hideVideoArea = function(){
+			$(video).hide();
+			$(parent).css('background','transparent');
+			$(controls).hide();
+			isHideVideoArea = true;
+		};
+		this._showVideoArea = function(){
+			$(video).show();
+			$(parent).css('background','#000');
+			$(controls).show();
+			isHideVideoArea = false;
+		}
 		/**
 		 * @description set up event handlers for html5 video element
 		 * @private
@@ -614,7 +627,9 @@
 			/* @const */ var WAITING_STATE = 2;
 			var scope = this;
 			$(parent).hover(function(){
-				$(controls).show();
+				if(!isHideVideoArea){
+					$(controls).show();
+				}
 			},function(){
 				$(controls).hide();
 				showLess();
@@ -808,12 +823,14 @@
 			/*******************
 			 * RELATED **/
 			$(rhapVideoRelatedBtn).click(function(){
+				scope._hideVideoArea();
 				rhapVideoRelatedPanel.slideDown('slow',function(){
 					rhapVideoRelatedPanelCloseButton.show();
 				});
 				showLess();
 			});
 			$(rhapVideoRelatedPanelCloseButton).click(function(){
+				scope._showVideoArea();
 				closeRelatedPanel();
 			});
 			var closeRelatedPanel = function(){

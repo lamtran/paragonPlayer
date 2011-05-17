@@ -120,12 +120,12 @@ ul.horizontalList li {
 .rhapVideoRelatedPanel a.rhapVideoRelatedPanelCloseButton{
 	position: absolute;
 	right: 30px;
-	bottom: 29px;
+	top: 29px;
 	display:none;
 }
 .rhapVideoRelatedPanel li a img{
-	width: 64px;
-	height: 64px;	
+	width: 150px;
+	height: 100px;	
 }
 .rhapVideoEmbedCode{
 	width: 100%;	

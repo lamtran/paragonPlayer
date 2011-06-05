@@ -114,21 +114,31 @@ ul.horizontalList li {
 	background-color: rgba(0, 0, 0, .3);
 	display: none;
 	position: absolute;
+	width: 723px;
+	height: 261px;
+	top:-0px;
 }
 
 .rhapVideoSharePanel a.rhapVideoSharePanelCloseButton , .rhapVideoEmbedPanel a.rhapVideoEmbedPanelCloseButton,
 .rhapVideoRelatedPanel a.rhapVideoRelatedPanelCloseButton{
 	position: absolute;
-	right: 30px;
-	top: 29px;
+	right: 18px;
+	top: 17px;
 	display:none;
 }
 .rhapVideoRelatedPanel li a img{
 	width: 150px;
 	height: 100px;	
 }
+.relatedVideoTitle{
+	display:block;	
+}
+#relatedVideosList{
+	position: absolute;	
+}
 .rhapVideoEmbedCode{
-	width: 100%;	
+	height: 95%;
+    width: 99%;	
 }
 
 .rhapVideoSharePanelContent {
@@ -143,16 +153,21 @@ ul.horizontalList li {
 	position: absolute;
 	left: 20px;
 	right: 20px;
-	top: 20px;
+	top: 54px;
 	bottom: 20px;
 	-moz-border-radius: 5px 5px 5px 5px;
 	border-radius: 5px 5px 5px 5px;
 	padding: 10px;
 	color: #fff;
+	overflow: auto;
 }
 
-.rhapVideoSharePanelContent h2 {
-	margin: 0;
+.panelHeader {
+	color: #FFFFFF;
+    left: 19px;
+    margin: 0;
+    position: absolute;
+    top: 17px;
 }
 
 .rhapVideoSharePanelContent input {

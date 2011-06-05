@@ -414,8 +414,8 @@
 			));
 			parent.append($(
 					'<div class="rhapVideoSharePanel">'+
+						'<h2 class="panelHeader">Share</h2>'+
 						'<div class="rhapVideoSharePanelContent">'+
-							'<h2>Share</h2>'+
 							'<span>Get URL:&nbsp;</span><input type="text" class="rhapVideoShareUrl"/>'+
 							'<ul>'+
 								'<li><a name="fb_share" type="button_count">Share</a></li>'+
@@ -428,8 +428,8 @@
 			));
 			parent.append($(
 					'<div class="rhapVideoEmbedPanel">'+
+						'<h2 class="panelHeader">Embed</h2>'+
 						'<div class="rhapVideoSharePanelContent">'+
-							'<h2>Embed</h2>'+
 							'<textarea class="rhapVideoEmbedCode">'+
 								'<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/themes/flick/jquery-ui.css" media="screen" rel="stylesheet" type="text/css" />'+
 								'<link href="assets/css/rhapVideo.css" media="screen" rel="stylesheet" type="text/css" />'+
@@ -459,13 +459,14 @@
 			var relatedVideoHtml = '';//'<li><a name="fb_share" type="button_count">Share</a></li>'+
 			for(var i=0;i<relatedVideos.length;i++){
 				var v = relatedVideos[i];
-				relatedVideoHtml+='<li><a href="'+v.src+'" data-width="'+v.width+'" data-height="'+v.height+'" data-type="'+v.type+'"><img src="'+v.poster+'"/></a></li>';
+				relatedVideoHtml+='<li><a href="'+v.src+'" data-width="'+v.width+'" data-height="'+v.height+'" data-type="'+v.type+'"><img src="'+v.poster+'"/></a>' +
+				'<a href="'+v.src+'" data-width="'+v.width+'" data-height="'+v.height+'" data-type="'+v.type+'" class="relatedVideoTitle">'+v.title+'</a></li>';
 			}
 			parent.append($(
 					'<div class="rhapVideoRelatedPanel">'+
+						'<h2 class="panelHeader">Related Videos</h2>'+
 						'<div class="rhapVideoSharePanelContent">'+
-							'<h2>Related Videos</h2>'+
-							'<ul class="horizontalList">'+
+							'<ul id="relatedVideosList" class="horizontalList">'+
 								relatedVideoHtml +
 							'</ul>'+
 						'</div>'+
@@ -487,23 +488,14 @@
 			rhapVideoRelatedPanelCloseButton.button();
 			toast = $('.toast',parent);
 			toast.css('line-height',parent.height()+'px');
-			$(rhapVideoSharePanel).css({
-				'width':(parseInt($(video).css('width'))-20)+'px',
-				'height':(parseInt($(video).css('height'))-80)+'px',
-				'left':'10px',
-				'top':'10px'
+			$(rhapVideoRelatedPanel).css({
+				'left': parseInt($(video).css('width'))/2-723/2 + 'px'
 			});
 			$(rhapVideoEmbedPanel).css({
-				'width':(parseInt($(video).css('width'))-20)+'px',
-				'height':(parseInt($(video).css('height'))-80)+'px',
-				'left':'10px',
-				'top':'10px'
+				'left': parseInt($(video).css('width'))/2-723/2 + 'px'
 			});
-			$(rhapVideoRelatedPanel).css({
-				'width':'716px',//(parseInt($(video).css('width'))-20)+'px',
-				'height':'261px',//(parseInt($(video).css('height'))-80)+'px',
-				'left': parseInt($(video).css('width'))/2-716/2 + 'px', //'10px',
-				'top':'-0px'
+			$(rhapVideoSharePanel).css({
+				'left': parseInt($(video).css('width'))/2-723/2 + 'px'
 			});
 			rhapVideoShareUrl = $('.rhapVideoShareUrl',rhapVideoSharePanel);
 			rhapVideoSharePanelCloseButton = $('.rhapVideoSharePanelCloseButton',rhapVideoSharePanel);
@@ -791,6 +783,10 @@
 			/*****************
 			 * SHARE **/
 			$(rhapVideoShareBtn).click(function(){
+				if(!video.paused){
+					video.pause();
+				}
+				scope._hideVideoArea();
 				rhapVideoSharePanel.slideDown('slow',function(){
 					rhapVideoShareUrl.select();
 					rhapVideoSharePanelCloseButton.show();
@@ -799,6 +795,7 @@
 				showLess();
 			});
 			$(rhapVideoSharePanelCloseButton).click(function(){
+				scope._showVideoArea();
 				closeSharePanel();
 			});
 			var closeSharePanel = function(){
@@ -808,12 +805,17 @@
 			/*******************
 			 * EMBEDDED **/
 			$(rhapVideoEmbedBtn).click(function(){
+				if(!video.paused){
+					video.pause();
+				}
+				scope._hideVideoArea();
 				rhapVideoEmbedPanel.slideDown('slow',function(){
 					rhapVideoEmbedPanelCloseButton.show();
 				});
 				showLess();
 			});
 			$(rhapVideoEmbedPanelCloseButton).click(function(){
+				scope._showVideoArea();
 				closeEmbedPanel();
 			});
 			var closeEmbedPanel = function(){
@@ -823,6 +825,9 @@
 			/*******************
 			 * RELATED **/
 			$(rhapVideoRelatedBtn).click(function(){
+				if(!video.paused){
+					video.pause();
+				}
 				scope._hideVideoArea();
 				rhapVideoRelatedPanel.slideDown('slow',function(){
 					rhapVideoRelatedPanelCloseButton.show();
@@ -846,6 +851,7 @@
 			    	video.src = link.attr('href');
 			    	video.type = link.attr('data-type');
 			    	$('body').bind('canplay',function(){
+			    		scope._showVideoArea();
 			    		scope._play(video);
 			    	});
 			    	video.load();
@@ -1225,6 +1231,7 @@
 		};
 	};
 	$(function(){
+		var stringLimit = 17;
 		$('video').each(function(index,video){
 			//wrap each video element in a div so we have context to build the controls
 			$(video).wrap(function() {
@@ -1237,7 +1244,8 @@
 				width: video.width,
 				height: video.height,
 				src: mainSource.src,
-				type: mainSource.type
+				type: mainSource.type,
+				title: video.title.length > stringLimit ? video.title.substring(0,17)+'...' : video.title
 			});
 			
 			$('.rhapRelatedVideo',video).each(function(index,relatedVideo){
@@ -1247,12 +1255,14 @@
 				var height = related.attr('data-height');
 				var src = related.attr('data-src');
 				var type = related.attr('data-type');
+				var title = related.attr('title');
 				relateds.push({
 					poster: poster,
 					width: width,
 					height: height,
 					src: src,
-					type: type
+					type: type,
+					title: title.length > stringLimit ? title.substring(0,17)+'...' : title
 				});
 			});
 			new RhapVideo().init(video,relateds);

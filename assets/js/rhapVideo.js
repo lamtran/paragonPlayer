@@ -270,7 +270,7 @@
 		// constants
 		/* @const */ var swfLocation = 'http://blog.rhapsody.com/video/SlimVideoPlayer.swf';
 		
-		var video, parent, relatedVideos, controls, playPause, playPauseCanvas, seekBar, timer, volumeSlider, volumeBtn, fullScreenBtn, rhapVideoBufferBar;
+		var video, parent, videoIndex, forcedFlash, relatedVideos, controls, playPause, playPauseCanvas, seekBar, timer, volumeSlider, volumeBtn, fullScreenBtn, rhapVideoBufferBar;
 		var bigPlayButton, seekBarHandle, rhapVideoMoreButton;
 		var seekSliding, seekValue=-1, videoVolume, savedVolumeBeforeMute, isFullScreen = false, isShowMore = false;
 		var rhapVideoMoreControls, rhapVideoSharePanel, rhapVideoShareBtn, rhapVideoShareUrl, rhapVideoSharePanelCloseButton;
@@ -296,7 +296,9 @@
 		 * 			config.sources.flv   {string} data containing information for flash playback
 		 * @return {RhapVideo} the video object
 		 */
-		this.init = function(videoElement,relateds){
+		this.init = function(index,videoElement,relateds,forced){
+			videoIndex = index;
+			forcedFlash = forced;
 			video = videoElement;
 			parent = $(video).parent();
 			relatedVideos = relateds;
@@ -333,11 +335,12 @@
 		 * @private
 		 */
 		this._createVideoElement = function(video){
-			if(this._renderHtml5Video(video)){
+			if(!forcedFlash && this._renderHtml5Video(video)){
 				this._drawLargePlayButton(video);
 				this._drawControls(video);
 				this._wireHtml5Events(video);
 			}else{
+				console.log('no html5, fall back to flash');
 				var params = {};
 				params.scale = "noscale";
 				params.menu = "false";
@@ -348,7 +351,7 @@
 				flashvars['width']=video.width;
 				flashvars['height']=video.height;
 				var flv;
-				$(video).children().each(function(index,source){
+				$($('.rhapRelatedVideos')[videoIndex]).siblings('source').each(function(index,source){
 					if(source.type=='video/mp4; codecs="vp6"'){
 						flv = source.src;
 					}
@@ -371,12 +374,19 @@
 					if(video.poster!=null){
 						flashvars['imageurl']=video.poster;
 					}
-					parent.append($('<div id="replaceMe"><p><a href="http://www.adobe.com/go/getflashplayer"><img src="http://www.adobe.com/images/shared/download_buttons/get_flash_player.gif" alt="Get Adobe Flash player" /></a></p></div>'));
+					//parent.append($('<div id="replaceMe"><p><a href="http://www.adobe.com/go/getflashplayer"><img src="http://www.adobe.com/images/shared/download_buttons/get_flash_player.gif" alt="Get Adobe Flash player" /></a></p></div>'));
+					console.log('swfLocation: ' + swfLocation);
+					console.log(swfobject);
+					console.log('w: ' + video.width + ' h: ' + video.height);
+					console.log('flashvars: ' + flashvars);
 					swfobject.embedSWF(swfLocation, 'replaceMe', video.width, video.height, "9.0.0", false, flashvars, params, attributes);
 					$(video).remove();
 					setTimeout(function(){
 						video = document.getElementById(attributes.id);
 					},10);
+					console.log('done embedding');
+				}else{
+					console.log('no flv');
 				}
 			}
 		};
@@ -762,7 +772,6 @@
 					$(video).height('100%');
 				}else{
 					isFullScreen = false;
-					console.log('video width: ' + video.videoWidth);
 					$(parent).removeClass('rhapVideoFullscreen');
 					$(parent).css({'width':video.videoWidth+'px','height':video.videoHeight+'px'});
 					$(video).width(video.videoWidth+'px');
@@ -1245,7 +1254,7 @@
 				height: video.height,
 				src: mainSource.src,
 				type: mainSource.type,
-				title: video.title.length > stringLimit ? video.title.substring(0,17)+'...' : video.title
+				title: video.title.length > stringLimit ? video.title.substring(0,stringLimit)+'...' : video.title
 			});
 			
 			$('.rhapRelatedVideo',video).each(function(index,relatedVideo){
@@ -1262,10 +1271,10 @@
 					height: height,
 					src: src,
 					type: type,
-					title: title.length > stringLimit ? title.substring(0,17)+'...' : title
+					title: title.length > stringLimit ? title.substring(0,stringLimit)+'...' : title
 				});
 			});
-			new RhapVideo().init(video,relateds);
+			new RhapVideo().init(index,video,relateds,true);
 		});
 	});
 })(jQuery);

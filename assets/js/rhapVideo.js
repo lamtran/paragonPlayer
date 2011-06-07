@@ -1,3 +1,19 @@
+var videos=[];
+/**
+ * methods exposed to Flash
+ */
+function showMore(videoIndex){
+	console.log('show more at index: ' + videoIndex);
+	console.log(videos[videoIndex]);
+	console.log(videos);
+	videos[videoIndex].showMoreControls();
+}
+function showLess(videoIndex){
+	console.log('show less at index: ' + videoIndex);
+	console.log(videos[videoIndex]);
+	console.log(videos);
+	videos[videoIndex].hideMoreControls();
+}
 (function($) {
 	/**
 	 * Convention:
@@ -335,6 +351,7 @@
 		 * @private
 		 */
 		this._createVideoElement = function(video){
+			this._drawCommonControls(video);
 			if(!forcedFlash && this._renderHtml5Video(video)){
 				this._drawLargePlayButton(video);
 				this._drawControls(video);
@@ -345,6 +362,7 @@
 				params.scale = "noscale";
 				params.menu = "false";
 				params.allowscriptaccess = "always";
+				params.allowFullScreen = "true";
 				var attributes = {};
 				attributes.id = 'flashid_'+new Date().getTime();
 				var flashvars = {};
@@ -371,22 +389,18 @@
 						flashvars['server']=server;
 					}
 					flashvars['path']=path;
+					flashvars['videoIndex']=videoIndex;
 					if(video.poster!=null){
 						flashvars['imageurl']=video.poster;
 					}
-					//parent.append($('<div id="replaceMe"><p><a href="http://www.adobe.com/go/getflashplayer"><img src="http://www.adobe.com/images/shared/download_buttons/get_flash_player.gif" alt="Get Adobe Flash player" /></a></p></div>'));
-					console.log('swfLocation: ' + swfLocation);
-					console.log(swfobject);
-					console.log('w: ' + video.width + ' h: ' + video.height);
-					console.log('flashvars: ' + flashvars);
-					swfobject.embedSWF(swfLocation, 'replaceMe', video.width, video.height, "9.0.0", false, flashvars, params, attributes);
+					parent.append($('<div id="replaceMe"><p><a href="http://www.adobe.com/go/getflashplayer"><img src="http://www.adobe.com/images/shared/download_buttons/get_flash_player.gif" alt="Get Adobe Flash player" /></a></p></div>'));
+					swfobject.embedSWF("SlimVideoPlayer.swf", 'replaceMe', video.width, video.height, "9.0.0", false, flashvars, params, attributes);
 					$(video).remove();
 					setTimeout(function(){
 						video = document.getElementById(attributes.id);
 					},10);
-					console.log('done embedding');
 				}else{
-					console.log('no flv');
+					//no flv
 				}
 			}
 		};
@@ -394,24 +408,7 @@
 			var w = video.videoWidth ? video.videoWidth : video.width;
 			seekBar.css({'width':w-seekBarLeftOffset-seekBarRightMargin});
 		};
-		/**
-		 * @description the video controls - play, pause, progress, etc.
-		 */
-		this._drawControls = function(video){
-			var scope = this;
-			parent.append($(
-					'<div class="rhapVideoControls">'+
-						'<a href="#" class="rhapVideoPlayControl paused disabled"><span>Play</span><canvas width="32" height="32" class="rhapVideoPlayControlCanvas"/></a>'+
-						'<div class="rhapVideoSeekBar"></div>'+
-						'<div class="rhapVideoVolumeBox">'+
-							'<div class="rhapVideoVolumeBg">'+
-								'<div class="rhapVideoVolumeSlider"></div>'+
-							'</div>'+
-							'<canvas width="24" height="18" class="rhapVideoVolumeButton"/>'+
-						'</div>'+
-						'<canvas width="24" height="18" class="rhapVideoFullScreenButton"/>'+
-						'<canvas width="24" height="18" class="rhapVideoMoreButton"/>'+
-					'</div>'));
+		this._drawCommonControls = function(video){
 			parent.append($(
 					'<div class="rhapVideoMoreControls">'+
 					'<ul>'+
@@ -483,8 +480,6 @@
 						'<a href="#" class="rhapVideoRelatedPanelCloseButton">Close</a>'+
 					'</div>'
 			));
-			//get newly created elements
-			controls = $('.rhapVideoControls',parent);
 			rhapVideoMoreControls = $('.rhapVideoMoreControls',parent);
 			rhapVideoShareBtn = $('.rhapVideoShareBtn',rhapVideoMoreControls);
 			rhapVideoSharePanel = $('.rhapVideoSharePanel',parent);
@@ -510,6 +505,28 @@
 			rhapVideoShareUrl = $('.rhapVideoShareUrl',rhapVideoSharePanel);
 			rhapVideoSharePanelCloseButton = $('.rhapVideoSharePanelCloseButton',rhapVideoSharePanel);
 			rhapVideoSharePanelCloseButton.button();
+		};
+		/**
+		 * @description the video controls - play, pause, progress, etc.
+		 */
+		this._drawControls = function(video){
+			var scope = this;
+			parent.append($(
+					'<div class="rhapVideoControls">'+
+						'<a href="#" class="rhapVideoPlayControl paused disabled"><span>Play</span><canvas width="32" height="32" class="rhapVideoPlayControlCanvas"/></a>'+
+						'<div class="rhapVideoSeekBar"></div>'+
+						'<div class="rhapVideoVolumeBox">'+
+							'<div class="rhapVideoVolumeBg">'+
+								'<div class="rhapVideoVolumeSlider"></div>'+
+							'</div>'+
+							'<canvas width="24" height="18" class="rhapVideoVolumeButton"/>'+
+						'</div>'+
+						'<canvas width="24" height="18" class="rhapVideoFullScreenButton"/>'+
+						'<canvas width="24" height="18" class="rhapVideoMoreButton"/>'+
+					'</div>'));
+			//get newly created elements
+			controls = $('.rhapVideoControls',parent);
+			
 			playPause = $('.rhapVideoPlayControl',controls);
 			playPauseCanvas = $('.rhapVideoPlayControlCanvas',playPause)[0];
 			
@@ -891,6 +908,20 @@
 				playPause.addClass('paused');
 				playPause.children().text('Play');
 			};
+		};
+		this.showMoreControls = function(){
+			console.log('00rhapVideoMoreControls goes down');
+			if(rhapVideoMoreControls.css('display')!='block'){
+				console.log('00sliding up rhapVideoMoreControls ' + rhapVideoMoreControls);
+				rhapVideoMoreControls.slideDown();
+			}
+		};
+		this.hideMoreControls = function(){
+			console.log('rhapVideoMoreControls goes down');
+			if(rhapVideoMoreControls.css('display')=='block'){
+				console.log('sliding up rhapVideoMoreControls ' + rhapVideoMoreControls);
+				rhapVideoMoreControls.slideUp();
+			}
 		};
 		/**
 		 * @description method to check whether to render an html5 <video> element
@@ -1274,7 +1305,7 @@
 					title: title.length > stringLimit ? title.substring(0,stringLimit)+'...' : title
 				});
 			});
-			new RhapVideo().init(index,video,relateds,true);
+			videos.push(new RhapVideo().init(index,video,relateds,true));
 		});
 	});
 })(jQuery);

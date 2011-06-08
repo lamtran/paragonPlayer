@@ -17,7 +17,7 @@
 		
 		var video, flashId, parent, videoIndex, forcedFlash, relatedVideos, controls, playPause, playPauseCanvas, seekBar, timer, volumeSlider, volumeBtn, fullScreenBtn, rhapVideoBufferBar;
 		var bigPlayButton, seekBarHandle, rhapVideoMoreButton;
-		var seekSliding, seekValue=-1, videoVolume, savedVolumeBeforeMute, isFullScreen = false, isShowMore = false;
+		var seekSliding, seekValue=-1, videoVolume, savedVolumeBeforeMute, isFullScreen = false;
 		var rhapVideoMoreControls, rhapVideoSharePanel, rhapVideoShareBtn, rhapVideoShareUrl, rhapVideoSharePanelCloseButton;
 		var rhapVideoDuration, rhapVideoEmbedPanel, rhapVideoEmbedBtn, rhapVideoEmbedPanelCloseButton;
 		var rhapVideoRelatedBtn, rhapVideoRelatedPanel, rhapVideoRelatedPanelCloseButton;
@@ -28,7 +28,7 @@
 		var overGradientStops = {overGradientStops:['#5F6367','#1D1E25']};
 		var upGradientStops = {upGradientStops:['#5F6367','#1D1E25']};
 		/* @const */ var WAITING_STATE = 2;
-
+		this.isShowMore = false;
 		this.init = function(index,videoElement,relateds,forced){
 			videoIndex = index;
 			forcedFlash = forced;
@@ -63,6 +63,7 @@
 				this._drawControls(video);
 				this._wireHtml5Events(video);
 			}else{
+				forcedFlash = true;
 				var params = {};
 				params.scale = "noscale";
 				params.menu = "false";
@@ -105,8 +106,6 @@
 					parent.append($('<div id="replaceMe"><p><a href="http://www.adobe.com/go/getflashplayer"><img src="http://www.adobe.com/images/shared/download_buttons/get_flash_player.gif" alt="Get Adobe Flash player" /></a></p></div>'));
 					swfobject.embedSWF("SlimVideoPlayer.swf", 'replaceMe', video.width, video.height, "9.0.0", false, flashvars, params, attributes);
 					$(video).remove();
-					onFlashVideoPlayerLoaded = function(){
-					}
 					/*
 					setTimeout(function(){
 						video = document.getElementById(attributes.id);
@@ -132,11 +131,11 @@
 			rhapVideoShareBtn = $('.rhapVideoShareBtn',rhapVideoMoreControls);
 			rhapVideoSharePanel = $('.rhapVideoSharePanel',parent);
 			$(rhapVideoSharePanel).css({
-				'left': parseInt($(video).css('width'))/2-723/2 + 'px'
+				'left': this.getVideoWidth()/2-723/2 + 'px'
 			});
 			rhapVideoEmbedPanel = $('.rhapVideoEmbedPanel',parent);
 			$(rhapVideoEmbedPanel).css({
-				'left': parseInt($(video).css('width'))/2-723/2 + 'px'
+				'left': this.getVideoWidth()/2-723/2 + 'px'
 			});
 			rhapVideoEmbedBtn = $('.rhapVideoEmbedBtn',rhapVideoMoreControls);
 			rhapVideoEmbedPanelCloseButton = $('.rhapVideoEmbedPanelCloseButton',rhapVideoEmbedPanel);
@@ -151,7 +150,7 @@
 			rhapVideoRelatedPanelCloseButton = $('.rhapVideoRelatedPanelCloseButton',rhapVideoRelatedPanel);
 			rhapVideoRelatedPanelCloseButton.button();
 			$(rhapVideoRelatedPanel).css({
-				'left': parseInt($(video).css('width'))/2-723/2 + 'px'
+				'left': this.getVideoWidth()/2-723/2 + 'px'
 			});
 	
 			toast = $('.toast',parent);
@@ -241,7 +240,7 @@
 			drawFullScreenBtn(fullScreenBtn[0]);
 			
 			rhapVideoMoreButton = $('.rhapVideoMoreButton',controls);
-			drawMoreBtn(rhapVideoMoreButton[0]);
+			toggleMoreBtn(rhapVideoMoreButton[0]);
 		};
 		this._play = function(video){
 			this._fitSourceDimensions(video,function(){
@@ -448,7 +447,7 @@
 				seekBar.css({'width':w-seekBarLeftOffset-seekBarRightMargin});
 			});
 			$(rhapVideoMoreButton).click(function(){
-				if(!isShowMore){
+				if(!scope.isShowMore){
 					scope.showMore();
 				}else{
 					scope.showLess();
@@ -466,33 +465,13 @@
 		};
 		/*********************
 		 * HELPERS **/
-		this.showMore = function(){
-			isShowMore = true;
-			drawMoreBtn(rhapVideoMoreButton[0],'down');
-			this.showMoreControls();
-		};
-		this.showLess = function(){
-			isShowMore = false;
-			drawMoreBtn(rhapVideoMoreButton[0],'up');
-			this.hideMoreControls();
-		};
-		this.showMoreControls = function(){
-			if(rhapVideoMoreControls.css('display')!='block'){
-				rhapVideoMoreControls.slideDown();
-			}
-		};
-		this.hideMoreControls = function(){
-			if(rhapVideoMoreControls.css('display')=='block'){
-				rhapVideoMoreControls.slideUp();
-			}
-		};
 		this._wireCommonEvents = function(video){
 			var scope = this;
 			/*****************
 			 * SHARE **/
 			$(rhapVideoShareBtn).click(function(){
 				if(!video.paused){
-					video.pause();
+					scope.getVideo().pause();
 				}
 				scope._hideVideoArea();
 				rhapVideoSharePanel.slideDown('slow',function(){
@@ -514,7 +493,7 @@
 			 * EMBEDDED **/
 			$(rhapVideoEmbedBtn).click(function(){
 				if(!video.paused){
-					video.pause();
+					scope.getVideo().pause();
 				}
 				scope._hideVideoArea();
 				rhapVideoEmbedPanel.slideDown('slow',function(){
@@ -567,14 +546,53 @@
 			    }
 			});
 		};
+		/**
+		 * calls common to both html5 and flash
+		 */
+		this.showMoreControls = function(){
+			this.isShowMore = true;
+			if(rhapVideoMoreControls.css('display')!='block'){
+				rhapVideoMoreControls.slideDown();
+			}
+		};
+		this.hideMoreControls = function(){
+			this.isShowMore = false;
+			if(rhapVideoMoreControls.css('display')=='block'){
+				rhapVideoMoreControls.slideUp();
+			}
+		};
 		this.getVideo = function(){
 			if(forcedFlash){
+				console.log('returning flash video obj');
 				return document.getElementById(flashId);
 			}else{
+				console.log('returning html5 video object');
 				return video;
 			}
 		};
-		
+		this.getVideoWidth = function(){
+			if(forcedFlash){
+				return document.getElementById(flashId).width;
+			}else{
+				return parseInt($(video).css('width'));
+			}
+		}
+		this.showMore = function(){
+			if(forcedFlash){
+				document.getElementById(flashId).toggleMoreBtn('down');
+			}else{
+				toggleMoreBtn(rhapVideoMoreButton[0],'down');
+			}
+			this.showMoreControls();
+		};
+		this.showLess = function(){
+			if(forcedFlash){
+				document.getElementById(flashId).toggleMoreBtn('up');
+			}else{
+				toggleMoreBtn(rhapVideoMoreButton[0],'up');
+			}
+			this.hideMoreControls();
+		};
 		
 		/**
 		 * @description method to draw the paused button

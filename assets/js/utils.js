@@ -303,7 +303,7 @@ function drawPauseRightBar(context, width,height) {
 	};
 }
 
-drawMoreBtn = function(canvas,direction) {
+toggleMoreBtn = function(canvas,direction) {
 	if(direction==null) {
 		direction = 'up';
 	}

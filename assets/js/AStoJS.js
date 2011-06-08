@@ -11,3 +11,11 @@ function showLess(videoIndex){
 function onFlashVideoPlayerLoaded(){
 	//overwrite this
 }
+function hideMoreControls(videoIndex){
+	var vid = videos[videoIndex];
+	console.log('is show more: ' + vid.isShowMore);
+	if(vid.isShowMore){
+		console.log('show lessssss');
+		vid.showLess();
+	}
+}

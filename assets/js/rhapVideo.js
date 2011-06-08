@@ -1,280 +1,9 @@
-var videos=[];
-/**
- * methods exposed to Flash
- */
-function showMore(videoIndex){
-	console.log('show more at index: ' + videoIndex);
-	console.log(videos[videoIndex]);
-	console.log(videos);
-	videos[videoIndex].showMoreControls();
-}
-function showLess(videoIndex){
-	console.log('show less at index: ' + videoIndex);
-	console.log(videos[videoIndex]);
-	console.log(videos);
-	videos[videoIndex].hideMoreControls();
-}
 (function($) {
 	/**
 	 * Convention:
 	 * 		A method that starts with _ means to be a private api, although it is defined as public so it can
 	 * 			be referenced by tests.  Do not call _xxx functions directly.
 	 */
-	
-	/** global utils
-	 * ***********************************************************/
-	/**
-	 * @description method to check if a string starts with another string
-	 * @static
-	 */
-	function startsWith(str,startsWithThis){
-		return (str.match("^"+startsWithThis)==startsWithThis);
-	}
-	function endsWith(str,endsWithThis){
-		return (str.match(endsWithThis+"$")==endsWithThis);
-	} 
-	$.generateId = function() {
-		return arguments.callee.prefix + arguments.callee.count++;
-	};
-	$.generateId.prefix = 'jq$';
-	$.generateId.count = 0;
-	$.fn.generateId = function() {
-		return this.each(function() {
-			this.id = $.generateId();
-		});
-	};
-	jQuery.fn.aPosition = function() {
-		thisLeft = this.offset().left;
-		thisTop = this.offset().top;
-		thisParent = this.parent();
-		parentLeft = thisParent.offset().left;
-		parentTop = thisParent.offset().top;
-		return {
-		left: thisLeft-parentLeft,
-		top: thisTop-parentTop
-		};
-	};
-	function printTimeRanges(tr) {
-		if (tr == null) return "undefined";
-		s= tr.length + ": ";
-		for (i=0; i<tr.length; i++) {
-		s += tr.start(i) + " - " + tr.end(i) + "; ";
-		}
-		return s;
-	}
-	/**
-	 * @description catch-all method to allow logging on all browsers
-	 * @static
-	 * @param event
-	 */
-	function log(event){
-		if (!event) { return; }
-		if (typeof event == "string") { event = { type: event }; }
-		if (event.type) { this.history.push(event.type); }
-		if (this.history.length >= 50) { this.history.shift(); }
-		try { console.log(event.type); } catch(e) { try { opera.postError(event.type); } catch(e){} }
-	}
-	
-	/** feature detection 
-	 * ************************************************************/
-	/**
-	 * @description method to detect video element support in current browser
-	 * @static
-	 */
-	function supportsVideo(v) {
-		return !!v.canPlayType;
-	}
-	/**
-	 * @description method to detect h264 codec support in current browser
-	 * @static
-	 */
-	function supportsH264Codec(v) {
-		if (!supportsVideo(v)) { return false; }
-		return $(v).has('source[type=\'video/mp4; codecs="avc1.42E01E, mp4a.40.2"\']').length>0 && v.canPlayType('video/mp4; codecs="avc1.42E01E, mp4a.40.2"');
-	}
-	/**
-	 * @description method to detect vp8 support in current browser
-	 * @static
-	 */
-	function supportsVp8Codec(v) {
-		if (!supportsVideo(v)) { return false; }
-		return $(v).has('source[type=\'video/webm; codecs="vp8, vorbis"\']').length>0 && v.canPlayType('video/webm; codecs="vp8, vorbis"');
-	}
-	/**
-	 * @description method to detect theora codec support in current browser
-	 * @static
-	 */
-	function supportsTheoraCodec(v) {
-		if (!supportsVideo(v)) { return false; }
-		return $(v).has('source[type=\'video/ogg; codecs="theora, vorbis"\']').length>0 && v.canPlayType('video/ogg; codecs="theora, vorbis"');
-	}
-	function getSupportedVideoSource(v){
-		var match = {};
-		$(v).children().each(function(index,source){
-			if(supportsH264Codec(v)){
-				if(source.type=='video/mp4; codecs="vp6"'){
-					source['src'] = source.src;
-					source['type'] = source.type;
-					return false;
-				}
-			}
-			if(supportsVp8Codec(v)){
-				if(source.type=='video/webm; codecs="vp8, vorbis"'){
-					source['src'] = source.src;
-					source['type'] = source.type;
-					return false;
-				}
-			}
-			if(supportsTheoraCodec(v)){
-				if(source.type=='video/ogg; codecs="theora, vorbis"'){
-					match['src'] = source.src;
-					match['type'] = source.type;
-					return false;
-				}
-			}
-		});
-		return match;
-	}
-	/**
-	 * @description method to detect canvas element support in current browser
-	 * @static
-	 */
-	function supportsCanvas() {
-		return !!document.createElement('canvas').getContext;
-	}
-	/**
-	 * @description A utility function to convert from degrees to radians
-	 */
-	function rads(x) { return Math.PI*x/180; }
-	
-	/**
-	 * @description helper to draw a triangle
-	 * @param context
-	 * @param width
-	 * @param height
-	 * @param padding
-	 * @returns {___anonymous3214_3277}
-	 */
-	function drawTriangle(context,width,height,padding){
-		var x1 = padding/2 + 1.3*width/4;
-		var y1 = height/4 + padding;
-		var x2 = -padding + 3.2*width/4;
-		var y2 = height/2;
-		var x3 = padding/2 + 1.3*width/4;
-		var y3 = 3*height/4 - padding;
-		context.beginPath();
-		context.moveTo(x1, y1);        
-		context.lineTo(x2, y2 ); 
-		context.lineTo(x3, y3);         
-		context.closePath();
-		return {
-			x1:x1,
-			y1:y1,
-			x2:x2,
-			y2:y2,
-			x3:x3,
-			y3:y3
-		};
-	}
-	/**
-	 * @description helper to draw a large, less flattened triangle
-	 * @param context
-	 * @param width
-	 * @param height
-	 * @param padding
-	 * @returns {___anonymous3889_3952}
-	 */
-	function drawLargeTriangle(context,width,height,padding){
-		
-		var x1 = padding/2 + 1.5*width/4;
-		var y1 = height/4 + padding;
-		var x2 = -padding + 3*width/4;
-		var y2 = height/2;
-		var x3 = padding/2 + 1.5*width/4;
-		var y3 = 3*height/4 - padding;
-		context.beginPath();
-		context.moveTo(x1, y1);        
-		context.lineTo(x2, y2 ); 
-		context.lineTo(x3, y3);         
-		context.closePath();
-		return {
-			x1:x1,
-			y1:y1,
-			x2:x2,
-			y2:y2,
-			x3:x3,
-			y3:y3
-		};
-	}
-	function drawPauseLeftBar(context, width,height){
-		var barWidth = width/6;
-		var barHeight = 14;
-		var xOffset = 1.2;
-		var yOffset = 1;
-		var x1 = width/4+xOffset;
-		var y1 = height/4+xOffset+yOffset;
-		var x2 = width/4+xOffset+barWidth;
-		var y2 = height/4+xOffset+yOffset;
-		var x3 = width/4+xOffset+barWidth;
-		var y3 = height/4+xOffset+barHeight-yOffset;
-		var x4 = width/4+xOffset;
-		var y4 = height/4+xOffset+barHeight-yOffset;
-		context.beginPath();
-		context.moveTo(x1, y1);        
-		context.lineTo(x2, y2 ); 
-		context.lineTo(x3, y3);         
-		context.lineTo(x4, y4);
-		context.closePath();
-		return {
-			x1:x1,
-			y1:y1,
-			x2:x2,
-			y2:y2,
-			x3:x2,
-			y3:y3
-		};
-	}
-	function drawRoundRect(ctx, x, y, width, height, radius) {
-		ctx.beginPath();
-		ctx.moveTo(x + radius, y);
-		ctx.lineTo(x + width - radius, y);
-		ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-		ctx.lineTo(x + width, y + height - radius);
-		ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-		ctx.lineTo(x + radius, y + height);
-		ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-		ctx.lineTo(x, y + radius);
-		ctx.quadraticCurveTo(x, y, x + radius, y);
-		ctx.closePath();
-	}
-	function drawPauseRightBar(context, width,height){
-		var barWidth = width/6;
-		var barHeight = 14;
-		var xOffset = 1.2;
-		var yOffset = 1;
-		var x1 = width/4+xOffset+barWidth+3;
-		var y1 = height/4+xOffset+yOffset;
-		var x2 = width/4+xOffset+barWidth+barWidth+3;
-		var y2 = height/4+xOffset+yOffset;
-		var x3 = width/4+xOffset+barWidth+barWidth+3;
-		var y3 = height/4+xOffset+barHeight-yOffset;
-		var x4 = width/4+xOffset+barWidth+3;
-		var y4 = height/4+xOffset+barHeight-yOffset;
-		context.beginPath();
-		context.moveTo(x1, y1);        
-		context.lineTo(x2, y2 ); 
-		context.lineTo(x3, y3);         
-		context.lineTo(x4, y4);
-		context.closePath();
-		return {
-			x1:x1,
-			y1:y1,
-			x2:x2,
-			y2:y2,
-			x3:x2,
-			y3:y3
-		};
-	}
 	
 	/**
 	 * @description Our video class
@@ -286,7 +15,7 @@ function showLess(videoIndex){
 		// constants
 		/* @const */ var swfLocation = 'http://blog.rhapsody.com/video/SlimVideoPlayer.swf';
 		
-		var video, parent, videoIndex, forcedFlash, relatedVideos, controls, playPause, playPauseCanvas, seekBar, timer, volumeSlider, volumeBtn, fullScreenBtn, rhapVideoBufferBar;
+		var video, flashId, parent, videoIndex, forcedFlash, relatedVideos, controls, playPause, playPauseCanvas, seekBar, timer, volumeSlider, volumeBtn, fullScreenBtn, rhapVideoBufferBar;
 		var bigPlayButton, seekBarHandle, rhapVideoMoreButton;
 		var seekSliding, seekValue=-1, videoVolume, savedVolumeBeforeMute, isFullScreen = false, isShowMore = false;
 		var rhapVideoMoreControls, rhapVideoSharePanel, rhapVideoShareBtn, rhapVideoShareUrl, rhapVideoSharePanelCloseButton;
@@ -296,22 +25,10 @@ function showLess(videoIndex){
 		var seekBarLeftOffset = 38;
 		var seekBarRightMargin = 132;//172;
 		var isHideVideoArea = false;
-		
-		/**
-		 * @description Initialize the video class
-		 * @public
-		 * @param {object} config data to configure the video player
-		 * 		config.id      {number} id of the wrapper div
-		 * 		config.width   {number} width of the video player
-		 * 		config.height  {number} height of the video player
-		 * 		config.preload {boolean} whether to preload the video
-		 * 		config.sources {object} data containing information on video sources
-		 * 			config.sources.mp4   {string} path to mp4 file - webkit browsers
-		 * 			config.sources.webm  {string} path to webm file - chrome, ff 4, ie9 (?)
-		 * 			config.sources.ogv   {string} path to ogv file - ff
-		 * 			config.sources.flv   {string} data containing information for flash playback
-		 * @return {RhapVideo} the video object
-		 */
+		var overGradientStops = {overGradientStops:['#5F6367','#1D1E25']};
+		var upGradientStops = {upGradientStops:['#5F6367','#1D1E25']};
+		/* @const */ var WAITING_STATE = 2;
+
 		this.init = function(index,videoElement,relateds,forced){
 			videoIndex = index;
 			forcedFlash = forced;
@@ -320,17 +37,6 @@ function showLess(videoIndex){
 			relatedVideos = relateds;
 			this._createVideoElement(video);
 			return this;
-		};
-		var _initialPositionTimer = function(){
-			if(timer.css('top')=='0px'){
-				timer.position({
-					my: "center bottom",
-					at: "center top",
-					of: seekBarHandle,
-					offset: '0 -3'
-				});
-				$(timer.css('top','-27px'));
-			}
 		};
 		var _positionTimer = function(){
 			timer.position({
@@ -351,27 +57,30 @@ function showLess(videoIndex){
 		 * @private
 		 */
 		this._createVideoElement = function(video){
-			this._drawCommonControls(video);
-			if(!forcedFlash && this._renderHtml5Video(video)){
+			if(!forcedFlash && renderHtml5Video(video)){
+				flashId=null;
 				this._drawLargePlayButton(video);
 				this._drawControls(video);
 				this._wireHtml5Events(video);
 			}else{
-				console.log('no html5, fall back to flash');
 				var params = {};
 				params.scale = "noscale";
 				params.menu = "false";
 				params.allowscriptaccess = "always";
 				params.allowFullScreen = "true";
+				params.analyticstrackcode="UA-5860230-6";
+				params.wmode = "opaque";
 				var attributes = {};
 				attributes.id = 'flashid_'+new Date().getTime();
+				flashId = attributes.id;
 				var flashvars = {};
 				flashvars['width']=video.width;
 				flashvars['height']=video.height;
-				var flv;
+				var flv,pathStr;
 				$($('.rhapRelatedVideos')[videoIndex]).siblings('source').each(function(index,source){
 					if(source.type=='video/mp4; codecs="vp6"'){
 						flv = source.src;
+						pathStr = source.title;
 					}
 				});
 				//detecting progressive or streaming
@@ -382,8 +91,8 @@ function showLess(videoIndex){
 						path = flv;
 					}else{
 						//streaming
-						server = flv.substr(0,flv.lastIndexOf('/'));
-						path = flv.substring(flv.lastIndexOf('/'),flv.length);
+						server = flv;
+						path = pathStr;
 					}
 					if(server!=null){
 						flashvars['server']=server;
@@ -396,115 +105,57 @@ function showLess(videoIndex){
 					parent.append($('<div id="replaceMe"><p><a href="http://www.adobe.com/go/getflashplayer"><img src="http://www.adobe.com/images/shared/download_buttons/get_flash_player.gif" alt="Get Adobe Flash player" /></a></p></div>'));
 					swfobject.embedSWF("SlimVideoPlayer.swf", 'replaceMe', video.width, video.height, "9.0.0", false, flashvars, params, attributes);
 					$(video).remove();
+					onFlashVideoPlayerLoaded = function(){
+					}
+					/*
 					setTimeout(function(){
 						video = document.getElementById(attributes.id);
+						console.log('video: ' + video);
 					},10);
+					*/
 				}else{
 					//no flv
 				}
 			}
+			this._drawCommonControls(video,parent,relatedVideos);
+			this._wireCommonEvents(video);
 		};
 		this._setSeekBarWidth = function(video){
 			var w = video.videoWidth ? video.videoWidth : video.width;
 			seekBar.css({'width':w-seekBarLeftOffset-seekBarRightMargin});
 		};
-		this._drawCommonControls = function(video){
-			parent.append($(
-					'<div class="rhapVideoMoreControls">'+
-					'<ul>'+
-					'<li><a href="#" class="rhapVideoRelatedBtn">related</a></li>'+
-					//'<li><a href="#">cc</a></li>'+
-					'<li><a href="#" class="rhapVideoEmbedBtn">embed</a></li>'+
-					'<li><a href="#" class="rhapVideoShareBtn">share</a></li>'+
-					'</ul>'+
-					'</div>'
-			));
-			parent.append($(
-					'<div class="rhapVideoSharePanel">'+
-						'<h2 class="panelHeader">Share</h2>'+
-						'<div class="rhapVideoSharePanelContent">'+
-							'<span>Get URL:&nbsp;</span><input type="text" class="rhapVideoShareUrl"/>'+
-							'<ul>'+
-								'<li><a name="fb_share" type="button_count">Share</a></li>'+
-								'<li><a href="http://twitter.com/share" class="twitter-share-button" data-count="none">Tweet</a></li>'+
-								'<li><a title="Post to Google Buzz" class="google-buzz-button" href="http://www.google.com/buzz/post" data-button-style="small-button"></a></li>'+
-							'</ul>'+
-						'</div>'+
-						'<a href="#" class="rhapVideoSharePanelCloseButton">Close</a>'+
-					'</div>'
-			));
-			parent.append($(
-					'<div class="rhapVideoEmbedPanel">'+
-						'<h2 class="panelHeader">Embed</h2>'+
-						'<div class="rhapVideoSharePanelContent">'+
-							'<textarea class="rhapVideoEmbedCode">'+
-								'<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/themes/flick/jquery-ui.css" media="screen" rel="stylesheet" type="text/css" />'+
-								'<link href="assets/css/rhapVideo.css" media="screen" rel="stylesheet" type="text/css" />'+
-								'<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script>'+
-								'<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.8/jquery-ui.min.js"></script>'+
-								'<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>'+
-								'<script src="http://static.ak.fbcdn.net/connect.php/js/FB.Share" type="text/javascript"></script>'+
-								'<script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>'+
-								'<script type="text/javascript" src="http://www.google.com/buzz/api/button.js"></script>'+
-								'<script type="text/javascript" src="assets/js/rhapVideo.js"></script>'+
-								'<video width="640" height="264" poster="http://lamtran.com/oceans-clip.png" >'+
-							        '<source src="http://lamtran.com/oceans-clip.mp4" type=\'video/mp4; codecs="avc1.42E01E, mp4a.40.2"\' />'+
-							        '<source src="http://lamtran.com/oceans-clip.webm" type=\'video/webm; codecs="vp8, vorbis"\' />'+
-							        '<source src="http://lamtran.com/oceans-clip.ogv" type=\'video/ogg; codecs="theora, vorbis"\' />'+
-							        '<source src="rtmp://lamtran.com:1935/vod/oceans-clip" type=\'video/mp4; codecs="vp6"\' />'+
-							   '</video>'+
-							'</textarea>'+
-						'</div>'+
-						'<a href="#" class="rhapVideoEmbedPanelCloseButton">Close</a>'+
-					'</div>'
-			));
-			parent.append($(
-					'<div class="toast">'+
-						'<span class="toastMessage">loading...</span>'+
-					'</div>'
-			));
-			var relatedVideoHtml = '';//'<li><a name="fb_share" type="button_count">Share</a></li>'+
-			for(var i=0;i<relatedVideos.length;i++){
-				var v = relatedVideos[i];
-				relatedVideoHtml+='<li><a href="'+v.src+'" data-width="'+v.width+'" data-height="'+v.height+'" data-type="'+v.type+'"><img src="'+v.poster+'"/></a>' +
-				'<a href="'+v.src+'" data-width="'+v.width+'" data-height="'+v.height+'" data-type="'+v.type+'" class="relatedVideoTitle">'+v.title+'</a></li>';
-			}
-			parent.append($(
-					'<div class="rhapVideoRelatedPanel">'+
-						'<h2 class="panelHeader">Related Videos</h2>'+
-						'<div class="rhapVideoSharePanelContent">'+
-							'<ul id="relatedVideosList" class="horizontalList">'+
-								relatedVideoHtml +
-							'</ul>'+
-						'</div>'+
-						'<a href="#" class="rhapVideoRelatedPanelCloseButton">Close</a>'+
-					'</div>'
-			));
+		this._drawCommonControls = function(video,parent,relatedVideos){
+			drawCommonControlsHelper(parent,video);
+			//storing private references
 			rhapVideoMoreControls = $('.rhapVideoMoreControls',parent);
+			rhapVideoRelatedBtn = $('.rhapVideoRelatedBtn',rhapVideoMoreControls);
 			rhapVideoShareBtn = $('.rhapVideoShareBtn',rhapVideoMoreControls);
 			rhapVideoSharePanel = $('.rhapVideoSharePanel',parent);
-			rhapVideoEmbedPanel = $('.rhapVideoEmbedPanel',parent);
-			rhapVideoRelatedPanel = $('.rhapVideoRelatedPanel',parent);
-			rhapVideoEmbedBtn = $('.rhapVideoEmbedBtn',rhapVideoMoreControls);
-			rhapVideoEmbedPanelCloseButton = $('.rhapVideoEmbedPanelCloseButton',rhapVideoEmbedPanel);
-			rhapVideoEmbedPanelCloseButton.button();
-			rhapVideoRelatedBtn = $('.rhapVideoRelatedBtn',rhapVideoMoreControls);
-			rhapVideoRelatedPanelCloseButton = $('.rhapVideoRelatedPanelCloseButton',rhapVideoRelatedPanel);
-			rhapVideoRelatedPanelCloseButton.button();
-			toast = $('.toast',parent);
-			toast.css('line-height',parent.height()+'px');
-			$(rhapVideoRelatedPanel).css({
-				'left': parseInt($(video).css('width'))/2-723/2 + 'px'
-			});
-			$(rhapVideoEmbedPanel).css({
-				'left': parseInt($(video).css('width'))/2-723/2 + 'px'
-			});
 			$(rhapVideoSharePanel).css({
 				'left': parseInt($(video).css('width'))/2-723/2 + 'px'
 			});
+			rhapVideoEmbedPanel = $('.rhapVideoEmbedPanel',parent);
+			$(rhapVideoEmbedPanel).css({
+				'left': parseInt($(video).css('width'))/2-723/2 + 'px'
+			});
+			rhapVideoEmbedBtn = $('.rhapVideoEmbedBtn',rhapVideoMoreControls);
+			rhapVideoEmbedPanelCloseButton = $('.rhapVideoEmbedPanelCloseButton',rhapVideoEmbedPanel);
+			rhapVideoEmbedPanelCloseButton.button();
 			rhapVideoShareUrl = $('.rhapVideoShareUrl',rhapVideoSharePanel);
 			rhapVideoSharePanelCloseButton = $('.rhapVideoSharePanelCloseButton',rhapVideoSharePanel);
 			rhapVideoSharePanelCloseButton.button();
+			
+			drawRelatedVideosHelper(parent,relatedVideos,video);
+			//storing private references
+			rhapVideoRelatedPanel = $('.rhapVideoRelatedPanel',parent);
+			rhapVideoRelatedPanelCloseButton = $('.rhapVideoRelatedPanelCloseButton',rhapVideoRelatedPanel);
+			rhapVideoRelatedPanelCloseButton.button();
+			$(rhapVideoRelatedPanel).css({
+				'left': parseInt($(video).css('width'))/2-723/2 + 'px'
+			});
+	
+			toast = $('.toast',parent);
+			toast.css('line-height',parent.height()+'px');
 		};
 		/**
 		 * @description the video controls - play, pause, progress, etc.
@@ -560,7 +211,7 @@ function showLess(videoIndex){
 			seekBarHandle.after('<canvas width="41" height="26" class="rhapVideoTimer"/>');
 			timer = $('.rhapVideoTimer',seekBar);
 			_positionTimer();
-			this._drawTimerLabel(timer,41,26,'00:00');
+			drawTimerLabel(timer,41,26,'00:00');
 			
 			//volume controls
 			volumeSlider = $('.rhapVideoVolumeSlider', controls);
@@ -584,13 +235,13 @@ function showLess(videoIndex){
 					}
 				}
 			});
-			this._drawVolumeBtn(volumeBtn);
+			drawVolumeBtn(volumeBtn[0]);
 			
 			fullScreenBtn = $('.rhapVideoFullScreenButton',controls);
-			this._drawFullScreenBtn(fullScreenBtn);
+			drawFullScreenBtn(fullScreenBtn[0]);
 			
 			rhapVideoMoreButton = $('.rhapVideoMoreButton',controls);
-			this._drawMoreBtn(rhapVideoMoreButton);
+			drawMoreBtn(rhapVideoMoreButton[0]);
 		};
 		this._play = function(video){
 			this._fitSourceDimensions(video,function(){
@@ -641,9 +292,6 @@ function showLess(videoIndex){
 		 * @private
 		 */
 		this._wireHtml5Events = function(video){
-			var overGradientStops = {overGradientStops:['#5F6367','#1D1E25']};
-			var upGradientStops = {upGradientStops:['#5F6367','#1D1E25']};
-			/* @const */ var WAITING_STATE = 2;
 			var scope = this;
 			$(parent).hover(function(){
 				if(!isHideVideoArea){
@@ -651,7 +299,7 @@ function showLess(videoIndex){
 				}
 			},function(){
 				$(controls).hide();
-				showLess();
+				scope.showLess();
 			});
 			this._wireBigPlayButton();
 			var seekUpdate = function() {
@@ -680,7 +328,7 @@ function showLess(videoIndex){
 						seekBar.slider('value', t);
 					}
 				}
-				scope._drawTimerLabel(timer,41,26,_timeFormat(currenttime));
+				drawTimerLabel(timer,41,26,_timeFormat(currenttime));
 				if(video.buffered && video.buffered.end(video.buffered.length-1)<=video.duration && rhapVideoBufferBar.width()!=rhapVideoBufferBar.parent().width()){
 					rhapVideoBufferBar.width(Math.floor(video.buffered.end(video.buffered.length-1)/video.duration*100)+'%');
 				}
@@ -754,7 +402,7 @@ function showLess(videoIndex){
 				}
 			});
 			$( seekBar ).bind( "slide", function(event, ui) {
-				scope._drawTimerLabel(timer,41,26,_timeFormat(ui.value));
+				drawTimerLabel(timer,41,26,_timeFormat(ui.value));
 				_positionTimer();
 			});
 			$( seekBar ).bind( "slidechange", function(event, ui) {
@@ -801,11 +449,45 @@ function showLess(videoIndex){
 			});
 			$(rhapVideoMoreButton).click(function(){
 				if(!isShowMore){
-					showMore();
+					scope.showMore();
 				}else{
-					showLess();
+					scope.showLess();
 				}
 			});
+			//private helpers
+			var showPausedState = function(){
+				//$(bigPlayButton).show();
+				scope._drawLargePlayButton(video);
+				scope._wireBigPlayButton();
+				playPause.removeClass('playing');
+				playPause.addClass('paused');
+				playPause.children().text('Play');
+			};
+		};
+		/*********************
+		 * HELPERS **/
+		this.showMore = function(){
+			isShowMore = true;
+			drawMoreBtn(rhapVideoMoreButton[0],'down');
+			this.showMoreControls();
+		};
+		this.showLess = function(){
+			isShowMore = false;
+			drawMoreBtn(rhapVideoMoreButton[0],'up');
+			this.hideMoreControls();
+		};
+		this.showMoreControls = function(){
+			if(rhapVideoMoreControls.css('display')!='block'){
+				rhapVideoMoreControls.slideDown();
+			}
+		};
+		this.hideMoreControls = function(){
+			if(rhapVideoMoreControls.css('display')=='block'){
+				rhapVideoMoreControls.slideUp();
+			}
+		};
+		this._wireCommonEvents = function(video){
+			var scope = this;
 			/*****************
 			 * SHARE **/
 			$(rhapVideoShareBtn).click(function(){
@@ -818,7 +500,7 @@ function showLess(videoIndex){
 					rhapVideoSharePanelCloseButton.show();
 				});
 				rhapVideoShareUrl.val(document.location);
-				showLess();
+				scope.showLess();
 			});
 			$(rhapVideoSharePanelCloseButton).click(function(){
 				scope._showVideoArea();
@@ -838,7 +520,7 @@ function showLess(videoIndex){
 				rhapVideoEmbedPanel.slideDown('slow',function(){
 					rhapVideoEmbedPanelCloseButton.show();
 				});
-				showLess();
+				scope.showLess();
 			});
 			$(rhapVideoEmbedPanelCloseButton).click(function(){
 				scope._showVideoArea();
@@ -851,14 +533,15 @@ function showLess(videoIndex){
 			/*******************
 			 * RELATED **/
 			$(rhapVideoRelatedBtn).click(function(){
-				if(!video.paused){
-					video.pause();
+				if(!scope.getVideo().paused){
+					//document.getElementById(flashId).pause();
+					scope.getVideo().pause();
 				}
 				scope._hideVideoArea();
 				rhapVideoRelatedPanel.slideDown('slow',function(){
 					rhapVideoRelatedPanelCloseButton.show();
 				});
-				showLess();
+				scope.showLess();
 			});
 			$(rhapVideoRelatedPanelCloseButton).click(function(){
 				scope._showVideoArea();
@@ -883,199 +566,16 @@ function showLess(videoIndex){
 			    	video.load();
 			    }
 			});
-			/*********************
-			 * HELPERS **/
-			var showMore = function(){
-				isShowMore = true;
-				scope._drawMoreBtn(rhapVideoMoreButton,'down');
-				if(rhapVideoMoreControls.css('display')!='block'){
-					rhapVideoMoreControls.slideDown();
-				}
-			};
-			var showLess = function(){
-				isShowMore = false;
-				scope._drawMoreBtn(rhapVideoMoreButton,'up');
-				if(rhapVideoMoreControls.css('display')=='block'){
-					rhapVideoMoreControls.slideUp();
-				}
-			};
-			//private helpers
-			var showPausedState = function(){
-				//$(bigPlayButton).show();
-				scope._drawLargePlayButton(video);
-				scope._wireBigPlayButton();
-				playPause.removeClass('playing');
-				playPause.addClass('paused');
-				playPause.children().text('Play');
-			};
 		};
-		this.showMoreControls = function(){
-			console.log('00rhapVideoMoreControls goes down');
-			if(rhapVideoMoreControls.css('display')!='block'){
-				console.log('00sliding up rhapVideoMoreControls ' + rhapVideoMoreControls);
-				rhapVideoMoreControls.slideDown();
+		this.getVideo = function(){
+			if(forcedFlash){
+				return document.getElementById(flashId);
+			}else{
+				return video;
 			}
 		};
-		this.hideMoreControls = function(){
-			console.log('rhapVideoMoreControls goes down');
-			if(rhapVideoMoreControls.css('display')=='block'){
-				console.log('sliding up rhapVideoMoreControls ' + rhapVideoMoreControls);
-				rhapVideoMoreControls.slideUp();
-			}
-		};
-		/**
-		 * @description method to check whether to render an html5 <video> element
-		 * @private
-		 */
-		this._renderHtml5Video = function(v){
-			return supportsVideo(v) &&
-			(supportsH264Codec(v) || supportsVp8Codec(v)  || supportsTheoraCodec(v));
-		};
-		this._drawMoreBtn = function(rhapVideoMoreButton,direction){
-			if(direction==null){
-				direction = 'up';
-			}
-			var canvas = rhapVideoMoreButton[0];
-			var context = canvas.getContext('2d');
-			var width = 18;
-			var height = 18;
-			var directionOffset = direction=='up' ? height/3 +1: 2*height/3-1;
-			var yOffset = direction=='up' ? height/2 + 1: height/2 - 1;
-			context.fillStyle='#29ABE2';
-			context.lineWidth = 1;
-			context.beginPath();
-			context.arc(width/2, height/2, 8, 0, Math.PI * 2, true);
-			context.fill();
-			context.closePath();
-			
-			context.lineWidth = 3;
-			context.strokeStyle= '#0C303F';
-			context.beginPath();
-			context.moveTo(width/4,yOffset);
-			context.lineTo(width/2,directionOffset);
-			context.lineTo(3*width/4,yOffset);
-			context.stroke();
-		};
-		this._drawFullScreenBtn = function(fullScreenBtn){
-			var canvas = fullScreenBtn[0];
-			var context = canvas.getContext('2d');
-			var width = 20;
-			var height = 15;
-			var radius = 5;
-			var sides = 5;
-			context.fillStyle='#29ABE2';
-			context.lineWidth = 1;
-			drawRoundRect(context,width/4+0,height/4+1,width/2-0,height/2-2,2);
-			context.fill(); 
-			
-			context.beginPath();
-			context.moveTo(radius, 0);
-			context.lineTo(sides, 0);
-			context.lineTo(0, sides);
-			context.lineTo(0, radius);
-			context.quadraticCurveTo(0, 0, radius,0);
-			context.closePath();
-			context.fill();
-			
-			context.beginPath();
-			context.moveTo(width-radius, 0);
-			context.lineTo(width-sides, 0);
-			context.lineTo(width, sides);
-			context.lineTo(width, radius);
-			context.quadraticCurveTo(width, 0, width-radius,0);
-			context.closePath();
-			context.fill();
-			
-			context.beginPath();
-			context.moveTo(width, height-radius);
-			context.lineTo(width, height-sides);
-			context.lineTo(width-sides, height);
-			context.lineTo(width-radius, height);
-			context.quadraticCurveTo(width, height, width,height-radius);
-			context.closePath();
-			context.fill();
-			
-			context.beginPath();
-			context.moveTo(0, height-radius);
-			context.lineTo(0, height-sides);
-			context.lineTo(sides, height);
-			context.lineTo(radius, height);
-			context.quadraticCurveTo(0, height, 0,height-radius);
-			context.closePath();
-			context.fill();
-		};
-		this._drawVolumeBtn = function(volumeBtn){
-			var canvas = volumeBtn[0];
-			var context = canvas.getContext('2d');
-			var width = 10;
-			var height = 15;
-			context.beginPath();
-			context.moveTo(width,0);
-			context.lineTo(width-1,0);
-			context.lineTo(width/2,height/4);
-			context.lineTo(0,height/4);
-			context.lineTo(0,3*height/4);
-			context.lineTo(width/2,3*height/4);
-			context.lineTo(width-1,height);
-			context.lineTo(width,height);
-			context.closePath();
-			
-			context.fillStyle='#29ABE2';
-			context.lineWidth = 1;
-			context.fill(); 
-			
-			context.lineWidth = 1;
-			context.moveTo(width+2,3);
-			context.quadraticCurveTo(width+4,height/2,width+2,height-3);
-			context.fill(); 
-			
-			context.moveTo(width+4, 1);
-			context.quadraticCurveTo(width+9,height/2,width+4,height-1);
-			context.fill(); 
-		};
-		this._drawTimerLabel = function(timer, width, boxHeight,text){
-			var canvas = timer[0];
-			var height = boxHeight-6;
-			var context = canvas.getContext('2d');
-			var x1 = 0;
-			var y1 = 0;
-			var x2 = width;
-			var y2 = 0;
-			var x3 = width;
-			var y3 = height;
-			var x4 = width/2+6;
-			var y4 = height;
-			var x5 = width/2;
-			var y5 = height+6;
-			var x6 = width/2-6;
-			var y6 = height;
-			var x7 = 0;
-			var y7 = height;
-			context.beginPath();
-			context.moveTo(x1, y1);        
-			context.lineTo(x2, y2 ); 
-			context.lineTo(x3, y3);     
-			context.lineTo(x4, y4); 
-			context.lineTo(x5, y5); 
-			context.lineTo(x6, y6); 
-			context.lineTo(x7, y7); 
-			context.closePath();
-			
-			
-			var grad = context.createLinearGradient(x7,y7,x1,y1);
-			grad.addColorStop(0, '#5F6367');
-			grad.addColorStop(1, '#1D1E25');
-			context.fillStyle=grad;
-			context.lineWidth = 1;
-			context.strokeStyle= '#424242';
-			context.fill(); 
-			context.stroke(); 
-			
-			context.font = "10pt Arial";
-			context.fillStyle='#ffffff';//grad;
-			context.fillText(text,5,16);
-			context.stroke(); 
-		};
+		
+		
 		/**
 		 * @description method to draw the paused button
 		 */
@@ -1091,7 +591,7 @@ function showLess(videoIndex){
 			canvas.width = canvas.width;
 			var context = canvas.getContext('2d');
 			
-			this._drawPlayPauseButtonBackground(context,buttonCenterX,buttonCenterY);
+			drawPlayPauseButtonBackground(context,buttonCenterX,buttonCenterY);
 			
 			var triangleCoords = drawPauseLeftBar(context, buttonWidth,buttonHeight);
 			var grad;
@@ -1149,30 +649,7 @@ function showLess(videoIndex){
 			context.fill(); 
 			context.stroke(); 
 		};
-		this._drawPlayPauseButtonBackground = function(context,buttonCenterX,buttonCenterY){
-			context.beginPath();
-			context.arc(buttonCenterX,buttonCenterY,16,0,rads(360),false); 
-			context.closePath();
-			var lingrad = context.createLinearGradient(0,0,0,15);
-			lingrad.addColorStop(0, '#253036');
-			lingrad.addColorStop(1, '#8896A7');
-			context.fillStyle=lingrad;
-			context.lineWidth = 1; 
-			context.fill(); 
-			
-			context.beginPath();
-			context.arc(buttonCenterX,buttonCenterY,14, 0,rads(360),false); 
-			context.closePath();
-			var lingrad = context.createLinearGradient(0,0,0,15);
-			lingrad.addColorStop(0, '#F2F2F2');
-			lingrad.addColorStop(.52, '#C9C9C9');
-			lingrad.addColorStop(1, '#A6A6A6');
-			context.fillStyle=lingrad;
-			context.lineWidth = 2; 
-			context.strokeStyle= '#424242';
-			context.fill(); 
-			context.stroke(); 
-		};
+		
 		/**
 		 * @description method to draw the play button
 		 */
@@ -1188,7 +665,7 @@ function showLess(videoIndex){
 			canvas.width = canvas.width;
 			var context = canvas.getContext('2d');
 			
-			this._drawPlayPauseButtonBackground(context,buttonCenterX,buttonCenterY);
+			drawPlayPauseButtonBackground(context,buttonCenterX,buttonCenterY);
 			
 			var triangleCoords = drawTriangle(context,buttonWidth,buttonHeight,padding);
 			var grad;
@@ -1305,7 +782,7 @@ function showLess(videoIndex){
 					title: title.length > stringLimit ? title.substring(0,stringLimit)+'...' : title
 				});
 			});
-			videos.push(new RhapVideo().init(index,video,relateds,true));
+			videos.push(new RhapVideo().init(index,video,relateds,false));
 		});
 	});
 })(jQuery);

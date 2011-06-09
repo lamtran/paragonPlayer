@@ -118,18 +118,18 @@ function supportsTheoraCodec(v) {
 
 function getSupportedVideoSource(v) {
 	var match = {};
-	$(v).children().each( function(index,source) {
+	$(v).children('source').each( function(index,source) {
 		if(supportsH264Codec(v)) {
-			if(source.type=='video/mp4; codecs="vp6"') {
-				source['src'] = source.src;
-				source['type'] = source.type;
+			if(source.type=='video/mp4; codecs="avc1.42E01E, mp4a.40.2"') {
+				match['src'] = source.src;
+				match['type'] = source.type;
 				return false;
 			}
 		}
 		if(supportsVp8Codec(v)) {
 			if(source.type=='video/webm; codecs="vp8, vorbis"') {
-				source['src'] = source.src;
-				source['type'] = source.type;
+				match['src'] = source.src;
+				match['type'] = source.type;
 				return false;
 			}
 		}
@@ -137,6 +137,33 @@ function getSupportedVideoSource(v) {
 			if(source.type=='video/ogg; codecs="theora, vorbis"') {
 				match['src'] = source.src;
 				match['type'] = source.type;
+				return false;
+			}
+		}
+	});
+	return match;
+}
+function getSupportedRelatedVideoSource(v,relatedVideo) {
+	var match = {};
+	$(relatedVideo).children('span').each( function(index,source) {
+		if(supportsH264Codec(v)) {
+			if($(source).attr('data-type')=='video/mp4; codecs="avc1.42E01E, mp4a.40.2"') {
+				match['src'] = $(source).attr('data-src');
+				match['type'] = $(source).attr('data-type');
+				return false;
+			}
+		}
+		if(supportsVp8Codec(v)) {
+			if($(source).attr('data-type')=='video/webm; codecs="vp8, vorbis"') {
+				match['src'] = $(source).attr('data-src');
+				match['type'] = $(source).attr('data-type');
+				return false;
+			}
+		}
+		if(supportsTheoraCodec(v)) {
+			if($(source).attr('data-type')=='video/ogg; codecs="theora, vorbis"') {
+				match['src'] = $(source).attr('data-src');
+				match['type'] = $(source).attr('data-type');
 				return false;
 			}
 		}

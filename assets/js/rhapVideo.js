@@ -332,29 +332,27 @@
 					rhapVideoBufferBar.width(Math.floor(video.buffered.end(video.buffered.length-1)/video.duration*100)+'%');
 				}
 			};
+			
 			$(video).bind('timeupdate',function(){
 				seekUpdate();
-			}); 
-			$(video).bind('durationchange',function(){
+			}).bind('durationchange',function(){
 				seekBar.slider("option","max",video.duration);
-			}); 
-			$(video).bind('loadstart',function(){
+			}).bind('loadstart',function(){
+				console.log('load start');
 				toast.css('line-height',parent.height()+'px');
 				toast.show();
-			}); 
-			$(video).bind('waiting',function(){
+			}).bind('waiting',function(){
+				console.log('waiting');
 				playPause.addClass('disabled');
-			});
-			$(video).bind('canplay',function(){
+			}).bind('canplay',function(){
+				console.log('can play');
 				toast.hide();
 				playPause.removeClass('disabled');
 				$('body').trigger('canplay');
-			});
-			$(video).bind('pause',function(){
+			}).bind('pause',function(){
 				showPausedState();
 				scope._drawPlayButton(upGradientStops);
-			});
-			function progressHandler(e){
+			}).bind('progress',function (e){
 			      if(e.total && e.loaded){
 			           // percentage of video loaded
 			          var proportion =  Math.floor(( e.loaded / e.total * 100));
@@ -362,16 +360,13 @@
 			      } else {
 			           // do nothing because we're autobuffering.
 			      }
-			}
-			video.addEventListener('progress',progressHandler,false);
-			$(video).bind('play',function() {
+			}).bind('play',function() {
 				$(bigPlayButton).hide();
 				playPause.removeClass('paused');
 				playPause.addClass('playing');
 				playPause.children().text('Pause');
 				scope._drawPausedButton(upGradientStops);
-			});
-			$(video).bind('ended',function() {
+			}).bind('ended',function() {
 				showPausedState();
 				video.pause();
 			});
@@ -542,6 +537,7 @@
 			    		scope._showVideoArea();
 			    		scope._play(video);
 			    	});
+			    	video.title=link.next('a').text();
 			    	video.load();
 			    }
 			});
@@ -788,8 +784,9 @@
 				var poster = related.attr('data-poster');
 				var width = related.attr('data-width');
 				var height = related.attr('data-height');
-				var src = related.attr('data-src');
-				var type = related.attr('data-type');
+				var relatedVideoSource = getSupportedRelatedVideoSource(video,relatedVideo);
+				var src = relatedVideoSource.src;
+				var type = relatedVideoSource.type;
 				var title = related.attr('title');
 				relateds.push({
 					poster: poster,

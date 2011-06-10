@@ -14,14 +14,14 @@
 	function RhapVideo(){
 		// constants
 		/* @const */ var swfLocation = 'http://blog.rhapsody.com/video/SlimVideoPlayer.swf';
-		
-		var video, flashId, parent, videoIndex, forcedFlash, relatedVideos, controls, playPause, playPauseCanvas, seekBar, timer, volumeSlider, volumeBtn, fullScreenBtn, rhapVideoBufferBar;
+		this.video;
+		var flashId, parent, videoIndex, forcedFlash, relatedVideos, controls, playPause, playPauseCanvas, seekBar, timer, volumeSlider, volumeBtn, fullScreenBtn, rhapVideoBufferBar;
 		var bigPlayButton, seekBarHandle, rhapVideoMoreButton;
 		var seekSliding, seekValue=-1, videoVolume, savedVolumeBeforeMute, isFullScreen = false;
 		var rhapVideoMoreControls, rhapVideoSharePanel, rhapVideoShareBtn, rhapVideoShareUrl, rhapVideoSharePanelCloseButton;
 		var rhapVideoDuration, rhapVideoEmbedPanel, rhapVideoEmbedBtn, rhapVideoEmbedPanelCloseButton;
 		var rhapVideoRelatedBtn, rhapVideoRelatedPanel, rhapVideoRelatedPanelCloseButton;
-		var toast;
+		this.toast;
 		var seekBarLeftOffset = 38;
 		var seekBarRightMargin = 132;//172;
 		var isHideVideoArea = false;
@@ -32,10 +32,10 @@
 		this.init = function(index,videoElement,relateds,forced){
 			videoIndex = index;
 			forcedFlash = forced;
-			video = videoElement;
-			parent = $(video).parent();
+			this.video = videoElement;
+			parent = $(this.video).parent();
 			relatedVideos = relateds;
-			this._createVideoElement(video);
+			this._createVideoElement(this.video);
 			return this;
 		};
 		var _positionTimer = function(){
@@ -116,8 +116,8 @@
 					//no flv
 				}
 			}
-			this._drawCommonControls(video,parent,relatedVideos);
-			this._wireCommonEvents(video);
+			this._drawCommonControls(this.video,parent,relatedVideos);
+			this._wireCommonEvents(this.video);
 		};
 		this._setSeekBarWidth = function(video){
 			var w = video.videoWidth ? video.videoWidth : video.width;
@@ -153,8 +153,8 @@
 				'left': this.getVideoWidth()/2-723/2 + 'px'
 			});
 	
-			toast = $('.toast',parent);
-			toast.css('line-height',parent.height()+'px');
+			this.toast = $('.toast',parent);
+			this.toast.css('line-height',parent.height()+'px');
 		};
 		/**
 		 * @description the video controls - play, pause, progress, etc.
@@ -244,14 +244,24 @@
 		};
 		this._play = function(video){
 			this._fitSourceDimensions(video,function(){
+				console.log('done fitting source, play now');
+				console.log('before play src is: ' + video.src);
 				video.play();
 			});
 		};
 		this._fitSourceDimensions = function(video,callback){
-			var parent = $(video).parent();
+			/*
+			for(var each in video){
+				console.log(each + ' - ' + video[each]);
+			}
+			*/
+			console.log('fit source dimensions ' + video.videoWidth + ' h: ' + video.videoHeight);
+			// var parent = $(video).parent();
 			var scope = this;
+			console.log(parent);
 			if(parent.width()!=video.videoWidth || parent.height()!=video.videoHeight){
 				$(video).hide();
+				console.log('fitting source');
 				parent.animate({
 				    width: video.videoWidth,
 				    height: video.videoHeight
@@ -266,91 +276,47 @@
 				callback();
 			}
 		};
-		this._wireBigPlayButton = function(){
+		this._wireBigPlayButton = function(video){
 			var scope = this;
-			$(bigPlayButton).click(function(){
-				$(this).hide();
+			$(bigPlayButton).click(function(e){
+				e.preventDefault();
+				$(scope.video).hide();
 				//video.play();
 				scope._play(video);
 			});
 		};
-		this._hideVideoArea = function(){
+		this._hideVideoArea = function(video){
 			$(video).hide();
 			$(parent).css('background','transparent');
 			$(controls).hide();
 			isHideVideoArea = true;
 		};
-		this._showVideoArea = function(){
+		this._showVideoArea = function(video){
 			$(video).show();
 			$(parent).css('background','#000');
 			$(controls).show();
 			isHideVideoArea = false;
 		}
-		/**
-		 * @description set up event handlers for html5 video element
-		 * @private
-		 */
-		this._wireHtml5Events = function(video){
+		this.bindVideoEvents = function(video){
+			console.log('bind video events');
 			var scope = this;
-			$(parent).hover(function(){
-				if(!isHideVideoArea){
-					$(controls).show();
-				}
-			},function(){
-				$(controls).hide();
-				scope.showLess();
-			});
-			this._wireBigPlayButton();
-			var seekUpdate = function() {
-				var currenttime = video.currentTime;
-				if(!seekSliding && video.readyState>video.HAVE_CURRENT_DATA) {
-					if(seekValue>0){
-						seekBar.slider('value', seekValue);
-						if(seekValue>currenttime){
-							seekValue = -1;
-						}else{
-							seekValue = -2;
-						}
-					}else{
-						var t = currenttime;
-						if(seekValue==-1){
-							if(currenttime<seekBar.slider('value')){
-								t = seekBar.slider('value');
-							}
-							seekValue=-3;
-						}else if(seekValue==-2){
-							if(currenttime>seekBar.slider('value')){
-								t = seekBar.slider('value');
-							}
-							seekValue=-3;
-						}
-						seekBar.slider('value', t);
-					}
-				}
-				drawTimerLabel(timer,41,26,_timeFormat(currenttime));
-				if(video.buffered && video.buffered.end(video.buffered.length-1)<=video.duration && rhapVideoBufferBar.width()!=rhapVideoBufferBar.parent().width()){
-					rhapVideoBufferBar.width(Math.floor(video.buffered.end(video.buffered.length-1)/video.duration*100)+'%');
-				}
-			};
-			
-			$(video).bind('timeupdate',function(){
-				seekUpdate();
-			}).bind('durationchange',function(){
+			$(video).bind('timeupdate',jQuery.proxy(this.seekUpdate,this))
+			.bind('durationchange',function(){
 				seekBar.slider("option","max",video.duration);
 			}).bind('loadstart',function(){
 				console.log('load start');
-				toast.css('line-height',parent.height()+'px');
-				toast.show();
+				scope.toast.css('line-height',parent.height()+'px');
+				scope.toast.show();
 			}).bind('waiting',function(){
 				console.log('waiting');
 				playPause.addClass('disabled');
 			}).bind('canplay',function(){
 				console.log('can play');
-				toast.hide();
+				scope.toast.hide();
 				playPause.removeClass('disabled');
 				$('body').trigger('canplay');
 			}).bind('pause',function(){
-				showPausedState();
+				scope.showPausedState();
 				scope._drawPlayButton(upGradientStops);
 			}).bind('progress',function (e){
 			      if(e.total && e.loaded){
@@ -367,29 +333,88 @@
 				playPause.children().text('Pause');
 				scope._drawPausedButton(upGradientStops);
 			}).bind('ended',function() {
-				showPausedState();
+				scope.showPausedState();
 				video.pause();
 			});
-			$(playPause).click(function(){
+		};
+		this.showPausedState = function(){
+				//$(bigPlayButton).show();
+			this._drawLargePlayButton(this.video);
+			this._wireBigPlayButton(this.video);
+			playPause.removeClass('playing');
+			playPause.addClass('paused');
+			playPause.children().text('Play');
+		};
+		this.seekUpdate = function() {
+			// console.log('seek udpate');
+			var currenttime = this.video.currentTime;
+			if(!seekSliding && this.video.readyState>this.video.HAVE_CURRENT_DATA) {
+				if(seekValue>0){
+					seekBar.slider('value', seekValue);
+					if(seekValue>currenttime){
+						seekValue = -1;
+					}else{
+						seekValue = -2;
+					}
+				}else{
+					var t = currenttime;
+					if(seekValue==-1){
+						if(currenttime<seekBar.slider('value')){
+							t = seekBar.slider('value');
+						}
+						seekValue=-3;
+					}else if(seekValue==-2){
+						if(currenttime>seekBar.slider('value')){
+							t = seekBar.slider('value');
+						}
+						seekValue=-3;
+					}
+					seekBar.slider('value', t);
+				}
+			}
+			drawTimerLabel(timer,41,26,_timeFormat(currenttime));
+			if(this.video.buffered && this.video.buffered.end(this.video.buffered.length-1)<=this.video.duration && rhapVideoBufferBar.width()!=rhapVideoBufferBar.parent().width()){
+				rhapVideoBufferBar.width(Math.floor(this.video.buffered.end(this.video.buffered.length-1)/this.video.duration*100)+'%');
+			}
+		};
+		/**
+		 * @description set up event handlers for html5 video element
+		 * @private
+		 */
+		this._wireHtml5Events = function(video){
+			var scope = this;
+			$(parent).hover(function(){
+				if(!isHideVideoArea){
+					$(controls).show();
+				}
+			},function(){
+				$(controls).hide();
+				scope.showLess();
+			});
+			this._wireBigPlayButton(video);
+			
+			this.bindVideoEvents(video);
+			$(playPause).click(function(e){
+				e.preventDefault();
 				//only play if video's state is passed waiting for data
-				if(video.readyState>video.HAVE_CURRENT_DATA){
-					if (video.ended || video.paused) {
-						scope._play(video);
+				if(scope.video.readyState>scope.video.HAVE_CURRENT_DATA){
+					if (scope.video.ended || scope.video.paused) {
+						scope._play(scope.video);
 					} else {
-						video.pause();
+						scope.video.pause();
 					}
 				}else{
 					alert('problem fetching video stream...');
 				}
 			});
 			$(playPause).hover(function(){
-				if(video.ended || video.paused){
+				if(scope.video.ended || scope.video.paused){
 					scope._drawPlayButton(overGradientStops);
 				}else{
 					scope._drawPausedButton(overGradientStops);
 				}
 			},function(){
-				if(video.ended || video.paused){
+				if(scope.video.ended || scope.video.paused){
 					scope._drawPlayButton(upGradientStops);
 				}else{
 					scope._drawPausedButton(upGradientStops);
@@ -403,16 +428,17 @@
 				_positionTimer();
 			});
 			$( seekBar ).bind( "slidestart", function(event, ui) {
-				video.pause();
+				scope.video.pause();
 			});
 			$( seekBar ).bind( "slidestop", function(event, ui) {
-				video.play();
+				scope.video.play();
 			});
-			$(volumeBtn).click(function(){
-				if(!video.muted){
+			$(volumeBtn).click(function(e){
+				e.preventDefault();
+				if(!scope.video.muted){
 					volumeBtn.css('opacity',0.4);
 					volumeSlider.slider("value",0);
-					savedVolumeBeforeMute = video.volume;
+					savedVolumeBeforeMute = scope.video.volume;
 				}else{
 					volumeBtn.css('opacity',1);
 					if(savedVolumeBeforeMute==null || savedVolumeBeforeMute==0){
@@ -420,28 +446,30 @@
 					}
 					volumeSlider.slider("value",savedVolumeBeforeMute);
 				}
-				video.muted = !video.muted;
+				scope.video.muted = !scope.video.muted;
 			});
-			$(fullScreenBtn).click(function(){
+			$(fullScreenBtn).click(function(e){
+				e.preventDefault();
 				if(!isFullScreen){
 					isFullScreen = true;
 					$(parent).addClass('rhapVideoFullscreen');
 					$(parent).css({'width':'auto','height':'auto'});
-					$(video).width('100%');
-					$(video).height('100%');
+					$(scope.video).width('100%');
+					$(scope.video).height('100%');
 				}else{
 					isFullScreen = false;
 					$(parent).removeClass('rhapVideoFullscreen');
-					$(parent).css({'width':video.videoWidth+'px','height':video.videoHeight+'px'});
-					$(video).width(video.videoWidth+'px');
-					$(video).height(video.videoHeight+'px');
+					$(parent).css({'width':scope.video.videoWidth+'px','height':scope.video.videoHeight+'px'});
+					$(scope.video).width(scope.video.videoWidth+'px');
+					$(scope.video).height(scope.video.videoHeight+'px');
 				}
 				var seekBarLeftOffset = 38;
 				var seekBarRightMargin = 132;
-				var w = parseInt($(video).css('width'));
+				var w = parseInt($(scope.video).css('width'));
 				seekBar.css({'width':w-seekBarLeftOffset-seekBarRightMargin});
 			});
-			$(rhapVideoMoreButton).click(function(){
+			$(rhapVideoMoreButton).click(function(e){
+				e.preventDefault();
 				if(!scope.isShowMore){
 					scope.showMore();
 				}else{
@@ -449,14 +477,6 @@
 				}
 			});
 			//private helpers
-			var showPausedState = function(){
-				//$(bigPlayButton).show();
-				scope._drawLargePlayButton(video);
-				scope._wireBigPlayButton();
-				playPause.removeClass('playing');
-				playPause.addClass('paused');
-				playPause.children().text('Play');
-			};
 		};
 		/*********************
 		 * HELPERS **/
@@ -464,11 +484,12 @@
 			var scope = this;
 			/*****************
 			 * SHARE **/
-			$(rhapVideoShareBtn).click(function(){
+			$(rhapVideoShareBtn).click(function(e){
+				e.preventDefault();
 				if(!video.paused){
 					scope.getVideo().pause();
 				}
-				scope._hideVideoArea();
+				scope._hideVideoArea(scope.video);
 				rhapVideoSharePanel.slideDown('slow',function(){
 					rhapVideoShareUrl.select();
 					rhapVideoSharePanelCloseButton.show();
@@ -476,8 +497,9 @@
 				rhapVideoShareUrl.val(document.location);
 				scope.showLess();
 			});
-			$(rhapVideoSharePanelCloseButton).click(function(){
-				scope._showVideoArea();
+			$(rhapVideoSharePanelCloseButton).click(function(e){
+				e.preventDefault();
+				scope._showVideoArea(scope.video);
 				closeSharePanel();
 			});
 			var closeSharePanel = function(){
@@ -486,18 +508,20 @@
 			};
 			/*******************
 			 * EMBEDDED **/
-			$(rhapVideoEmbedBtn).click(function(){
+			$(rhapVideoEmbedBtn).click(function(e){
+				e.preventDefault();
 				if(!video.paused){
 					scope.getVideo().pause();
 				}
-				scope._hideVideoArea();
+				scope._hideVideoArea(scope.video);
 				rhapVideoEmbedPanel.slideDown('slow',function(){
 					rhapVideoEmbedPanelCloseButton.show();
 				});
 				scope.showLess();
 			});
-			$(rhapVideoEmbedPanelCloseButton).click(function(){
-				scope._showVideoArea();
+			$(rhapVideoEmbedPanelCloseButton).click(function(e){
+				e.preventDefault();
+				scope._showVideoArea(scope.video);
 				closeEmbedPanel();
 			});
 			var closeEmbedPanel = function(){
@@ -506,19 +530,21 @@
 			};
 			/*******************
 			 * RELATED **/
-			$(rhapVideoRelatedBtn).click(function(){
+			$(rhapVideoRelatedBtn).click(function(e){
+				e.preventDefault();
 				if(!scope.getVideo().paused){
 					//document.getElementById(flashId).pause();
 					scope.getVideo().pause();
 				}
-				scope._hideVideoArea();
+				scope._hideVideoArea(scope.video);
 				rhapVideoRelatedPanel.slideDown('slow',function(){
 					rhapVideoRelatedPanelCloseButton.show();
 				});
 				scope.showLess();
 			});
-			$(rhapVideoRelatedPanelCloseButton).click(function(){
-				scope._showVideoArea();
+			$(rhapVideoRelatedPanelCloseButton).click(function(e){
+				e.preventDefault();
+				scope._showVideoArea(scope.video);
 				closeRelatedPanel();
 			});
 			var closeRelatedPanel = function(){
@@ -529,16 +555,63 @@
 				e.preventDefault();
 			    var domEl = $(this).get(0);
 			    if(domEl.nodeName=='IMG'){
+	    			var browser = $.browser;
 			    	closeRelatedPanel();
 			    	var link = $(domEl).parent();
-			    	video.src = link.attr('href');
-			    	video.type = link.attr('data-type');
-			    	$('body').bind('canplay',function(){
-			    		scope._showVideoArea();
-			    		scope._play(video);
-			    	});
-			    	video.title=link.next('a').text();
-			    	video.load();
+	    			if($.browser.msie && startsWith($.browser.version,"9")){
+	    				console.log('its ie9');
+	    				var newVideo = $(document.createElement('video'))
+					    .attr({
+					    	'src': link.attr('href'),
+					    	'poster':'http://lamtran.com/oceans-clip.png',
+					    	'title':'titleeeeeeee'
+					    }) // Changed 'href' attribute to 'src'
+					    .css({
+					      width: 320,
+					      height: 240
+					    });
+	    				/*
+	    				var newVideo = $('<video width="320" height="240" poster="http://lamtran.com/oceans-clip.png" title="Oceans Clip">'+
+	    					'<source src="'+link.attr('href')+'" type=\'video/mp4; codecs="avc1.42E01E, mp4a.40.2"\'/>'+
+	    					'</video>');
+	    				*/
+	    				console.log('new video',newVideo);
+	    				$(video).remove();
+	    				parent.prepend(newVideo);
+    					console.log('new video',newVideo.context);
+    					console.log('old video',video);
+	    				scope.video = newVideo.context;
+	    				scope.bindVideoEvents(scope.video);
+	    				scope._showVideoArea(scope.video);
+	    				// newVideo.context.play();
+	    				// video.play();
+	    				console.log(scope.video.src);
+	    				// scope._play(scope.video);
+	    				$('body').bind('canplay',function(){
+	    					console.log('canplay is thrown');
+				    		scope._showVideoArea();
+				    		scope._play(scope.video);
+				    	});
+	    				/*
+	    				*/
+	    				/*
+	    				$('body').bind('canplay',function(){
+	    					console.log('canplay is thrown');
+				    		scope._showVideoArea();
+				    		scope._play(video);
+				    	});
+				    	video.load();
+				    	*/
+	    			}else{
+				    	video.src = link.attr('href');
+				    	video.type = link.attr('data-type');
+				    	video.title=link.next('a').text();
+				    	$('body').bind('canplay',function(){
+				    		scope._showVideoArea(scope.video);
+				    		scope._play(video);
+				    	});
+				    	video.load();
+	    			}
 			    }
 			});
 		};
@@ -563,14 +636,14 @@
 				return document.getElementById(flashId);
 			}else{
 				console.log('returning html5 video object');
-				return video;
+				return this.video;
 			}
 		};
 		this.getVideoWidth = function(){
 			if(forcedFlash){
 				return document.getElementById(flashId).width;
 			}else{
-				return parseInt($(video).css('width'));
+				return parseInt($(this.video).css('width'));
 			}
 		}
 		this.showMore = function(){

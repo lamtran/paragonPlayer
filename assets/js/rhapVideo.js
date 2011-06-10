@@ -559,9 +559,8 @@
 			    	closeRelatedPanel();
 			    	var link = $(domEl).parent();
 	    			if($.browser.msie && startsWith($.browser.version,"9")){
-	    				console.log('its ie9');
-	    				var newVideo = $(document.createElement('video'))
-					    .attr({
+	    				var newVideo = document.createElement('video');
+					    $(newVideo).attr({
 					    	'src': link.attr('href'),
 					    	'poster':'http://lamtran.com/oceans-clip.png',
 					    	'title':'titleeeeeeee'
@@ -578,9 +577,9 @@
 	    				console.log('new video',newVideo);
 	    				$(video).remove();
 	    				parent.prepend(newVideo);
-    					console.log('new video',newVideo.context);
+    					console.log('new video',newVideo);
     					console.log('old video',video);
-	    				scope.video = newVideo.context;
+	    				scope.video = newVideo;//.context;
 	    				scope.bindVideoEvents(scope.video);
 	    				scope._showVideoArea(scope.video);
 	    				// newVideo.context.play();
@@ -589,9 +588,9 @@
 	    				// scope._play(scope.video);
 	    				$('body').bind('canplay',function(){
 	    					console.log('canplay is thrown');
-				    		scope._showVideoArea();
 				    		scope._play(scope.video);
 				    	});
+				    	scope._play(scope.video);
 	    				/*
 	    				*/
 	    				/*

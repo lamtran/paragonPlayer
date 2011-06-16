@@ -77,24 +77,16 @@
 				var flashvars = {};
 				flashvars['width']=video.width;
 				flashvars['height']=video.height;
-				var flv,pathStr;
+				var server,path;
 				$($('.rhapRelatedVideos')[videoIndex]).siblings('source').each(function(index,source){
 					if(source.type=='video/mp4; codecs="vp6"'){
-						flv = source.src;
-						pathStr = source.title;
+						server = $(source).attr('data-server');
+						path = $(source).attr('data-src');
 					}
 				});
 				//detecting progressive or streaming
 				var server,path;
-				if(flv){
-					if(endsWith(flv,'.flv')){
-						//progressive
-						path = flv;
-					}else{
-						//streaming
-						server = flv;
-						path = pathStr;
-					}
+				if(path){
 					if(server!=null){
 						flashvars['server']=server;
 					}
@@ -106,6 +98,11 @@
 					parent.append($('<div id="replaceMe"><p><a href="http://www.adobe.com/go/getflashplayer"><img src="http://www.adobe.com/images/shared/download_buttons/get_flash_player.gif" alt="Get Adobe Flash player" /></a></p></div>'));
 					swfobject.embedSWF("SlimVideoPlayer.swf", 'replaceMe', video.width, video.height, "9.0.0", false, flashvars, params, attributes);
 					$(video).remove();
+					var scope = this;
+					onFlashVideoPlayerLoaded = function(){
+						scope._drawCommonControls(scope.video,parent,relatedVideos);
+						scope._wireCommonEvents(scope.video);
+					};
 					/*
 					setTimeout(function(){
 						video = document.getElementById(attributes.id);
@@ -116,8 +113,10 @@
 					//no flv
 				}
 			}
-			this._drawCommonControls(this.video,parent,relatedVideos);
-			this._wireCommonEvents(this.video);
+			if(!forcedFlash){
+				this._drawCommonControls(this.video,parent,relatedVideos);
+				this._wireCommonEvents(this.video);
+			}
 		};
 		this._setSeekBarWidth = function(video){
 			var w = video.videoWidth ? video.videoWidth : video.width;
@@ -244,24 +243,14 @@
 		};
 		this._play = function(video){
 			this._fitSourceDimensions(video,function(){
-				console.log('done fitting source, play now');
-				console.log('before play src is: ' + video.src);
 				video.play();
 			});
 		};
 		this._fitSourceDimensions = function(video,callback){
-			/*
-			for(var each in video){
-				console.log(each + ' - ' + video[each]);
-			}
-			*/
-			console.log('fit source dimensions ' + video.videoWidth + ' h: ' + video.videoHeight);
 			// var parent = $(video).parent();
 			var scope = this;
-			console.log(parent);
 			if(parent.width()!=video.videoWidth || parent.height()!=video.videoHeight){
 				$(video).hide();
-				console.log('fitting source');
 				parent.animate({
 				    width: video.videoWidth,
 				    height: video.videoHeight
@@ -280,7 +269,7 @@
 			var scope = this;
 			$(bigPlayButton).click(function(e){
 				e.preventDefault();
-				$(scope.video).hide();
+				// $(scope.video).hide();
 				//video.play();
 				scope._play(video);
 			});
@@ -298,20 +287,16 @@
 			isHideVideoArea = false;
 		}
 		this.bindVideoEvents = function(video){
-			console.log('bind video events');
 			var scope = this;
 			$(video).bind('timeupdate',jQuery.proxy(this.seekUpdate,this))
 			.bind('durationchange',function(){
 				seekBar.slider("option","max",video.duration);
 			}).bind('loadstart',function(){
-				console.log('load start');
 				scope.toast.css('line-height',parent.height()+'px');
 				scope.toast.show();
 			}).bind('waiting',function(){
-				console.log('waiting');
 				playPause.addClass('disabled');
 			}).bind('canplay',function(){
-				console.log('can play');
 				scope.toast.hide();
 				playPause.removeClass('disabled');
 				$('body').trigger('canplay');
@@ -486,7 +471,7 @@
 			 * SHARE **/
 			$(rhapVideoShareBtn).click(function(e){
 				e.preventDefault();
-				if(!video.paused){
+				if(!scope.isVideoPaused()){
 					scope.getVideo().pause();
 				}
 				scope._hideVideoArea(scope.video);
@@ -510,7 +495,7 @@
 			 * EMBEDDED **/
 			$(rhapVideoEmbedBtn).click(function(e){
 				e.preventDefault();
-				if(!video.paused){
+				if(!scope.isVideoPaused()){
 					scope.getVideo().pause();
 				}
 				scope._hideVideoArea(scope.video);
@@ -532,8 +517,7 @@
 			 * RELATED **/
 			$(rhapVideoRelatedBtn).click(function(e){
 				e.preventDefault();
-				if(!scope.getVideo().paused){
-					//document.getElementById(flashId).pause();
+				if(!scope.isVideoPaused()){
 					scope.getVideo().pause();
 				}
 				scope._hideVideoArea(scope.video);
@@ -560,56 +544,40 @@
 			    	var link = $(domEl).parent();
 	    			if($.browser.msie && startsWith($.browser.version,"9")){
 	    				var newVideo = document.createElement('video');
+	    				var titleLink = link.siblings().get(0);
 					    $(newVideo).attr({
 					    	'src': link.attr('href'),
-					    	'poster':'http://lamtran.com/oceans-clip.png',
-					    	'title':'titleeeeeeee'
-					    }) // Changed 'href' attribute to 'src'
-					    .css({
-					      width: 320,
-					      height: 240
-					    });
-	    				/*
-	    				var newVideo = $('<video width="320" height="240" poster="http://lamtran.com/oceans-clip.png" title="Oceans Clip">'+
-	    					'<source src="'+link.attr('href')+'" type=\'video/mp4; codecs="avc1.42E01E, mp4a.40.2"\'/>'+
-	    					'</video>');
-	    				*/
-	    				console.log('new video',newVideo);
-	    				$(video).remove();
+					    	'poster':domEl.src,
+					    	'title':$(titleLink).text()
+					    })
+					    ;
 	    				parent.prepend(newVideo);
-    					console.log('new video',newVideo);
-    					console.log('old video',video);
-	    				scope.video = newVideo;//.context;
+	    				var oldVideo = scope.video;
+	    				scope.video = newVideo;
 	    				scope.bindVideoEvents(scope.video);
 	    				scope._showVideoArea(scope.video);
-	    				// newVideo.context.play();
-	    				// video.play();
-	    				console.log(scope.video.src);
-	    				// scope._play(scope.video);
+	    				$(oldVideo).remove();
 	    				$('body').bind('canplay',function(){
-	    					console.log('canplay is thrown');
+	    					console.log('can play kicked off');
 				    		scope._play(scope.video);
 				    	});
-				    	scope._play(scope.video);
-	    				/*
-	    				*/
-	    				/*
-	    				$('body').bind('canplay',function(){
-	    					console.log('canplay is thrown');
-				    		scope._showVideoArea();
-				    		scope._play(video);
-				    	});
-				    	video.load();
-				    	*/
+				    	//scope._play(scope.video);
 	    			}else{
-				    	video.src = link.attr('href');
-				    	video.type = link.attr('data-type');
-				    	video.title=link.next('a').text();
-				    	$('body').bind('canplay',function(){
-				    		scope._showVideoArea(scope.video);
-				    		scope._play(video);
-				    	});
-				    	video.load();
+	    				if(forcedFlash){
+	    					scope.getVideo().loadVideo({
+									'server': 'rtmp://lamtran.com:1935/vod/',
+									'path': 'oceans-clip'
+								});
+	    				}else{
+					    	video.src = link.attr('href');
+					    	video.type = link.attr('data-type');
+					    	video.title=link.next('a').text();
+					    	$('body').bind('canplay',function(){
+					    		scope._showVideoArea(scope.video);
+					    		scope._play(video);
+					    	});
+					    	video.load();
+	    				}
 	    			}
 			    }
 			});
@@ -631,13 +599,18 @@
 		};
 		this.getVideo = function(){
 			if(forcedFlash){
-				console.log('returning flash video obj');
 				return document.getElementById(flashId);
 			}else{
-				console.log('returning html5 video object');
 				return this.video;
 			}
 		};
+		this.isVideoPaused = function(){
+			if(forcedFlash){
+				return document.getElementById(flashId).isPaused();
+			}else{
+				return this.video.paused;
+			}
+		}
 		this.getVideoWidth = function(){
 			if(forcedFlash){
 				return document.getElementById(flashId).width;
@@ -795,7 +768,15 @@
 			bigButtonWidth = bigButtonWidth > bigButtonMaxWidth ? bigButtonMaxWidth : Math.max(bigButtonMinWidth, bigButtonWidth);
 			var bigButtonHeight = bigButtonWidth*.7;
 			// draw and position it 
-			$(video).after($('<canvas class="bigPlayButton" width="'+bigButtonWidth+'px" height="'+bigButtonHeight+'px"></canvas>'));
+			if($('.bigPlayButton',parent).length==0){
+				$(video).after($('<canvas class="bigPlayButton" width="'+bigButtonWidth+'px" height="'+bigButtonHeight+'px"></canvas>'));
+				bigPlayButton = $(video).next()[0];
+			}else{
+				bigPlayButton = $(video).next()[0];
+				bigPlayButton.width = bigButtonWidth;
+				bigPlayButton.height = bigButtonHeight;
+				$(bigPlayButton).show();
+			}
 			var bigButtonX = videoWidth/2-bigButtonWidth/2;
 			var bigButtonY = videoHeight/2-bigButtonHeight/2;
 			bigPlayButton = $(video).next()[0];
@@ -806,6 +787,8 @@
 			});
 			// draw the play triangle
 			var context = bigPlayButton.getContext("2d");
+			//reset canvas
+			context.clearRect(0, 0, bigPlayButton.width, bigPlayButton.height);
 			var padding = 0;
 			
 			drawLargeTriangle(context,bigButtonWidth,bigButtonHeight,2);
@@ -842,16 +825,20 @@
 			});
 			var relateds = [];
 			var mainSource = getSupportedVideoSource(video);
-			relateds.push({
+			var firstVideo = {
 				poster: video.poster,
 				width: video.width,
 				height: video.height,
 				src: mainSource.src,
 				type: mainSource.type,
 				title: video.title.length > stringLimit ? video.title.substring(0,stringLimit)+'...' : video.title
-			});
-			
-			$('.rhapRelatedVideo',video).each(function(index,relatedVideo){
+			};
+			if(mainSource['server']!=null){
+				firstVideo['server']=mainSource['server'];
+			}
+			relateds.push(firstVideo);
+			var relatedVideo;
+			$($('.rhapRelatedVideos')[index]).children().each(function(index,relatedVideo){
 				var related = $(relatedVideo);
 				var poster = related.attr('data-poster');
 				var width = related.attr('data-width');
@@ -860,14 +847,18 @@
 				var src = relatedVideoSource.src;
 				var type = relatedVideoSource.type;
 				var title = related.attr('title');
-				relateds.push({
+				relatedVideo = {
 					poster: poster,
 					width: width,
 					height: height,
 					src: src,
 					type: type,
 					title: title.length > stringLimit ? title.substring(0,stringLimit)+'...' : title
-				});
+				};
+				if(relatedVideoSource['server']!=null){
+					relatedVideo['server']=relatedVideoSource['server'];
+				}
+				relateds.push(relatedVideo);
 			});
 			videos.push(new RhapVideo().init(index,video,relateds,false));
 		});

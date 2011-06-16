@@ -10,6 +10,10 @@ function showLess(videoIndex){
 }
 function onFlashVideoPlayerLoaded(){
 	//overwrite this
+	console.log('onflashvideoplayerloaded!');
+}
+function onFlashLog(msg){
+	console.log('fromFlash: ' + msg);
 }
 function hideMoreControls(videoIndex){
 	var vid = videos[videoIndex];

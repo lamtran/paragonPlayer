@@ -167,6 +167,14 @@ function getSupportedRelatedVideoSource(v,relatedVideo) {
 				return false;
 			}
 		}
+		if(!renderHtml5Video(v)){
+			if($(source).attr('data-type')=='video/mp4; codecs="vp6"') {
+				match['server'] = $(source).attr('data-server');
+				match['type'] = $(source).attr('data-type');
+				match['src'] = $(source).attr('path');
+				return false;
+			}
+		}
 	});
 	return match;
 }

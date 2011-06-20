@@ -565,8 +565,8 @@
 	    			}else{
 	    				if(forcedFlash){
 	    					scope.getVideo().loadVideo({
-									'server': 'rtmp://lamtran.com:1935/vod/',
-									'path': 'oceans-clip'
+									'server': link.attr('data-server'),
+									'path': link.attr('href')
 								});
 	    				}else{
 					    	video.src = link.attr('href');
@@ -824,7 +824,7 @@
 				return '<div class="rhapVideoWrapper" style="height:'+video.height+'px;width:'+video.width+'px"/>';//style="height:'+video.height+'px"
 			});
 			var relateds = [];
-			var mainSource = getSupportedVideoSource(video);
+			var mainSource = getSupportedVideoSource(video,index);
 			var firstVideo = {
 				poster: video.poster,
 				width: video.width,
@@ -836,6 +836,7 @@
 			if(mainSource['server']!=null){
 				firstVideo['server']=mainSource['server'];
 			}
+			console.log('pushing first video: ' + firstVideo.src);
 			relateds.push(firstVideo);
 			var relatedVideo;
 			$($('.rhapRelatedVideos')[index]).children().each(function(index,relatedVideo){

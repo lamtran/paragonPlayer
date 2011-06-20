@@ -116,9 +116,17 @@ function supportsTheoraCodec(v) {
 	return $(v).has('source[type=\'video/ogg; codecs="theora, vorbis"\']').length>0 && v.canPlayType('video/ogg; codecs="theora, vorbis"');
 }
 
-function getSupportedVideoSource(v) {
+function getSupportedVideoSource(v,videoIndex) {
 	var match = {};
-	$(v).children('source').each( function(index,source) {
+	$($('.rhapRelatedVideos')[videoIndex]).siblings('source').each( function(index,source) {
+		if(!renderHtml5Video(v)){
+			if(source.type=='video/mp4; codecs="vp6"') {
+				match['server'] = $(source).attr('data-server');
+				match['type'] = source.type;
+				match['src'] = $(source).attr('data-src');
+				return false;
+			}
+		}
 		if(supportsH264Codec(v)) {
 			if(source.type=='video/mp4; codecs="avc1.42E01E, mp4a.40.2"') {
 				match['src'] = source.src;
@@ -171,7 +179,7 @@ function getSupportedRelatedVideoSource(v,relatedVideo) {
 			if($(source).attr('data-type')=='video/mp4; codecs="vp6"') {
 				match['server'] = $(source).attr('data-server');
 				match['type'] = $(source).attr('data-type');
-				match['src'] = $(source).attr('path');
+				match['src'] = $(source).attr('data-src');
 				return false;
 			}
 		}
@@ -422,9 +430,12 @@ function drawCommonControlsHelper(parent,video) {
 
 function drawRelatedVideosHelper(parent,relatedVideos,video) {
 	var relatedVideoHtml = '';
+	var v,serverStr;
 	for(var i=0;i<relatedVideos.length;i++) {
-		var v = relatedVideos[i];
-		relatedVideoHtml+='<li><a href="'+v.src+'" data-width="'+v.width+'" data-height="'+v.height+'" data-type="'+v.type+'"><img src="'+v.poster+'"/></a>' +
+		v = relatedVideos[i];
+		serverStr = v['server'] ? 'data-server="'+v['server']+'"':'';
+		console.log('looking at: ' + v.src + ' server: ' + serverStr);
+		relatedVideoHtml+='<li><a href="'+v.src+'" '+serverStr+' data-width="'+v.width+'" data-height="'+v.height+'" data-type="'+v.type+'"><img src="'+v.poster+'"/></a>' +
 		'<a href="'+v.src+'" data-width="'+v.width+'" data-height="'+v.height+'" data-type="'+v.type+'" class="relatedVideoTitle">'+v.title+'</a></li>';
 	}
 	parent.append($(

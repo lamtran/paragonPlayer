@@ -116,71 +116,73 @@ function supportsTheoraCodec(v) {
 	return $(v).has('source[type=\'video/ogg; codecs="theora, vorbis"\']').length>0 && v.canPlayType('video/ogg; codecs="theora, vorbis"');
 }
 
-function getSupportedVideoSource(v,videoIndex) {
+function getSupportedVideoSource(v,videoIndex,forcedFlash) {
 	var match = {};
 	$($('.rhapRelatedVideos')[videoIndex]).siblings('source').each( function(index,source) {
-		if(!renderHtml5Video(v)){
+		if(!renderHtml5Video(v) || forcedFlash){
 			if(source.type=='video/mp4; codecs="vp6"') {
 				match['server'] = $(source).attr('data-server');
 				match['type'] = source.type;
 				match['src'] = $(source).attr('data-src');
 				return false;
 			}
-		}
-		if(supportsH264Codec(v)) {
-			if(source.type=='video/mp4; codecs="avc1.42E01E, mp4a.40.2"') {
-				match['src'] = source.src;
-				match['type'] = source.type;
-				return false;
+		}else{
+			if(supportsH264Codec(v)) {
+				if(source.type=='video/mp4; codecs="avc1.42E01E, mp4a.40.2"') {
+					match['src'] = source.src;
+					match['type'] = source.type;
+					return false;
+				}
 			}
-		}
-		if(supportsVp8Codec(v)) {
-			if(source.type=='video/webm; codecs="vp8, vorbis"') {
-				match['src'] = source.src;
-				match['type'] = source.type;
-				return false;
+			if(supportsVp8Codec(v)) {
+				if(source.type=='video/webm; codecs="vp8, vorbis"') {
+					match['src'] = source.src;
+					match['type'] = source.type;
+					return false;
+				}
 			}
-		}
-		if(supportsTheoraCodec(v)) {
-			if(source.type=='video/ogg; codecs="theora, vorbis"') {
-				match['src'] = source.src;
-				match['type'] = source.type;
-				return false;
+			if(supportsTheoraCodec(v)) {
+				if(source.type=='video/ogg; codecs="theora, vorbis"') {
+					match['src'] = source.src;
+					match['type'] = source.type;
+					return false;
+				}
 			}
 		}
 	});
 	return match;
 }
-function getSupportedRelatedVideoSource(v,relatedVideo) {
+function getSupportedRelatedVideoSource(v,relatedVideo,forcedFlash) {
 	var match = {};
 	$(relatedVideo).children('span').each( function(index,source) {
-		if(supportsH264Codec(v)) {
-			if($(source).attr('data-type')=='video/mp4; codecs="avc1.42E01E, mp4a.40.2"') {
-				match['src'] = $(source).attr('data-src');
-				match['type'] = $(source).attr('data-type');
-				return false;
-			}
-		}
-		if(supportsVp8Codec(v)) {
-			if($(source).attr('data-type')=='video/webm; codecs="vp8, vorbis"') {
-				match['src'] = $(source).attr('data-src');
-				match['type'] = $(source).attr('data-type');
-				return false;
-			}
-		}
-		if(supportsTheoraCodec(v)) {
-			if($(source).attr('data-type')=='video/ogg; codecs="theora, vorbis"') {
-				match['src'] = $(source).attr('data-src');
-				match['type'] = $(source).attr('data-type');
-				return false;
-			}
-		}
-		if(!renderHtml5Video(v)){
+		if(!renderHtml5Video(v) || forcedFlash){
 			if($(source).attr('data-type')=='video/mp4; codecs="vp6"') {
 				match['server'] = $(source).attr('data-server');
 				match['type'] = $(source).attr('data-type');
 				match['src'] = $(source).attr('data-src');
 				return false;
+			}
+		}else{
+			if(supportsH264Codec(v)) {
+				if($(source).attr('data-type')=='video/mp4; codecs="avc1.42E01E, mp4a.40.2"') {
+					match['src'] = $(source).attr('data-src');
+					match['type'] = $(source).attr('data-type');
+					return false;
+				}
+			}
+			if(supportsVp8Codec(v)) {
+				if($(source).attr('data-type')=='video/webm; codecs="vp8, vorbis"') {
+					match['src'] = $(source).attr('data-src');
+					match['type'] = $(source).attr('data-type');
+					return false;
+				}
+			}
+			if(supportsTheoraCodec(v)) {
+				if($(source).attr('data-type')=='video/ogg; codecs="theora, vorbis"') {
+					match['src'] = $(source).attr('data-src');
+					match['type'] = $(source).attr('data-type');
+					return false;
+				}
 			}
 		}
 	});
@@ -434,7 +436,6 @@ function drawRelatedVideosHelper(parent,relatedVideos,video) {
 	for(var i=0;i<relatedVideos.length;i++) {
 		v = relatedVideos[i];
 		serverStr = v['server'] ? 'data-server="'+v['server']+'"':'';
-		console.log('looking at: ' + v.src + ' server: ' + serverStr);
 		relatedVideoHtml+='<li><a href="'+v.src+'" '+serverStr+' data-width="'+v.width+'" data-height="'+v.height+'" data-type="'+v.type+'"><img src="'+v.poster+'"/></a>' +
 		'<a href="'+v.src+'" data-width="'+v.width+'" data-height="'+v.height+'" data-type="'+v.type+'" class="relatedVideoTitle">'+v.title+'</a></li>';
 	}

@@ -553,70 +553,70 @@
 	    			var browser = $.browser;
 			    	closeRelatedPanel();
 			    	var link = $(domEl).parent();
-	    			if($.browser.msie && startsWith($.browser.version,"9")){
-	    				var newVideo = document.createElement('video');
-	    				var titleLink = link.siblings().get(0);
-	    				var dimensions={};
-				    	if(forcedSize){
-				    		dimensions['width'] = forcedWidth;
-				    		dimensions['height'] = forcedHeight;
-				    	}else{
-				    		//size not forced, fall onto hard-coded size
-					    	if(link.attr('data-width')){
-					    		dimensions['width'] = link.attr('data-width');
+			    	if(forcedFlash){
+    					var path = link.attr('href');
+    					//IE-7 fix
+    					if(startsWith(path,'http://localhost/')){
+    						path = path.substring(17, path.length);
+    					}
+    					var videoConfig = {
+							'server': link.attr('data-server'),
+							'path': path
+						};
+						if(forcedSize){
+							videoConfig['height']=forcedHeight;
+							videoConfig['width']=forcedWidth;
+						}else{
+							// load in videos native size
+						}
+    					scope.getVideo().loadVideo(videoConfig);
+    				}else{
+		    			if($.browser.msie && startsWith($.browser.version,"9")){
+		    				var newVideo = document.createElement('video');
+		    				var titleLink = link.siblings().get(0);
+		    				var dimensions={};
+					    	if(forcedSize){
+					    		dimensions['width'] = forcedWidth;
+					    		dimensions['height'] = forcedHeight;
+					    	}else{
+					    		//size not forced, fall onto hard-coded size
+						    	if(link.attr('data-width')){
+						    		dimensions['width'] = link.attr('data-width');
+						    	}
+						    	if(link.attr('data-height')){
+						    		dimensions['height'] = link.attr('data-height');
+						    	}
+						    	//nothing was specified, use video's native size
+						    	if(vidW==null){
+						    		dimensions['width'] = video.videoWidth;
+						    	}
+						    	if(vidH==null){
+						    		dimensions['height'] = video.videoHeight;
+						    	}
 					    	}
-					    	if(link.attr('data-height')){
-					    		dimensions['height'] = link.attr('data-height');
-					    	}
-					    	//nothing was specified, use video's native size
-					    	if(vidW==null){
-					    		dimensions['width'] = video.videoWidth;
-					    	}
-					    	if(vidH==null){
-					    		dimensions['height'] = video.videoHeight;
-					    	}
-				    	}
-					    $(newVideo).attr({
-					    	'src': link.attr('href'),
-					    	'poster':domEl.src,
-					    	'title':$(titleLink).text()
-					    })
-					    .css({
-					    	width: dimensions['width']+'px',
-					    	height: dimensions['height']+'px'
-					    })
-					    ;
-	    				parent.prepend(newVideo);
-	    				var oldVideo = scope.video;
-	    				scope.video = newVideo;
-	    				scope.bindVideoEvents(scope.video);
-	    				scope._showVideoArea(scope.video);
-	    				$(oldVideo).remove();
-	    				
-				    	
-	    				$('body').bind('canplay',function(){
-				    		scope._play(scope.video,dimensions);
-				    	});
-				    	//scope._play(scope.video);
-	    			}else{
-	    				if(forcedFlash){
-	    					var path = link.attr('href');
-	    					//IE-7 fix
-	    					if(startsWith(path,'http://localhost/')){
-	    						path = path.substring(17, path.length);
-	    					}
-	    					var videoConfig = {
-								'server': link.attr('data-server'),
-								'path': path
-							};
-							if(forcedSize){
-								videoConfig['height']=forcedHeight;
-								videoConfig['width']=forcedWidth;
-							}else{
-								// load in videos native size
-							}
-	    					scope.getVideo().loadVideo(videoConfig);
-	    				}else{
+						    $(newVideo).attr({
+						    	'src': link.attr('href'),
+						    	'poster':domEl.src,
+						    	'title':$(titleLink).text()
+						    })
+						    .css({
+						    	width: dimensions['width']+'px',
+						    	height: dimensions['height']+'px'
+						    })
+						    ;
+		    				parent.prepend(newVideo);
+		    				var oldVideo = scope.video;
+		    				scope.video = newVideo;
+		    				scope.bindVideoEvents(scope.video);
+		    				scope._showVideoArea(scope.video);
+		    				$(oldVideo).remove();
+		    				
+					    	
+		    				$('body').bind('canplay',function(){
+					    		scope._play(scope.video,dimensions);
+					    	});
+					    	//scope._play(scope.video);
+		    			}else{
 					    	video.src = link.attr('href');
 					    	video.type = link.attr('data-type');
 					    	video.title=link.next('a').text();
@@ -645,8 +645,8 @@
 					    		scope._play(video,dimensions);
 					    	});
 					    	video.load();
-	    				}
-	    			}
+		    			}
+    				}
 			    }
 			});
 		};
@@ -891,8 +891,12 @@
 			$(video).wrap(function() {
 				return '<div class="rhapVideoWrapper" style="height:'+video.height+'px;width:'+video.width+'px"/>';//style="height:'+video.height+'px"
 			});
+			var forcedSize = $(video).attr('data-forced-size') ? $(video).attr('data-forced-size')=='true' : false;
+			var forcedFlash = $(video).attr('data-forced-flash') ? $(video).attr('data-forced-flash')=='true' : false;
 			var relateds = [];
-			var mainSource = getSupportedVideoSource(video,index);
+			var mainSource = getSupportedVideoSource(video,index,forcedFlash);
+			console.log('forcedFlash: ' + forcedFlash);
+			console.log('mainsource: ' + mainSource['src']);
 			var firstVideo = {
 				poster: video.poster,
 				width: video.width,
@@ -911,7 +915,8 @@
 				var poster = related.attr('data-poster');
 				var width = related.attr('data-width');
 				var height = related.attr('data-height');
-				var relatedVideoSource = getSupportedRelatedVideoSource(video,relatedVideo);
+				var relatedVideoSource = getSupportedRelatedVideoSource(video,relatedVideo,forcedFlash);
+				console.log('relatedsrc: ' + relatedVideoSource['src']);
 				var src = relatedVideoSource.src;
 				var type = relatedVideoSource.type;
 				var title = related.attr('title');
@@ -928,8 +933,6 @@
 				}
 				relateds.push(relatedVideo);
 			});
-			var forcedSize = $(video).attr('data-forced-size') ? $(video).attr('data-forced-size')=='true' : false;
-			var forcedFlash = $(video).attr('data-forced-flash') ? $(video).attr('data-forced-flash')=='true' : false;
 			videos.push(new RhapVideo().init(index,video,relateds,forcedFlash,forcedSize));
 		});
 	});

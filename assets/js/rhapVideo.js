@@ -15,6 +15,8 @@
 		// constants
 		/* @const */ var swfLocation = 'http://blog.rhapsody.com/video/SlimVideoPlayer.swf';
 		this.video;
+		var forcedHeight, forcedWidth;
+		var forcedSize = false;
 		var flashId, parent, videoIndex, forcedFlash, relatedVideos, controls, playPause, playPauseCanvas, seekBar, timer, volumeSlider, volumeBtn, fullScreenBtn, rhapVideoBufferBar;
 		var bigPlayButton, seekBarHandle, rhapVideoMoreButton;
 		var seekSliding, seekValue=-1, videoVolume, savedVolumeBeforeMute, isFullScreen = false;
@@ -29,12 +31,15 @@
 		var upGradientStops = {upGradientStops:['#5F6367','#1D1E25']};
 		/* @const */ var WAITING_STATE = 2;
 		this.isShowMore = false;
-		this.init = function(index,videoElement,relateds,forced){
+		this.init = function(index,videoElement,relateds,forcedFlashVideo,forcedConstantSize){
 			videoIndex = index;
-			forcedFlash = forced;
+			forcedFlash = forcedFlashVideo;
+			forcedSize = forcedConstantSize;
 			this.video = videoElement;
 			parent = $(this.video).parent();
 			relatedVideos = relateds;
+			forcedHeight = videoElement.height;
+			forcedWidth = videoElement.width;
 			this._createVideoElement(this.video);
 			return this;
 		};
@@ -103,12 +108,6 @@
 						scope._drawCommonControls(scope.video,parent,relatedVideos);
 						scope._wireCommonEvents(scope.video);
 					};
-					/*
-					setTimeout(function(){
-						video = document.getElementById(attributes.id);
-						console.log('video: ' + video);
-					},10);
-					*/
 				}else{
 					//no flv
 				}
@@ -241,15 +240,15 @@
 			rhapVideoMoreButton = $('.rhapVideoMoreButton',controls);
 			toggleMoreBtn(rhapVideoMoreButton[0]);
 		};
-		this._play = function(video){
-			this._fitSourceDimensions(video,function(){
+		this._play = function(video,dimensions){
+			this._fitSourceDimensions(video,dimensions,function(){
 				video.play();
 			});
 		};
-		this._fitSourceDimensions = function(video,callback){
+		this._fitSourceDimensions = function(video,dimensions,callback){
 			// var parent = $(video).parent();
 			var scope = this;
-			if(parent.width()!=video.videoWidth || parent.height()!=video.videoHeight){
+			if((parent.width()!=dimensions['width'] || parent.height()!=dimensions['height'])){
 				$(video).hide();
 				parent.animate({
 				    width: video.videoWidth,
@@ -271,19 +270,24 @@
 				e.preventDefault();
 				// $(scope.video).hide();
 				//video.play();
-				scope._play(video);
+				scope._play(video,{
+					width: video.width,
+					height: video.height
+				});
 			});
 		};
 		this._hideVideoArea = function(video){
 			$(video).hide();
 			$(parent).css('background','transparent');
 			$(controls).hide();
+			$(bigPlayButton).hide();
 			isHideVideoArea = true;
 		};
 		this._showVideoArea = function(video){
 			$(video).show();
 			$(parent).css('background','#000');
 			$(controls).show();
+			$(bigPlayButton).show();
 			isHideVideoArea = false;
 		}
 		this.bindVideoEvents = function(video){
@@ -323,15 +327,19 @@
 			});
 		};
 		this.showPausedState = function(){
-				//$(bigPlayButton).show();
-			this._drawLargePlayButton(this.video);
-			this._wireBigPlayButton(this.video);
+			if(!forcedSize){
+				this._drawLargePlayButton(this.video);
+				this._wireBigPlayButton(this.video);
+			}else{
+				if(!isHideVideoArea){
+					$(bigPlayButton).show();
+				}
+			}
 			playPause.removeClass('playing');
 			playPause.addClass('paused');
 			playPause.children().text('Play');
 		};
 		this.seekUpdate = function() {
-			// console.log('seek udpate');
 			var currenttime = this.video.currentTime;
 			if(!seekSliding && this.video.readyState>this.video.HAVE_CURRENT_DATA) {
 				if(seekValue>0){
@@ -384,7 +392,10 @@
 				//only play if video's state is passed waiting for data
 				if(scope.video.readyState>scope.video.HAVE_CURRENT_DATA){
 					if (scope.video.ended || scope.video.paused) {
-						scope._play(scope.video);
+						scope._play(scope.video,{
+							width: video.width,
+							height: video.height
+						});
 					} else {
 						scope.video.pause();
 					}
@@ -545,10 +556,34 @@
 	    			if($.browser.msie && startsWith($.browser.version,"9")){
 	    				var newVideo = document.createElement('video');
 	    				var titleLink = link.siblings().get(0);
+	    				var dimensions={};
+				    	if(forcedSize){
+				    		dimensions['width'] = forcedWidth;
+				    		dimensions['height'] = forcedHeight;
+				    	}else{
+				    		//size not forced, fall onto hard-coded size
+					    	if(link.attr('data-width')){
+					    		dimensions['width'] = link.attr('data-width');
+					    	}
+					    	if(link.attr('data-height')){
+					    		dimensions['height'] = link.attr('data-height');
+					    	}
+					    	//nothing was specified, use video's native size
+					    	if(vidW==null){
+					    		dimensions['width'] = video.videoWidth;
+					    	}
+					    	if(vidH==null){
+					    		dimensions['height'] = video.videoHeight;
+					    	}
+				    	}
 					    $(newVideo).attr({
 					    	'src': link.attr('href'),
 					    	'poster':domEl.src,
 					    	'title':$(titleLink).text()
+					    })
+					    .css({
+					    	width: dimensions['width']+'px',
+					    	height: dimensions['height']+'px'
 					    })
 					    ;
 	    				parent.prepend(newVideo);
@@ -557,24 +592,57 @@
 	    				scope.bindVideoEvents(scope.video);
 	    				scope._showVideoArea(scope.video);
 	    				$(oldVideo).remove();
+	    				
+				    	
 	    				$('body').bind('canplay',function(){
-	    					console.log('can play kicked off');
-				    		scope._play(scope.video);
+				    		scope._play(scope.video,dimensions);
 				    	});
 				    	//scope._play(scope.video);
 	    			}else{
 	    				if(forcedFlash){
-	    					scope.getVideo().loadVideo({
-									'server': link.attr('data-server'),
-									'path': link.attr('href')
-								});
+	    					var path = link.attr('href');
+	    					//IE-7 fix
+	    					if(startsWith(path,'http://localhost/')){
+	    						path = path.substring(17, path.length);
+	    					}
+	    					var videoConfig = {
+								'server': link.attr('data-server'),
+								'path': path
+							};
+							if(forcedSize){
+								videoConfig['height']=forcedHeight;
+								videoConfig['width']=forcedWidth;
+							}else{
+								// load in videos native size
+							}
+	    					scope.getVideo().loadVideo(videoConfig);
 	    				}else{
 					    	video.src = link.attr('href');
 					    	video.type = link.attr('data-type');
 					    	video.title=link.next('a').text();
+					    	var dimensions={};
+					    	if(forcedSize){
+					    		dimensions['width'] = forcedWidth;
+					    		dimensions['height'] = forcedHeight;
+					    	}else{
+					    		//size not forced, fall onto hard-coded size
+						    	if(link.attr('data-width')){
+						    		dimensions['width'] = link.attr('data-width');
+						    	}
+						    	if(link.attr('data-height')){
+						    		dimensions['height'] = link.attr('data-height');
+						    	}
+						    	//nothing was specified, use video's native size
+						    	if(vidW==null){
+						    		dimensions['width'] = video.videoWidth;
+						    	}
+						    	if(vidH==null){
+						    		dimensions['height'] = video.videoHeight;
+						    	}
+					    	}
 					    	$('body').bind('canplay',function(){
 					    		scope._showVideoArea(scope.video);
-					    		scope._play(video);
+					    		scope._play(video,dimensions);
 					    	});
 					    	video.load();
 	    				}
@@ -761,8 +829,8 @@
 		this._drawLargePlayButton = function(video){
 			/* @const */ var bigButtonMaxWidth = 125;
 			/* @const */ var bigButtonMinWidth = 85;
-			var videoWidth = (video.videoWidth ? video.videoWidth : video.width);
-			var videoHeight = (video.videoHeight ? video.videoHeight : video.height);
+			var videoWidth = video.width;//(video.videoWidth ? video.videoWidth : video.width);
+			var videoHeight = video.height;//(video.videoHeight ? video.videoHeight : video.height);
 			// set button measurements 
 			var bigButtonWidth =  videoWidth*20/100;
 			bigButtonWidth = bigButtonWidth > bigButtonMaxWidth ? bigButtonMaxWidth : Math.max(bigButtonMinWidth, bigButtonWidth);
@@ -836,7 +904,6 @@
 			if(mainSource['server']!=null){
 				firstVideo['server']=mainSource['server'];
 			}
-			console.log('pushing first video: ' + firstVideo.src);
 			relateds.push(firstVideo);
 			var relatedVideo;
 			$($('.rhapRelatedVideos')[index]).children().each(function(index,relatedVideo){
@@ -861,7 +928,9 @@
 				}
 				relateds.push(relatedVideo);
 			});
-			videos.push(new RhapVideo().init(index,video,relateds,false));
+			var forcedSize = $(video).attr('data-forced-size') ? $(video).attr('data-forced-size')=='true' : false;
+			var forcedFlash = $(video).attr('data-forced-flash') ? $(video).attr('data-forced-flash')=='true' : false;
+			videos.push(new RhapVideo().init(index,video,relateds,forcedFlash,forcedSize));
 		});
 	});
 })(jQuery);

@@ -116,6 +116,10 @@ function supportsTheoraCodec(v) {
 	return $(v).has('source[type=\'video/ogg; codecs="theora, vorbis"\']').length>0 && v.canPlayType('video/ogg; codecs="theora, vorbis"');
 }
 
+function supportsWebStorage(){
+	return window.localStorage;
+}
+
 function getSupportedVideoSource(v,videoIndex,forcedFlash) {
 	var match = {};
 	$($('.rhapRelatedVideos')[videoIndex]).siblings('source').each( function(index,source) {

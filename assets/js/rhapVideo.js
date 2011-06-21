@@ -455,9 +455,17 @@
 				}else{
 					isFullScreen = false;
 					$(parent).removeClass('rhapVideoFullscreen');
-					$(parent).css({'width':scope.video.videoWidth+'px','height':scope.video.videoHeight+'px'});
-					$(scope.video).width(scope.video.videoWidth+'px');
-					$(scope.video).height(scope.video.videoHeight+'px');
+					var w,h;
+					if(forcedSize){
+						w = forcedWidth;
+						h = forcedHeight;
+					}else{
+						w = scope.video.videoWidth;
+						h = scope.video.videoHeight;
+					}
+					$(parent).css({'width':w+'px','height':h+'px'});
+					$(scope.video).width(w+'px');
+					$(scope.video).height(h+'px');
 				}
 				var seekBarLeftOffset = 38;
 				var seekBarRightMargin = 132;
@@ -895,8 +903,6 @@
 			var forcedFlash = $(video).attr('data-forced-flash') ? $(video).attr('data-forced-flash')=='true' : false;
 			var relateds = [];
 			var mainSource = getSupportedVideoSource(video,index,forcedFlash);
-			console.log('forcedFlash: ' + forcedFlash);
-			console.log('mainsource: ' + mainSource['src']);
 			var firstVideo = {
 				poster: video.poster,
 				width: video.width,
@@ -916,7 +922,6 @@
 				var width = related.attr('data-width');
 				var height = related.attr('data-height');
 				var relatedVideoSource = getSupportedRelatedVideoSource(video,relatedVideo,forcedFlash);
-				console.log('relatedsrc: ' + relatedVideoSource['src']);
 				var src = relatedVideoSource.src;
 				var type = relatedVideoSource.type;
 				var title = related.attr('title');

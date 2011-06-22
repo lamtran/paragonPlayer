@@ -23,64 +23,137 @@
 	<script type="text/javascript" src="assets/js/rhapVideo.js"></script>
 	
 	<!-- harness code -- DO NOT DEPLOY WITH VIDEO PLAYER -->
+	<!--
+	<link class="ui-theme" rel="Stylesheet" type="text/css" href="http://jqueryui.com/themeroller/css/parseTheme.css.php?ffDefault=Trebuchet+MS,+Tahoma,+Verdana,+Arial,+sans-serif&fwDefault=bold&fsDefault=1.1em&cornerRadius=4px&bgColorHeader=f6a828&bgTextureHeader=12_gloss_wave.png&bgImgOpacityHeader=35&borderColorHeader=e78f08&fcHeader=ffffff&iconColorHeader=ffffff&bgColorContent=eeeeee&bgTextureContent=03_highlight_soft.png&bgImgOpacityContent=100&borderColorContent=dddddd&fcContent=333333&iconColorContent=222222&bgColorDefault=f6f6f6&bgTextureDefault=02_glass.png&bgI...gOpacityHighlight=75&borderColorHighlight=fed22f&fcHighlight=363636&iconColorHighlight=228ef1&bgColorError=b81900&bgTextureError=08_diagonals_thick.png&bgImgOpacityError=18&borderColorError=cd0a0a&fcError=ffffff&iconColorError=ffd27a&bgColorOverlay=666666&bgTextureOverlay=08_diagonals_thick.png&bgImgOpacityOverlay=20&opacityOverlay=50&bgColorShadow=000000&bgTextureShadow=01_flat.png&bgImgOpacityShadow=10&opacityShadow=20&thicknessShadow=5px&offsetTopShadow=-5px&offsetLeftShadow=-5px&cornerRadiusShadow=5px">
+	-->
+	<link href="assets/css/cupertino/jquery-ui-1.8.13.custom.css" media="screen" rel="stylesheet" type="text/css" />
 	<script type="text/javascript" src="assets/js/harness.js"></script>
+	<style>
+	label, input { display:block; }
+	input.text { margin-bottom:12px; width:95%; padding: .4em; }
+	fieldset { padding:0; border:0; margin-top:25px; }
+	h1 { font-size: 1.2em; margin: .6em 0; }
+	div#users-contain { margin: 20px 0; }
+	div#users-contain table { margin: 1em 0; border-collapse: collapse; width: 100%; }
+	div#users-contain table td, div#users-contain table th { border: 1px solid #eee; padding: .6em 10px; text-align: left; }
+	.ui-dialog .ui-state-error { padding: .3em; }
+	.validateTips { border: 1px solid transparent; padding: 0.3em; }
+	
+	.ui-widget {
+	    font-size: 1.0em;
+	}
+	</style> 
 </head>
 <body>
 <h1 class="header"><!--<img alt="logo" src="assets/images/header_logo.jpg"/>--><span></span></h1>
-	<!-- // BEGIN VIDEO PLAYER MARKUP /// -->
-	<div style="margin: 0 auto;width:640px">
-		<!--  width="640" height="264" -->
-		<!--  width="320" height="240" -->
-		<!-- <source src="rtmp://flashplay.rbn.com/a41/d1/rstone/rstone/" type='video/mp4; codecs="vp6"' title="download/flash/RSGG/KnuxFinal"/> 
-		
-	        <source type="video/webm" src="http://videos-cdn.mozilla.net/brand/Mozilla_Firefox_Manifesto_v0.2_640.webm"></source>
-	        <source type="video/webm; codecs=&quot;vp8, vorbis&quot;" src="http://video-js.zencoder.com/oceans-clip.webm"></source>
-	        <source type='video/webm; codecs="vp8, vorbis"' src="http://video-js.zencoder.com/oceans-clip.webm"></source>
-		-->
-		<video width="640" height="480" poster="http://lamtran.com/oceans-clip.png" title="Oceans Clip" data-forced-size="true" data-forced-flash="false">
-	        <source src="http://lamtran.com/oceans-clip.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"' />
-	        <source src="http://lamtran.com/oceans-clip.webm" type='video/webm; codecs="vp8, vorbis"' />
-	        <source src="http://lamtran.com/oceans-clip.ogv" type='video/ogg; codecs="theora, vorbis"' />
-	        <source data-server="rtmp://lamtran.com:1935/vod/" type='video/mp4; codecs="vp6"' data-src="oceans-clip"/>
-	        <div class="rhapRelatedVideos">
-	        	<div title="Cutting Edge" class="rhapRelatedVideo" data-width="640" data-height="360" data-poster="http://lamtran.com/Cutting-Edge-640.jpg">
-	        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/Cutting-Edge-640.mp4" data-type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'></span>
-	        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/Cutting-Edge-640.webm" data-type='video/webm; codecs="vp8, vorbis"'></span>
-	        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/Cutting-Edge-640.ogv" data-type='video/ogg; codecs="theora, vorbis"'></span>
-	        		<span class="rhapRelatedVideoSource" data-server="rtmp://lamtran.com:1935/vod/" data-src="Cutting-Edge-640" data-type='video/mp4; codecs="vp6"'></span>
-	        	</div>
-	        	<div title="Features" class="rhapRelatedVideo" data-width="640" data-height="360" data-poster="http://lamtran.com/FF4_Jess3Features_VO_1.jpg">
-	        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/FF4_Jess3Features_VO_1.mp4" data-type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'></span>
-	        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/FF4_Jess3Features_VO_1.webm" data-type='video/webm; codecs="vp8, vorbis"'></span>
-	        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/FF4_Jess3Features_VO_1.ogv" data-type='video/ogg; codecs="theora, vorbis"'></span>
-	        		<span class="rhapRelatedVideoSource" data-server="rtmp://lamtran.com:1935/vod/" data-src="FF4_Jess3Features_VO_1" data-type='video/mp4; codecs="vp6"'></span>
-	        	</div>
-	        	<div title="Mobile Addons" class="rhapRelatedVideo" data-width="640" data-height="360" data-poster="http://lamtran.com/Mobile-Addons-640.jpg">
-	        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/Mobile-Addons-640.mp4" data-type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'></span>
-	        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/Mobile-Addons-640.webm" data-type='video/webm; codecs="vp8, vorbis"'></span>
-	        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/Mobile-Addons-640.ogv" data-type='video/ogg; codecs="theora, vorbis"'></span>
-	        		<span class="rhapRelatedVideoSource" data-server="rtmp://lamtran.com:1935/vod/" data-src="Mobile-Addons-640" data-type='video/mp4; codecs="vp6"'></span>
-	        	</div>
-	        	<div title="Manifesto" class="rhapRelatedVideo" data-width="640" data-height="360" data-poster="http://lamtran.com/Mozilla_Firefox_Manifesto_v0.2_640.jpg">
-	        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/Mozilla_Firefox_Manifesto_v0.2_640.mp4" data-type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'></span>
-	        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/Mozilla_Firefox_Manifesto_v0.2_640.webm" data-type='video/webm; codecs="vp8, vorbis"'></span>
-	        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/Mozilla_Firefox_Manifesto_v0.2_640.ogv" data-type='video/ogg; codecs="theora, vorbis"'></span>
-	        		<span class="rhapRelatedVideoSource" data-server="rtmp://lamtran.com:1935/vod/" data-src="Mozilla_Firefox_Manifesto_v0.2_640" data-type='video/mp4; codecs="vp6"'></span>
-	        	</div>
-	        	<div title="Meet The Cubs" class="rhapRelatedVideo" data-width="640" data-height="360" data-poster="http://lamtran.com/meetthecubs.jpg">
-	        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/meetthecubs.mp4video.mp4" data-type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'></span>
-	        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/meetthecubs.webm" data-type='video/webm; codecs="vp8, vorbis"'></span>
-	        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/meetthecubs.ogv" data-type='video/ogg; codecs="theora, vorbis"'></span>
-	        		<span class="rhapRelatedVideoSource" data-server="rtmp://lamtran.com:1935/vod/" data-src="meetthecubs" data-type='video/mp4; codecs="vp6"'></span>
-	        	</div>
-	        	<div title="Dart Moor" class="rhapRelatedVideo" data-width="640" data-height="360" data-poster="http://lamtran.com/dartmoor.jpg">
-	        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/dartmoor.mp4" data-type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'></span>
-	        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/dartmoor.webmvp8.webm" data-type='video/webm; codecs="vp8, vorbis"'></span>
-	        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/dartmoor.ogv" data-type='video/ogg; codecs="theora, vorbis"'></span>
-	        		<span class="rhapRelatedVideoSource" data-server="rtmp://lamtran.com:1935/vod/" data-src="dartmoor" data-type='video/mp4; codecs="vp6"'></span>
-	        	</div>
-	        </div>
-	   </video>
+	<div id="tabs">
+		<ul>
+			<li><a href="#tabs-1">Video Player</a></li>
+			<li><a href="#tabs-2">Configurations</a></li>
+			<li><a href="#tabs-3">Logs</a></li>
+		</ul>
+		<div id="tabs-1">
+			<div style="margin: 0 auto;width:640px">
+				<!-- // BEGIN VIDEO PLAYER MARKUP /// -->
+				<!--  width="640" height="264" -->
+				<!--  width="320" height="240" -->
+				<!-- <source src="rtmp://flashplay.rbn.com/a41/d1/rstone/rstone/" type='video/mp4; codecs="vp6"' title="download/flash/RSGG/KnuxFinal"/> 
+				
+			        <source type="video/webm" src="http://videos-cdn.mozilla.net/brand/Mozilla_Firefox_Manifesto_v0.2_640.webm"></source>
+			        <source type="video/webm; codecs=&quot;vp8, vorbis&quot;" src="http://video-js.zencoder.com/oceans-clip.webm"></source>
+			        <source type='video/webm; codecs="vp8, vorbis"' src="http://video-js.zencoder.com/oceans-clip.webm"></source>
+				-->
+				<video width="640" height="480" poster="http://lamtran.com/oceans-clip.png" title="Oceans Clip" data-forced-size="true" data-forced-flash="false">
+			        <source src="http://lamtran.com/oceans-clip.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"' />
+			        <source src="http://lamtran.com/oceans-clip.webm" type='video/webm; codecs="vp8, vorbis"' />
+			        <source src="http://lamtran.com/oceans-clip.ogv" type='video/ogg; codecs="theora, vorbis"' />
+			        <source data-server="rtmp://lamtran.com:1935/vod/" type='video/mp4; codecs="vp6"' data-src="oceans-clip"/>
+			        <div class="rhapRelatedVideos">
+			        	<div title="Cutting Edge" class="rhapRelatedVideo" data-width="640" data-height="360" data-poster="http://lamtran.com/Cutting-Edge-640.jpg">
+			        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/Cutting-Edge-640.mp4" data-type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'></span>
+			        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/Cutting-Edge-640.webm" data-type='video/webm; codecs="vp8, vorbis"'></span>
+			        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/Cutting-Edge-640.ogv" data-type='video/ogg; codecs="theora, vorbis"'></span>
+			        		<span class="rhapRelatedVideoSource" data-server="rtmp://lamtran.com:1935/vod/" data-src="Cutting-Edge-640" data-type='video/mp4; codecs="vp6"'></span>
+			        	</div>
+			        	<div title="Features" class="rhapRelatedVideo" data-width="640" data-height="360" data-poster="http://lamtran.com/FF4_Jess3Features_VO_1.jpg">
+			        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/FF4_Jess3Features_VO_1.mp4" data-type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'></span>
+			        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/FF4_Jess3Features_VO_1.webm" data-type='video/webm; codecs="vp8, vorbis"'></span>
+			        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/FF4_Jess3Features_VO_1.ogv" data-type='video/ogg; codecs="theora, vorbis"'></span>
+			        		<span class="rhapRelatedVideoSource" data-server="rtmp://lamtran.com:1935/vod/" data-src="FF4_Jess3Features_VO_1" data-type='video/mp4; codecs="vp6"'></span>
+			        	</div>
+			        	<div title="Mobile Addons" class="rhapRelatedVideo" data-width="640" data-height="360" data-poster="http://lamtran.com/Mobile-Addons-640.jpg">
+			        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/Mobile-Addons-640.mp4" data-type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'></span>
+			        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/Mobile-Addons-640.webm" data-type='video/webm; codecs="vp8, vorbis"'></span>
+			        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/Mobile-Addons-640.ogv" data-type='video/ogg; codecs="theora, vorbis"'></span>
+			        		<span class="rhapRelatedVideoSource" data-server="rtmp://lamtran.com:1935/vod/" data-src="Mobile-Addons-640" data-type='video/mp4; codecs="vp6"'></span>
+			        	</div>
+			        	<div title="Manifesto" class="rhapRelatedVideo" data-width="640" data-height="360" data-poster="http://lamtran.com/Mozilla_Firefox_Manifesto_v0.2_640.jpg">
+			        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/Mozilla_Firefox_Manifesto_v0.2_640.mp4" data-type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'></span>
+			        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/Mozilla_Firefox_Manifesto_v0.2_640.webm" data-type='video/webm; codecs="vp8, vorbis"'></span>
+			        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/Mozilla_Firefox_Manifesto_v0.2_640.ogv" data-type='video/ogg; codecs="theora, vorbis"'></span>
+			        		<span class="rhapRelatedVideoSource" data-server="rtmp://lamtran.com:1935/vod/" data-src="Mozilla_Firefox_Manifesto_v0.2_640" data-type='video/mp4; codecs="vp6"'></span>
+			        	</div>
+			        	<div title="Meet The Cubs" class="rhapRelatedVideo" data-width="640" data-height="360" data-poster="http://lamtran.com/meetthecubs.jpg">
+			        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/meetthecubs.mp4video.mp4" data-type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'></span>
+			        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/meetthecubs.webm" data-type='video/webm; codecs="vp8, vorbis"'></span>
+			        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/meetthecubs.ogv" data-type='video/ogg; codecs="theora, vorbis"'></span>
+			        		<span class="rhapRelatedVideoSource" data-server="rtmp://lamtran.com:1935/vod/" data-src="meetthecubs" data-type='video/mp4; codecs="vp6"'></span>
+			        	</div>
+			        	<div title="Dart Moor" class="rhapRelatedVideo" data-width="640" data-height="360" data-poster="http://lamtran.com/dartmoor.jpg">
+			        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/dartmoor.mp4" data-type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'></span>
+			        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/dartmoor.webmvp8.webm" data-type='video/webm; codecs="vp8, vorbis"'></span>
+			        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/dartmoor.ogv" data-type='video/ogg; codecs="theora, vorbis"'></span>
+			        		<span class="rhapRelatedVideoSource" data-server="rtmp://lamtran.com:1935/vod/" data-src="dartmoor" data-type='video/mp4; codecs="vp6"'></span>
+			        	</div>
+			        </div>
+			   </video>
+			</div>
+		</div>
+		<div id="tabs-2">
+			<div id="users-contain" class="ui-widget">
+				<h1>Saved Configurations:</h1>
+				<table id="users" class="ui-widget ui-widget-content">
+					<thead>
+						<tr class="ui-widget-header ">
+							<th>Description</th>
+							<th>Initial Width</th>
+							<th>Initial Height</th>
+							<th>Preferred Width</th>
+							<th>Preferred Height</th>
+							<th>Force Flash</th>
+							<th>Pop out</th>
+						</tr>
+					</thead>
+					<tbody>
+						<!--
+						<tr>
+							<td>John Doe</td>
+							<td>john.doe@example.com</td>
+							<td>johndoe1</td>
+						</tr>
+						-->
+					</tbody>
+				</table>
+			</div>
+			<button id="create-new-configuration">New Configuration</button> 
+			<div id="dialog-form" title="Create new user">
+				<p class="validateTips">All form fields are required.</p>
+				<form>
+					<fieldset>
+						<label for="name">Name</label>
+						<input type="text" name="name" id="name" class="text ui-widget-content ui-corner-all" />
+						<label for="email">Email</label>
+						<input type="text" name="email" id="email" value="" class="text ui-widget-content ui-corner-all" />
+						<label for="password">Password</label>
+						<input type="password" name="password" id="password" value="" class="text ui-widget-content ui-corner-all" />
+					</fieldset>
+				</form>
+			</div> 
+		</div>
+		<div id="tabs-3">
+			<p>Mauris eleifend est et turpis. Duis id erat. Suspendisse potenti. Aliquam vulputate, pede vel vehicula accumsan, mi neque rutrum erat, eu congue orci lorem eget lorem. Vestibulum non ante. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Fusce sodales. Quisque eu urna vel enim commodo pellentesque. Praesent eu risus hendrerit ligula tempus pretium. Curabitur lorem enim, pretium nec, feugiat nec, luctus a, lacus.</p>
+			<p>Duis cursus. Maecenas ligula eros, blandit nec, pharetra at, semper at, magna. Nullam ac lacus. Nulla facilisi. Praesent viverra justo vitae neque. Praesent blandit adipiscing velit. Suspendisse potenti. Donec mattis, pede vel pharetra blandit, magna ligula faucibus eros, id euismod lacus dolor eget odio. Nam scelerisque. Donec non libero sed nulla mattis commodo. Ut sagittis. Donec nisi lectus, feugiat porttitor, tempor ac, tempor vitae, pede. Aenean vehicula velit eu tellus interdum rutrum. Maecenas commodo. Pellentesque nec elit. Fusce in lacus. Vivamus a libero vitae lectus hendrerit hendrerit.</p>
+		</div>
 	</div>
    <!-- /////////////////// END VIDEO PLAYER MARK UP // -->
 </body>

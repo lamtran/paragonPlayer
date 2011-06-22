@@ -142,7 +142,7 @@ ul.horizontalList li {
     width: 99%;	
 }
 
-.rhapVideoSharePanelContent {
+body .rhapVideoSharePanelContent {
 	background-color: #6EC2E9;
 	background-image: -moz-linear-gradient(left, #6EC2E9, #01B4E8);
 	background-image: -webkit-gradient(
@@ -165,6 +165,9 @@ ul.horizontalList li {
 	overflow: auto;
 }
 
+body .rhapVideoSharePanelContent a{
+	color: #fff;
+}
 .panelHeader {
 	color: #FFFFFF;
     left: 19px;
@@ -287,8 +290,7 @@ ul.horizontalList li {
 
 .rhapVideoBufferBar {
 	background: #1C334E;
-	background: -moz-linear-gradient(center top -90deg, #2A4669, #1C334E)
-		repeat scroll left 0 #1F3744;
+	background: -moz-linear-gradient(center top -90deg, #2A4669, #1C334E) repeat scroll left 0 #1F3744;
 	background: -webkit-gradient(
 	    linear,
 	    left top,
@@ -320,17 +322,17 @@ ul.horizontalList li {
 	padding: 10px;
 }
 
-.rhapVideoMoreControls a {
+body .rhapVideoMoreControls a {
 	text-decoration: none;
 	color: #fff;
 }
 
 /** override jquery ui styles **/
-.rhapVideoSeekBar .ui-slider-handle {
+.rhapVideoWrapper .rhapVideoSeekBar .ui-slider-handle {
 	margin-left: -0.1em;
 }
 
-.rhapVideoSeekBar .ui-slider-handle {
+.rhapVideoWrapper .rhapVideoSeekBar .ui-slider-handle {
 	width: 7px;
 }
 
@@ -404,7 +406,7 @@ ul.horizontalList li {
 	border: 1px solid #000000;
 }
 
-.rhapVideoSeekBar .ui-state-default {
+.rhapVideoWrapper .rhapVideoSeekBar .ui-state-default {
 	background: #CCC;
 	background: -moz-linear-gradient(center top -90deg, #FFFFFF, #000000)
 		repeat scroll left 0 #1F3744;

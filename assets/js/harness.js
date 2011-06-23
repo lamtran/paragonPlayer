@@ -214,7 +214,7 @@ $(function() {
 			}else{
 				description += ' inline.'
 			}
-			$( "#users tbody" ).append( "<tr>" +
+			$( "#users tbody" ).append( "<tr id='id_"+config.id+"'>" +
 			"<td>" + description + "</td>" +
 			"<td>" + config.initialWidth + "</td>" +
 			"<td>" + config.initialHeight + "</td>" +
@@ -225,7 +225,22 @@ $(function() {
 			"</tr>" );
 			description='';
 		}
-			
+		$('tbody tr').hover(
+			function(){
+				if(!$(this).hasClass('ui-state-active')){
+					$(this).find('td').addClass('ui-state-hover');
+				}
+			},
+			function(){
+				$(this).find('td').removeClass('ui-state-hover');
+			}
+		);
+		$('tbody tr').click(function(event){
+			console.log('clicked on ' + this.id);
+			$(this).parent().find('tr.ui-state-active').removeClass('ui-state-active');
+			$(this).addClass('ui-state-active');
+		});	
+		$('tbody tr:nth-child(1)').addClass('ui-state-active');
 	});
 });
 

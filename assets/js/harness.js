@@ -2,67 +2,9 @@
  * @author lamtran
  */
 var db;
-// This is what our customer data looks like.
-var configData = [{
-	id: 1,
-	//description: "fixed size, flash only, inline",
-	initialWidth: 640,
-	initialHeight: 480,
-	preferredWidth: '640',
-	preferredHeight: '480',
-	forcedFlash: true,
-	popout: false
-},{
-	id: 2,
-	//description: "auto resize to video's native dimensions, auto detect video support, inline",
-	initialWidth: 640,
-	initialHeight: 480,
-	preferredWidth: 'auto',
-	preferredHeight: 'auto',
-	forcedFlash: false,
-	popout: false
-},{
-	id: 3,
-	//description: "auto resize to video's native dimensions, auto detect video support, pop out",
-	initialWidth: 640,
-	initialHeight: 480,
-	preferredWidth: 'auto',
-	preferredHeight: 'auto',
-	forcedFlash: false,
-	popout: true
-},{
-	id: 4,
-	//description: "fixed size, auto detect video support, inline",
-	initialWidth: 640,
-	initialHeight: 480,
-	preferredWidth: '640',
-	preferredHeight: '480',
-	forcedFlash: false,
-	popout: false
-},{
-	id: 5,
-	//description: "auto resize to a fixed dimension, auto detect video support, inline",
-	initialWidth: 200,
-	initialHeight: 100,
-	preferredWidth: '640',
-	preferredHeight: '480',
-	forcedFlash: false,
-	popout: false
-},{
-	id: 6,
-	//description: "fixed size, auto detect video support, pop out",
-	initialWidth: 640,
-	initialHeight: 480,
-	preferredWidth: '640',
-	preferredHeight: '480',
-	forcedFlash: false,
-	popout: true
-}
-];
+var selectedConfig = 0;
 
 initIndexedDb();
-
-var DAO= {};
 
 var request = window.indexedDB.open("VideoConfigs");
 request.onsuccess = function(event) {
@@ -88,7 +30,8 @@ request.onsuccess = function(event) {
 			// going to use "ssn" as our key path because it's guaranteed to be
 			// unique.
 			var objectStore = db.createObjectStore("globalConfigs", {
-				keyPath: "id"
+				keyPath: "id",
+				autoIncrement:true
 			});
 
 			// Store values in the newly created objectStore.
@@ -228,19 +171,68 @@ $(function() {
 		$('tbody tr').hover(
 			function(){
 				if(!$(this).hasClass('ui-state-active')){
-					$(this).find('td').addClass('ui-state-hover');
+					$(this).addClass('ui-state-hover');
 				}
 			},
 			function(){
-				$(this).find('td').removeClass('ui-state-hover');
+				$(this).removeClass('ui-state-hover');
 			}
 		);
 		$('tbody tr').click(function(event){
 			console.log('clicked on ' + this.id);
-			$(this).parent().find('tr.ui-state-active').removeClass('ui-state-active');
-			$(this).addClass('ui-state-active');
+			var clickedId = Number(this.id.split('id_')[1])-1;
+			console.log('clicked id: ' + clickedId);
+			if(clickedId!=selectedConfig){
+				$(this).parent().find('tr.ui-state-active').removeClass('ui-state-active');
+				$(this).addClass('ui-state-active');
+				if($(this).hasClass('ui-state-hover')){
+					$(this).removeClass('ui-state-hover');
+				}
+				selectedConfig=clickedId;
+				$('#harnessContainer .rhapVideoWrapper').remove();
+				console.log(configData[selectedConfig]);
+				var config = configData[selectedConfig];
+				var videos = config.videos;
+				var firstVideo = videos[0];
+				var sources = '', relatedVideos = '';
+				if(firstVideo.mp4){
+					sources+='<source src="'+firstVideo.mp4+'" type=\'video/mp4; codecs="avc1.42E01E, mp4a.40.2"\' />';
+				}
+				if(firstVideo.webm){
+					sources+='<source src="'+firstVideo.webm+'" type=\'video/webm; codecs="vp8, vorbis"\' />';
+				}
+				if(firstVideo.ogg){
+					sources+='<source src="'+firstVideo.ogg+'" type=\'video/ogg; codecs="theora, vorbis"\' />';
+				}
+				if(firstVideo.flv){
+					sources+='<source data-server="'+firstVideo.flv.server+'" type=\'video/mp4; codecs="vp6"\' data-src="'+firstVideo.flv.src+'"/>';
+				}
+				relatedVideos += '<div class="rhapRelatedVideos">';
+				var relatedVideo;
+				for(var i=1;i<videos.length;i++){
+					relatedVideo = videos[i];
+					/*
+					<div title="Cutting Edge" class="rhapRelatedVideo" data-width="640" data-height="360" data-poster="http://lamtran.com/Cutting-Edge-640.jpg">
+			        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/Cutting-Edge-640.mp4" data-type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'></span>
+			        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/Cutting-Edge-640.webm" data-type='video/webm; codecs="vp8, vorbis"'></span>
+			        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/Cutting-Edge-640.ogv" data-type='video/ogg; codecs="theora, vorbis"'></span>
+			        		<span class="rhapRelatedVideoSource" data-server="rtmp://lamtran.com:1935/vod/" data-src="Cutting-Edge-640" data-type='video/mp4; codecs="vp6"'></span>
+			        	</div>
+			        */
+				}
+				relatedVideos += '</div>';
+				$('#harnessContainer').append(
+					'<video width="'+config.initialWidth+'" height="'+config.initialHeight+'" data-preferred-width="'+config.preferredWidth+'" data-preferred-height="'+config.preferredHeight+'" poster="http://lamtran.com/oceans-clip.png" title="Oceans Clip" data-forced-flash="'+config.forcedFlash+'" data-popout="'+config.popout+'">' +
+						sources +
+						relatedVideos +
+					'</video>'
+				);
+				var video = $('#harnessContainer video')[0];
+				console.log(video);
+				new RhapVideo().init(0,video);
+			}
 		});	
-		$('tbody tr:nth-child(1)').addClass('ui-state-active');
+		$('tbody tr:nth-child('+1+')').addClass('ui-state-active');
 	});
 });
 

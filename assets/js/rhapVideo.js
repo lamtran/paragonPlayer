@@ -1,3 +1,6 @@
+//expose the RhapVideo class so it can be used outside of jQuery's scope
+
+var RhapVideo;
 (function($) {
 	/**
 	 * Convention:
@@ -11,10 +14,11 @@
 	 * @this {RhapVideo}
 	 * @return {RhapVideo} the RhapVideo object
 	 */
-	function RhapVideo(){
+	RhapVideo = function(){
 		// constants
 		/* @const */ var swfLocation = 'http://blog.rhapsody.com/video/SlimVideoPlayer.swf';
 		this.video;
+		var stringLimit = 17;
 		var forcedHeight, forcedWidth;
 		var forcedSize = false;
 		var flashId, parent, videoIndex, forcedFlash, relatedVideos, controls, playPause, playPauseCanvas, seekBar, timer, volumeSlider, volumeBtn, fullScreenBtn, rhapVideoBufferBar;
@@ -32,9 +36,55 @@
 		/* @const */ var WAITING_STATE = 2;
 		this.isShowMore = false;
 		this.init = function(index,videoElement,relateds,forcedFlashVideo,forcedConstantSize){
+			//wrap each video element in a div so we have context to build the controls
+			$(videoElement).wrap(function() {
+				return '<div class="rhapVideoWrapper" style="height:'+videoElement.height+'px;width:'+videoElement.width+'px"/>';
+			});
+			//var forcedSize = $(video).attr('data-forced-size') ? $(video).attr('data-forced-size')=='true' : false;
+			var preferredWidth = Number($(videoElement).attr('data-preferred-width'));
+			var preferredHeight = Number($(videoElement).attr('data-preferred-height'));
+			forcedSize = videoElement.width == preferredWidth && videoElement.height == preferredHeight;
+			forcedFlash = $(videoElement).attr('data-forced-flash') ? $(videoElement).attr('data-forced-flash')=='true' : false;
+			var relateds = [];
+			var mainSource = getSupportedVideoSource(videoElement,index,forcedFlash);
+			var firstVideo = {
+				poster: videoElement.poster,
+				width: videoElement.width,
+				height: videoElement.height,
+				src: mainSource.src,
+				type: mainSource.type,
+				title: videoElement.title.length > stringLimit ? videoElement.title.substring(0,stringLimit)+'...' : videoElement.title
+			};
+			if(mainSource['server']!=null){
+				firstVideo['server']=mainSource['server'];
+			}
+			relateds.push(firstVideo);
+			var relatedVideo;
+			$($('.rhapRelatedVideos')[index]).children().each(function(index,relatedVideo){
+				var related = $(relatedVideo);
+				var poster = related.attr('data-poster');
+				var width = related.attr('data-width');
+				var height = related.attr('data-height');
+				var relatedVideoSource = getSupportedRelatedVideoSource(videoElement,relatedVideo,forcedFlash);
+				var src = relatedVideoSource.src;
+				var type = relatedVideoSource.type;
+				var title = related.attr('title');
+				relatedVideo = {
+					poster: poster,
+					width: width,
+					height: height,
+					src: src,
+					type: type,
+					title: title.length > stringLimit ? title.substring(0,stringLimit)+'...' : title
+				};
+				if(relatedVideoSource['server']!=null){
+					relatedVideo['server']=relatedVideoSource['server'];
+				}
+				relateds.push(relatedVideo);
+			});
+			console.log('forced size: ' + forcedSize);
+			
 			videoIndex = index;
-			forcedFlash = forcedFlashVideo;
-			forcedSize = forcedConstantSize;
 			this.video = videoElement;
 			parent = $(this.video).parent();
 			relatedVideos = relateds;
@@ -893,52 +943,8 @@
 		};
 	};
 	$(function(){
-		var stringLimit = 17;
 		$('video').each(function(index,video){
-			//wrap each video element in a div so we have context to build the controls
-			$(video).wrap(function() {
-				return '<div class="rhapVideoWrapper" style="height:'+video.height+'px;width:'+video.width+'px"/>';//style="height:'+video.height+'px"
-			});
-			var forcedSize = $(video).attr('data-forced-size') ? $(video).attr('data-forced-size')=='true' : false;
-			var forcedFlash = $(video).attr('data-forced-flash') ? $(video).attr('data-forced-flash')=='true' : false;
-			var relateds = [];
-			var mainSource = getSupportedVideoSource(video,index,forcedFlash);
-			var firstVideo = {
-				poster: video.poster,
-				width: video.width,
-				height: video.height,
-				src: mainSource.src,
-				type: mainSource.type,
-				title: video.title.length > stringLimit ? video.title.substring(0,stringLimit)+'...' : video.title
-			};
-			if(mainSource['server']!=null){
-				firstVideo['server']=mainSource['server'];
-			}
-			relateds.push(firstVideo);
-			var relatedVideo;
-			$($('.rhapRelatedVideos')[index]).children().each(function(index,relatedVideo){
-				var related = $(relatedVideo);
-				var poster = related.attr('data-poster');
-				var width = related.attr('data-width');
-				var height = related.attr('data-height');
-				var relatedVideoSource = getSupportedRelatedVideoSource(video,relatedVideo,forcedFlash);
-				var src = relatedVideoSource.src;
-				var type = relatedVideoSource.type;
-				var title = related.attr('title');
-				relatedVideo = {
-					poster: poster,
-					width: width,
-					height: height,
-					src: src,
-					type: type,
-					title: title.length > stringLimit ? title.substring(0,stringLimit)+'...' : title
-				};
-				if(relatedVideoSource['server']!=null){
-					relatedVideo['server']=relatedVideoSource['server'];
-				}
-				relateds.push(relatedVideo);
-			});
-			videos.push(new RhapVideo().init(index,video,relateds,forcedFlash,forcedSize));
+			videos.push(new RhapVideo().init(index,video));
 		});
 	});
 })(jQuery);

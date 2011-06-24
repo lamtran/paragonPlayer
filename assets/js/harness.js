@@ -208,17 +208,25 @@ $(function() {
 					sources+='<source data-server="'+firstVideo.flv.server+'" type=\'video/mp4; codecs="vp6"\' data-src="'+firstVideo.flv.src+'"/>';
 				}
 				relatedVideos += '<div class="rhapRelatedVideos">';
-				var relatedVideo;
+				var relatedVideo, relatedVideoMarkup='';
 				for(var i=1;i<videos.length;i++){
 					relatedVideo = videos[i];
-					/*
-					<div title="Cutting Edge" class="rhapRelatedVideo" data-width="640" data-height="360" data-poster="http://lamtran.com/Cutting-Edge-640.jpg">
-			        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/Cutting-Edge-640.mp4" data-type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'></span>
-			        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/Cutting-Edge-640.webm" data-type='video/webm; codecs="vp8, vorbis"'></span>
-			        		<span class="rhapRelatedVideoSource" data-src="http://lamtran.com/Cutting-Edge-640.ogv" data-type='video/ogg; codecs="theora, vorbis"'></span>
-			        		<span class="rhapRelatedVideoSource" data-server="rtmp://lamtran.com:1935/vod/" data-src="Cutting-Edge-640" data-type='video/mp4; codecs="vp6"'></span>
-			        	</div>
-			        */
+					relatedVideoMarkup += '<div title="Cutting Edge" class="rhapRelatedVideo" data-width="640" data-height="360" data-poster="http://lamtran.com/Cutting-Edge-640.jpg">';
+					if(relatedVideo.mp4){
+						relatedVideoMarkup += '<span class="rhapRelatedVideoSource" data-src="'+relatedVideo.mp4+'" data-type=\'video/mp4; codecs="avc1.42E01E, mp4a.40.2"\'></span>';
+					}
+					if(relatedVideo.webm){
+						relatedVideoMarkup += '<span class="rhapRelatedVideoSource" data-src="'+relatedVideo.webm+'" data-type=\'video/webm; codecs="vp8, vorbis"\'></span>';
+					}
+					if(relatedVideo.ogg){
+						relatedVideoMarkup += '<span class="rhapRelatedVideoSource" data-src="'+relatedVideo.ogg+'" data-type=\'video/ogg; codecs="theora, vorbis"\'></span>';
+					}
+					if(relatedVideo.flv){
+						relatedVideoMarkup += '<span class="rhapRelatedVideoSource" data-server="'+relatedVideo.flv.server+'" data-src="'+relatedVideo.flv.src+'" data-type=\'video/mp4; codecs="vp6"\'></span>';
+					}
+					relatedVideoMarkup += '</div>';
+					relatedVideos += relatedVideoMarkup;
+					relatedVideoMarkup = '';
 				}
 				relatedVideos += '</div>';
 				$('#harnessContainer').append(

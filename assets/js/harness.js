@@ -8,7 +8,6 @@ initIndexedDb();
 
 var request = window.indexedDB.open("VideoConfigs");
 request.onsuccess = function(event) {
-	console.log('opened DB!');
 	// Do something with request.result!
 	db = this.result;
 	if(db==null) {
@@ -72,11 +71,8 @@ function readDb(onsuccess) {
 	var request = objectStore.getAll();
 	request.onerror = function(event) {
 		// Handle errors!
-		console.log('readDb error!');
-		console.log(event);
 	};
 	request.onsuccess = onsuccess;
-	console.log('readDb!');
 }
 
 function deleteDB() {
@@ -134,7 +130,6 @@ $(function() {
 	});
 	readDb(function(event){
 		// Do something with the request.result!
-		console.log(event);
 		var savedConfigs = event.target.result;
 		var config, description='';
 		for(var e in savedConfigs){
@@ -179,9 +174,7 @@ $(function() {
 			}
 		);
 		$('tbody tr').click(function(event){
-			console.log('clicked on ' + this.id);
 			var clickedId = Number(this.id.split('id_')[1])-1;
-			console.log('clicked id: ' + clickedId);
 			if(clickedId!=selectedConfig){
 				$(this).parent().find('tr.ui-state-active').removeClass('ui-state-active');
 				$(this).addClass('ui-state-active');
@@ -190,10 +183,9 @@ $(function() {
 				}
 				selectedConfig=clickedId;
 				$('#harnessContainer .rhapVideoWrapper').remove();
-				console.log(configData[selectedConfig]);
 				var config = configData[selectedConfig];
-				var videos = config.videos;
-				var firstVideo = videos[0];
+				var videosToRender = config.videos;
+				var firstVideo = videosToRender[0];
 				var sources = '', relatedVideos = '';
 				if(firstVideo.mp4){
 					sources+='<source src="'+firstVideo.mp4+'" type=\'video/mp4; codecs="avc1.42E01E, mp4a.40.2"\' />';
@@ -209,9 +201,9 @@ $(function() {
 				}
 				relatedVideos += '<div class="rhapRelatedVideos">';
 				var relatedVideo, relatedVideoMarkup='';
-				for(var i=1;i<videos.length;i++){
-					relatedVideo = videos[i];
-					relatedVideoMarkup += '<div title="Cutting Edge" class="rhapRelatedVideo" data-width="640" data-height="360" data-poster="http://lamtran.com/Cutting-Edge-640.jpg">';
+				for(var i=1;i<videosToRender.length;i++){
+					relatedVideo = videosToRender[i];
+					relatedVideoMarkup += '<div title="'+relatedVideo.title+'" class="rhapRelatedVideo" data-width="640" data-height="360" data-poster="'+relatedVideo.poster+'">';
 					if(relatedVideo.mp4){
 						relatedVideoMarkup += '<span class="rhapRelatedVideoSource" data-src="'+relatedVideo.mp4+'" data-type=\'video/mp4; codecs="avc1.42E01E, mp4a.40.2"\'></span>';
 					}
@@ -230,14 +222,14 @@ $(function() {
 				}
 				relatedVideos += '</div>';
 				$('#harnessContainer').append(
-					'<video width="'+config.initialWidth+'" height="'+config.initialHeight+'" data-preferred-width="'+config.preferredWidth+'" data-preferred-height="'+config.preferredHeight+'" poster="http://lamtran.com/oceans-clip.png" title="Oceans Clip" data-forced-flash="'+config.forcedFlash+'" data-popout="'+config.popout+'">' +
+					'<video width="'+config.initialWidth+'" height="'+config.initialHeight+'" data-preferred-width="'+config.preferredWidth+'" data-preferred-height="'+config.preferredHeight+'" poster="'+firstVideo.poster+'" title="'+firstVideo.title+'" data-forced-flash="'+config.forcedFlash+'" data-popout="'+config.popout+'">' +
 						sources +
 						relatedVideos +
 					'</video>'
 				);
 				var video = $('#harnessContainer video')[0];
-				console.log(video);
-				new RhapVideo().init(0,video);
+				videos=[]
+				videos.push(new RhapVideo().init(0,video));
 			}
 		});	
 		$('tbody tr:nth-child('+1+')').addClass('ui-state-active');

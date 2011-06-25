@@ -82,7 +82,6 @@ var RhapVideo;
 				}
 				relateds.push(relatedVideo);
 			});
-			console.log('forced size: ' + forcedSize);
 			
 			videoIndex = index;
 			this.video = videoElement;
@@ -147,6 +146,7 @@ var RhapVideo;
 					}
 					flashvars['path']=path;
 					flashvars['videoIndex']=videoIndex;
+					flashvars['analyticstrackcode']='UA-5860230-6';
 					if(video.poster!=null){
 						flashvars['imageurl']=video.poster;
 					}

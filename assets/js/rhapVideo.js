@@ -18,6 +18,7 @@ var RhapVideo;
 		// constants
 		/* @const */ var swfLocation = 'http://blog.rhapsody.com/video/SlimVideoPlayer.swf';
 		this.video;
+		var videoPlay25Percent, videoPlay50Percent, videoPlay75Percent;
 		var stringLimit = 17;
 		var forcedHeight, forcedWidth;
 		var forcedSize = false;
@@ -55,6 +56,8 @@ var RhapVideo;
 				type: mainSource.type,
 				title: videoElement.title.length > stringLimit ? videoElement.title.substring(0,stringLimit)+'...' : videoElement.title
 			};
+			videoElement.src=mainSource.src;
+			videoElement.type=mainSource.type;
 			if(mainSource['server']!=null){
 				firstVideo['server']=mainSource['server'];
 			}
@@ -344,6 +347,11 @@ var RhapVideo;
 			var scope = this;
 			$(video).bind('timeupdate',jQuery.proxy(this.seekUpdate,this))
 			.bind('durationchange',function(){
+				console.log("DURATION CHANGE: " + video.duration);
+				videoPlay25Percent = Math.round((video.duration/100)*25);
+				videoPlay50Percent = Math.round((video.duration/100)*50);
+				videoPlay75Percent = Math.round((video.duration/100)*75);
+				console.log('25%: ' + videoPlay25Percent + ' 50%: ' + videoPlay50Percent + ' 75%: ' + videoPlay75Percent);
 				seekBar.slider("option","max",video.duration);
 			}).bind('loadstart',function(){
 				scope.toast.css('line-height',parent.height()+'px');
@@ -366,12 +374,20 @@ var RhapVideo;
 			           // do nothing because we're autobuffering.
 			      }
 			}).bind('play',function() {
+				if($(scope.video).attr("currentTime")==0){
+					_gaq.push(['_trackEvent', 'VideoPlayer', 'Play', '0%'+document.location+':'+video.src]);
+				}
 				$(bigPlayButton).hide();
 				playPause.removeClass('paused');
 				playPause.addClass('playing');
 				playPause.children().text('Pause');
 				scope._drawPausedButton(upGradientStops);
 			}).bind('ended',function() {
+				console.log('ended - report 100%');
+				_gaq.push(['_trackEvent', 'VideoPlayer', 'Play', '100%'+document.location+':'+scope.video.src]);
+				videoPlay25Percent=Math.round((scope.video.duration/100)*25);
+				videoPlay50Percent=Math.round((scope.video.duration/100)*50);
+				videoPlay75Percent=Math.round((scope.video.duration/100)*75);
 				scope.showPausedState();
 				video.pause();
 			});
@@ -413,6 +429,20 @@ var RhapVideo;
 						seekValue=-3;
 					}
 					seekBar.slider('value', t);
+					var flooredT = Math.floor(t);
+					if(flooredT==videoPlay25Percent){
+						console.log('report 25%');
+						_gaq.push(['_trackEvent', 'VideoPlayer', 'Play', '25%'+document.location+':'+this.video.src]);
+						videoPlay25Percent=-1;
+					}else if(flooredT==videoPlay50Percent){
+						console.log('report 50%');
+						_gaq.push(['_trackEvent', 'VideoPlayer', 'Play', '50%'+document.location+':'+this.video.src]);
+						videoPlay50Percent=-1;
+					}else if(flooredT==videoPlay75Percent){
+						console.log('report 75%');
+						_gaq.push(['_trackEvent', 'VideoPlayer', 'Play', '75%'+document.location+':'+this.video.src]);
+						videoPlay75Percent=-1;
+					}
 				}
 			}
 			drawTimerLabel(timer,41,26,_timeFormat(currenttime));

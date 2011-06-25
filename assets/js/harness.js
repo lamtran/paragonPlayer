@@ -232,7 +232,7 @@ $(function() {
 				videos.push(new RhapVideo().init(0,video));
 			}
 		});	
-		$('tbody tr:nth-child('+1+')').addClass('ui-state-active');
+		$('tbody tr:nth-child('+(selectedConfig+1)+')').addClass('ui-state-active');
 	});
 });
 

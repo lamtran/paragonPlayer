@@ -3,9 +3,6 @@
 <head>
 <meta charset="utf-8" />
 <title>Rhapsody Video Player</title>
-	<!-- harness's styles 
-	-->
-	<link href="assets/css/main.css" media="screen" rel="stylesheet" type="text/css" />
 	<!-- player's styles -->
 	<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/themes/flick/jquery-ui.css" media="screen" rel="stylesheet" type="text/css" />
 	<link href="assets/css/rhapVideo.css" media="screen" rel="stylesheet" type="text/css" />
@@ -14,9 +11,7 @@
 	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.8/jquery-ui.min.js"></script>
 	<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
 	<!-- social -->
-	<script src="http://static.ak.fbcdn.net/connect.php/js/FB.Share" type="text/javascript"></script>
-	<script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>
-	<script type="text/javascript" src="http://www.google.com/buzz/api/button.js"></script>
+	
 	<!-- player code -->
 	<script type="text/javascript" src="assets/js/AStoJS.js"></script>
 	<script type="text/javascript" src="assets/js/utils.js"></script>
@@ -51,7 +46,7 @@
 		<ul>
 			<li><a href="#tabs-1">Video Player</a></li>
 			<li><a href="#tabs-2">Configurations</a></li>
-			<li><a href="#tabs-3">Logs</a></li>
+			<li><a href="#tabs-3">Demos</a></li>
 		</ul>
 		<div id="tabs-1">
 			<div id="harnessContainer" style="margin: 0 auto;width:640px">
@@ -112,7 +107,7 @@
 		</div>
 		<div id="tabs-2">
 			<div id="users-contain" class="ui-widget">
-				<h1>Saved Configurations:</h1>
+				<h1>Sample Video Configurations:</h1>
 				<table id="users" class="ui-widget ui-widget-content">
 					<thead>
 						<tr class="ui-widget-header ">
@@ -129,7 +124,10 @@
 					</tbody>
 				</table>
 			</div>
-			<button id="create-new-configuration">New Configuration</button> 
+			<button id="load-video-configuration">Load Video Configuration</button> 
+			<button id="edit-video-configuration">Edit Video Configuration</button> 
+			<button id="delete-video-configuration">Delete Video Configuration</button> 
+			<button id="create-new-configuration">New Video Configuration</button> 
 			<div id="dialog-form" title="Create new user">
 				<p class="validateTips">All form fields are required.</p>
 				<form>
@@ -142,10 +140,18 @@
 						<input type="password" name="password" id="password" value="" class="text ui-widget-content ui-corner-all" />
 					</fieldset>
 				</form>
-			</div> 
+			</div>
+			<br/><br/>
+			<h1>Global Configurations</h1> 
+			<form>
+				<fieldset>
+					<label for="analyticscode">Analytics code</label><input type="text" name="analyticscode" id="analyticscode" class="text ui-widget-content ui-corner-all"/>
+				</fieldset>
+			</form>
+			<button id="save-global-configuration">Save Global Configuration (Requires Page Refresh)</button> 
 		</div>
 		<div id="tabs-3">
-			<p>Logs will get outputted here.</p>
+			<p>Demos</p>
 		</div>
 	</div>
    <!-- /////////////////// END VIDEO PLAYER MARK UP // -->

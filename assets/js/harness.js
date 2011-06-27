@@ -5,8 +5,10 @@ var db;
 var selectedConfig = 0;
 
 initIndexedDb();
+initLocalStorage();
 
 var request = window.indexedDB.open("VideoConfigs");
+var dbVersion = 1;
 request.onsuccess = function(event) {
 	// Do something with request.result!
 	db = this.result;
@@ -18,24 +20,30 @@ request.onsuccess = function(event) {
 		// requests!
 		alert("Database error: " + event.target.errorCode);
 	};
-	if (db.version != "1.0") {
-		var request = db.setVersion("1.0");
+	if (!db.version || db.version<dbVersion) {
+		var oldVersion = db.version;
+		var request = db.setVersion(dbVersion);
 		request.onerror = function(event) {
 			// Handle errors.
 		};
 		request.onsuccess = function(event) {
-			// Set up the database structure here!
-			// Create an objectStore to hold information about our customers. We're
-			// going to use "ssn" as our key path because it's guaranteed to be
-			// unique.
-			var objectStore = db.createObjectStore("globalConfigs", {
-				keyPath: "id",
-				autoIncrement:true
-			});
-
-			// Store values in the newly created objectStore.
-			for (i in configData) {
-				objectStore.add(configData[i]);
+			if(!oldVersion){
+				// Set up the database structure here!
+				var objectStore = db.createObjectStore("videoConfigs", {
+					keyPath: "id",
+					autoIncrement:true
+				});
+	
+				// Store values in the newly created objectStore.
+				for (i in configData) {
+					objectStore.add(configData[i]);
+				}
+			}else if(oldVersion==1){
+				console.log('upgrade to latest from ' + oldVersion + ' to '+dbVersion);
+			}else if(oldVersion==2){
+				console.log('upgrade to latest from ' + oldVersion + ' to '+dbVersion);
+			}else if(oldVersion==3){
+				
 			}
 		};
 	}
@@ -60,19 +68,137 @@ function writeToDb() {
 
 function readDb(onsuccess) {
 	if(db==null){
-		//console.log('wait a little bit and try again');
+		// console.log('wait a little bit and try again');
 		setTimeout(function(){
 			readDb(onsuccess);
 		},500);
 		return;
 	}
-	var transaction = db.transaction(["globalConfigs"]);
-	var objectStore = transaction.objectStore("globalConfigs");
-	var request = objectStore.getAll();
-	request.onerror = function(event) {
+	var transaction = db.transaction(["videoConfigs"]);
+	var objectStore = transaction.objectStore("videoConfigs");
+	// Get everything in the store;
+	var keyRange = IDBKeyRange.lowerBound(0);
+	var cursorRequest = objectStore.openCursor(keyRange);
+
+	cursorRequest.onsuccess = onsuccess;
+	cursorRequest.onerror = function(event) {
 		// Handle errors!
 	};
-	request.onsuccess = onsuccess;
+	//var request = objectStore.getAll();
+	//request.onerror = function(event) {
+		// Handle errors!
+	//};
+	//request.onsuccess = onsuccess;
+}
+function renderConfigs(savedConfigs){
+	// Do something with the request.result!
+	// var savedConfigs = event.target.result;
+	var config, description='';
+	for(var e in savedConfigs){
+		config = savedConfigs[e];
+		if(config.preferredWidth=='auto' || config.preferredHeight=='auto'){
+			description += 'auto resize to video\'s native dimensions,';
+		}else if(config.initialWidth==config.preferredWidth 
+			&& config.initialHeight==config.preferredHeight){
+			description += 'fixed size,'	
+		}else{
+			description += 'auto resize to preferred dimensions,';
+		}
+		if(config.forcedFlash){
+			description += ' flash only,';
+		}else{
+			description += ' auto detect video support,';
+		}
+		if(config.popout){
+			description += ' pop out.';
+		}else{
+			description += ' inline.'
+		}
+		$( "#users tbody" ).append( "<tr id='id_"+config.id+"'>" +
+		"<td>" + description + "</td>" +
+		"<td>" + config.initialWidth + "</td>" +
+		"<td>" + config.initialHeight + "</td>" +
+		"<td>" + config.preferredWidth + "</td>" +
+		"<td>" + config.preferredHeight + "</td>" +
+		"<td>" + config.forcedFlash + "</td>" +
+		"<td>" + config.popout + "</td>" +
+		"</tr>" );
+		description='';
+	}
+	$('tbody tr').hover(
+		function(){
+			if(!$(this).hasClass('ui-state-active')){
+				$(this).addClass('ui-state-hover');
+			}
+		},
+		function(){
+			$(this).removeClass('ui-state-hover');
+		}
+	);
+	$('tbody tr').click(function(event){
+		var clickedId = Number(this.id.split('id_')[1])-1;
+		if(clickedId>1){
+			alert('not yet supported');
+			return;
+		}
+		if(clickedId!=selectedConfig){
+			$(this).parent().find('tr.ui-state-active').removeClass('ui-state-active');
+			$(this).addClass('ui-state-active');
+			if($(this).hasClass('ui-state-hover')){
+				$(this).removeClass('ui-state-hover');
+			}
+			selectedConfig=clickedId;
+			$('#harnessContainer .rhapVideoWrapper').remove();
+			var config = configData[selectedConfig];
+			var videosToRender = config.videos;
+			var firstVideo = videosToRender[0];
+			var sources = '', relatedVideos = '';
+			if(firstVideo.mp4){
+				sources+='<source src="'+firstVideo.mp4+'" type=\'video/mp4; codecs="avc1.42E01E, mp4a.40.2"\' />';
+			}
+			if(firstVideo.webm){
+				sources+='<source src="'+firstVideo.webm+'" type=\'video/webm; codecs="vp8, vorbis"\' />';
+			}
+			if(firstVideo.ogg){
+				sources+='<source src="'+firstVideo.ogg+'" type=\'video/ogg; codecs="theora, vorbis"\' />';
+			}
+			if(firstVideo.flv){
+				sources+='<source data-server="'+firstVideo.flv.server+'" type=\'video/mp4; codecs="vp6"\' data-src="'+firstVideo.flv.src+'"/>';
+			}
+			relatedVideos += '<div class="rhapRelatedVideos">';
+			var relatedVideo, relatedVideoMarkup='';
+			for(var i=1;i<videosToRender.length;i++){
+				relatedVideo = videosToRender[i];
+				relatedVideoMarkup += '<div title="'+relatedVideo.title+'" class="rhapRelatedVideo" data-width="640" data-height="360" data-poster="'+relatedVideo.poster+'">';
+				if(relatedVideo.mp4){
+					relatedVideoMarkup += '<span class="rhapRelatedVideoSource" data-src="'+relatedVideo.mp4+'" data-type=\'video/mp4; codecs="avc1.42E01E, mp4a.40.2"\'></span>';
+				}
+				if(relatedVideo.webm){
+					relatedVideoMarkup += '<span class="rhapRelatedVideoSource" data-src="'+relatedVideo.webm+'" data-type=\'video/webm; codecs="vp8, vorbis"\'></span>';
+				}
+				if(relatedVideo.ogg){
+					relatedVideoMarkup += '<span class="rhapRelatedVideoSource" data-src="'+relatedVideo.ogg+'" data-type=\'video/ogg; codecs="theora, vorbis"\'></span>';
+				}
+				if(relatedVideo.flv){
+					relatedVideoMarkup += '<span class="rhapRelatedVideoSource" data-server="'+relatedVideo.flv.server+'" data-src="'+relatedVideo.flv.src+'" data-type=\'video/mp4; codecs="vp6"\'></span>';
+				}
+				relatedVideoMarkup += '</div>';
+				relatedVideos += relatedVideoMarkup;
+				relatedVideoMarkup = '';
+			}
+			relatedVideos += '</div>';
+			$('#harnessContainer').append(
+				'<video width="'+config.initialWidth+'" height="'+config.initialHeight+'" data-preferred-width="'+config.preferredWidth+'" data-preferred-height="'+config.preferredHeight+'" poster="'+firstVideo.poster+'" title="'+firstVideo.title+'" data-forced-flash="'+config.forcedFlash+'" data-popout="'+config.popout+'">' +
+					sources +
+					relatedVideos +
+				'</video>'
+			);
+			var video = $('#harnessContainer video')[0];
+			videos=[]
+			videos.push(new RhapVideo().init(0,video));
+		}
+	});	
+	$('tbody tr:nth-child('+(selectedConfig+1)+')').addClass('ui-state-active');
 }
 
 function deleteDB() {
@@ -90,18 +216,26 @@ function deleteDB() {
 		console.log("Error: " + e.message);
 	}
 }
-
+var configsFromDb=[];
 $(function() {
+	$('#analyticscode').val(localStorage['analyticscode']);
 	var name = $( "#name" ),
 	email = $( "#email" ),
 	password = $( "#password" ),
 	allFields = $( [] ).add( name ).add( email ).add( password );
 	$( "#tabs" ).tabs();
-	$( "#create-new-configuration" )
-	.button()
+	$( "#create-new-configuration" ).button()
 	.click( function() {
 		$( "#dialog-form" ).dialog( "open" );
 	});
+	$('#save-global-configuration').button()
+	.click(function(){
+		localStorage['analyticscode']=$('#analyticscode').val();
+		window.location.reload();
+	});
+	$('#load-video-configuration').button();
+	$('#edit-video-configuration').button();
+	$('#delete-video-configuration').button();
 	$( "#dialog-form" ).dialog({
 		autoOpen: false,
 		height: 300,
@@ -129,110 +263,22 @@ $(function() {
 		}
 	});
 	readDb(function(event){
-		// Do something with the request.result!
-		var savedConfigs = event.target.result;
-		var config, description='';
-		for(var e in savedConfigs){
-			config = savedConfigs[e];
-			if(config.preferredWidth=='auto' || config.preferredHeight=='auto'){
-				description += 'auto resize to video\'s native dimensions,';
-			}else if(config.initialWidth==config.preferredWidth 
-				&& config.initialHeight==config.preferredHeight){
-				description += 'fixed size,'	
-			}else{
-				description += 'auto resize to preferred dimensions,';
-			}
-			if(config.forcedFlash){
-				description += ' flash only,';
-			}else{
-				description += ' auto detect video support,';
-			}
-			if(config.popout){
-				description += ' pop out.';
-			}else{
-				description += ' inline.'
-			}
-			$( "#users tbody" ).append( "<tr id='id_"+config.id+"'>" +
-			"<td>" + description + "</td>" +
-			"<td>" + config.initialWidth + "</td>" +
-			"<td>" + config.initialHeight + "</td>" +
-			"<td>" + config.preferredWidth + "</td>" +
-			"<td>" + config.preferredHeight + "</td>" +
-			"<td>" + config.forcedFlash + "</td>" +
-			"<td>" + config.popout + "</td>" +
-			"</tr>" );
-			description='';
+		var result = event.target.result;
+		if(!!result == false){
+			renderConfigs(configsFromDb);			
+			return;
 		}
-		$('tbody tr').hover(
-			function(){
-				if(!$(this).hasClass('ui-state-active')){
-					$(this).addClass('ui-state-hover');
-				}
-			},
-			function(){
-				$(this).removeClass('ui-state-hover');
-			}
-		);
-		$('tbody tr').click(function(event){
-			var clickedId = Number(this.id.split('id_')[1])-1;
-			if(clickedId!=selectedConfig){
-				$(this).parent().find('tr.ui-state-active').removeClass('ui-state-active');
-				$(this).addClass('ui-state-active');
-				if($(this).hasClass('ui-state-hover')){
-					$(this).removeClass('ui-state-hover');
-				}
-				selectedConfig=clickedId;
-				$('#harnessContainer .rhapVideoWrapper').remove();
-				var config = configData[selectedConfig];
-				var videosToRender = config.videos;
-				var firstVideo = videosToRender[0];
-				var sources = '', relatedVideos = '';
-				if(firstVideo.mp4){
-					sources+='<source src="'+firstVideo.mp4+'" type=\'video/mp4; codecs="avc1.42E01E, mp4a.40.2"\' />';
-				}
-				if(firstVideo.webm){
-					sources+='<source src="'+firstVideo.webm+'" type=\'video/webm; codecs="vp8, vorbis"\' />';
-				}
-				if(firstVideo.ogg){
-					sources+='<source src="'+firstVideo.ogg+'" type=\'video/ogg; codecs="theora, vorbis"\' />';
-				}
-				if(firstVideo.flv){
-					sources+='<source data-server="'+firstVideo.flv.server+'" type=\'video/mp4; codecs="vp6"\' data-src="'+firstVideo.flv.src+'"/>';
-				}
-				relatedVideos += '<div class="rhapRelatedVideos">';
-				var relatedVideo, relatedVideoMarkup='';
-				for(var i=1;i<videosToRender.length;i++){
-					relatedVideo = videosToRender[i];
-					relatedVideoMarkup += '<div title="'+relatedVideo.title+'" class="rhapRelatedVideo" data-width="640" data-height="360" data-poster="'+relatedVideo.poster+'">';
-					if(relatedVideo.mp4){
-						relatedVideoMarkup += '<span class="rhapRelatedVideoSource" data-src="'+relatedVideo.mp4+'" data-type=\'video/mp4; codecs="avc1.42E01E, mp4a.40.2"\'></span>';
-					}
-					if(relatedVideo.webm){
-						relatedVideoMarkup += '<span class="rhapRelatedVideoSource" data-src="'+relatedVideo.webm+'" data-type=\'video/webm; codecs="vp8, vorbis"\'></span>';
-					}
-					if(relatedVideo.ogg){
-						relatedVideoMarkup += '<span class="rhapRelatedVideoSource" data-src="'+relatedVideo.ogg+'" data-type=\'video/ogg; codecs="theora, vorbis"\'></span>';
-					}
-					if(relatedVideo.flv){
-						relatedVideoMarkup += '<span class="rhapRelatedVideoSource" data-server="'+relatedVideo.flv.server+'" data-src="'+relatedVideo.flv.src+'" data-type=\'video/mp4; codecs="vp6"\'></span>';
-					}
-					relatedVideoMarkup += '</div>';
-					relatedVideos += relatedVideoMarkup;
-					relatedVideoMarkup = '';
-				}
-				relatedVideos += '</div>';
-				$('#harnessContainer').append(
-					'<video width="'+config.initialWidth+'" height="'+config.initialHeight+'" data-preferred-width="'+config.preferredWidth+'" data-preferred-height="'+config.preferredHeight+'" poster="'+firstVideo.poster+'" title="'+firstVideo.title+'" data-forced-flash="'+config.forcedFlash+'" data-popout="'+config.popout+'">' +
-						sources +
-						relatedVideos +
-					'</video>'
-				);
-				var video = $('#harnessContainer video')[0];
-				videos=[]
-				videos.push(new RhapVideo().init(0,video));
-			}
-		});	
-		$('tbody tr:nth-child('+(selectedConfig+1)+')').addClass('ui-state-active');
+
+		configsFromDb.push(result.value);
+		result.continue();
+	});
+	$('#tabs').bind('tabsselect', function(event, ui) {
+
+	    // Objects available in the function context:
+	    //ui.tab     // anchor element of the selected (clicked) tab
+	    //ui.panel   // element, that contains the selected/clicked tab contents
+	    //console.log(ui.index);   // zero-based index of the selected (clicked) tab
+	
 	});
 });
 
@@ -306,5 +352,18 @@ function initIndexedDb() {
 		window.IDBKeyRange.bound = function (left, right, openLeft, openRight) {
 			return window.indexedDB.range.bound(left, right, openLeft, openRight);
 		};
+	}
+}
+function supports_html5_storage() {
+  try {
+    return 'localStorage' in window && window['localStorage'] !== null;
+  } catch (e) {
+    return false;
+  }
+}
+function initLocalStorage(){
+	if(!localStorage['analyticscode']){
+		//defaults to: UA-5860230-6
+		localStorage['analyticscode']='UA-5860230-6';
 	}
 }

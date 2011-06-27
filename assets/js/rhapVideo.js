@@ -16,7 +16,7 @@ var RhapVideo;
 	 */
 	RhapVideo = function(){
 		// constants
-		/* @const */ var swfLocation = 'http://blog.rhapsody.com/video/SlimVideoPlayer.swf';
+		var swfLocation = 'http://blog.rhapsody.com/video/SlimVideoPlayer.swf';
 		this.video;
 		var videoPlay25Percent, videoPlay50Percent, videoPlay75Percent;
 		var stringLimit = 17;
@@ -36,11 +36,13 @@ var RhapVideo;
 		var upGradientStops = {upGradientStops:['#5F6367','#1D1E25']};
 		/* @const */ var WAITING_STATE = 2;
 		this.isShowMore = false;
+		this.html;
 		this.init = function(index,videoElement,relateds,forcedFlashVideo,forcedConstantSize){
 			//wrap each video element in a div so we have context to build the controls
 			$(videoElement).wrap(function() {
 				return '<div class="rhapVideoWrapper" style="height:'+videoElement.height+'px;width:'+videoElement.width+'px"/>';
 			});
+			this.html=$(videoElement).parent().html();
 			//var forcedSize = $(video).attr('data-forced-size') ? $(video).attr('data-forced-size')=='true' : false;
 			var preferredWidth = Number($(videoElement).attr('data-preferred-width'));
 			var preferredHeight = Number($(videoElement).attr('data-preferred-height'));
@@ -126,7 +128,7 @@ var RhapVideo;
 				params.menu = "false";
 				params.allowscriptaccess = "always";
 				params.allowFullScreen = "true";
-				params.analyticstrackcode="UA-5860230-6";
+				params.analyticstrackcode=analyticsCode;
 				params.wmode = "opaque";
 				var attributes = {};
 				attributes.id = 'flashid_'+new Date().getTime();
@@ -149,7 +151,7 @@ var RhapVideo;
 					}
 					flashvars['path']=path;
 					flashvars['videoIndex']=videoIndex;
-					flashvars['analyticstrackcode']='UA-5860230-6';
+					flashvars['analyticstrackcode']=analyticsCode;
 					if(video.poster!=null){
 						flashvars['imageurl']=video.poster;
 					}
@@ -176,6 +178,7 @@ var RhapVideo;
 		};
 		this._drawCommonControls = function(video,parent,relatedVideos){
 			drawCommonControlsHelper(parent,video);
+			$('.embedcode',parent).text(this.html);
 			//storing private references
 			rhapVideoMoreControls = $('.rhapVideoMoreControls',parent);
 			rhapVideoRelatedBtn = $('.rhapVideoRelatedBtn',rhapVideoMoreControls);

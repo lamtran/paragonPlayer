@@ -1,5 +1,6 @@
+var analyticsCode = localStorage['analyticscode'] ? localStorage['analyticscode'] : 'UA-5860230-6';
 var _gaq = _gaq || [];
-_gaq.push(['_setAccount', 'UA-5860230-6']);
+_gaq.push(['_setAccount', analyticsCode]);
 (function() {
 	var ga = document.createElement('script');
 	ga.type = 'text/javascript';
@@ -404,9 +405,9 @@ function drawCommonControlsHelper(parent,video) {
 	'<div class="rhapVideoSharePanelContent">'+
 	'<span>Get URL:&nbsp;</span><input type="text" class="rhapVideoShareUrl"/>'+
 	'<ul>'+
-	'<li><a name="fb_share" type="button_count">Share</a></li>'+
-	'<li><a href="http://twitter.com/share" class="twitter-share-button" data-count="none">Tweet</a></li>'+
-	'<li><a title="Post to Google Buzz" class="google-buzz-button" href="http://www.google.com/buzz/post" data-button-style="small-button"></a></li>'+
+	'<li><a name="fb_share" type="button_count">Share</a><script src="http://static.ak.fbcdn.net/connect.php/js/FB.Share" type="text/javascript"></script></li>'+
+	'<li><a href="http://twitter.com/share" class="twitter-share-button" data-count="none">Tweet</a><script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script></li>'+
+	'<li><a title="Post to Google Buzz" class="google-buzz-button" href="http://www.google.com/buzz/post" data-button-style="small-button"></a><script type="text/javascript" src="http://www.google.com/buzz/api/button.js"></script></li>'+
 	'</ul>'+
 	'</div>'+
 	'<a href="#" class="rhapVideoSharePanelCloseButton">Close</a>'+
@@ -416,23 +417,35 @@ function drawCommonControlsHelper(parent,video) {
 	'<div class="rhapVideoEmbedPanel">'+
 	'<h2 class="panelHeader">Embed</h2>'+
 	'<div class="rhapVideoSharePanelContent">'+
-	'<textarea class="rhapVideoEmbedCode">'+
-	'<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/themes/flick/jquery-ui.css" media="screen" rel="stylesheet" type="text/css" />'+
-	'<link href="assets/css/rhapVideo.css" media="screen" rel="stylesheet" type="text/css" />'+
-	'<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script>'+
-	'<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.8/jquery-ui.min.js"></script>'+
-	'<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>'+
-	'<script src="http://static.ak.fbcdn.net/connect.php/js/FB.Share" type="text/javascript"></script>'+
-	'<script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>'+
-	'<script type="text/javascript" src="http://www.google.com/buzz/api/button.js"></script>'+
-	'<script type="text/javascript" src="assets/js/rhapVideo.js"></script>'+
-	'<video width="640" height="264" poster="http://lamtran.com/oceans-clip.png" >'+
-	'<source src="http://lamtran.com/oceans-clip.mp4" type=\'video/mp4; codecs="avc1.42E01E, mp4a.40.2"\' />'+
-	'<source src="http://lamtran.com/oceans-clip.webm" type=\'video/webm; codecs="vp8, vorbis"\' />'+
-	'<source src="http://lamtran.com/oceans-clip.ogv" type=\'video/ogg; codecs="theora, vorbis"\' />'+
-	'<source src="rtmp://lamtran.com:1935/vod/oceans-clip" type=\'video/mp4; codecs="vp6"\' />'+
-	'</video>'+
-	'</textarea>'+
+	//'<textarea class="rhapVideoEmbedCode">'+
+	'<h3>Put these in the &lt;head&gt; section of your webpage</h3>'+
+	'<p>'+
+	'<code>'+
+	'&lt;!-- player\'s styles --&gt;'+
+	'&lt;link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/themes/flick/jquery-ui.css" media="screen" rel="stylesheet" type="text/css" /&gt;'+
+	'&lt;link href="assets/css/rhapVideo.css" media="screen" rel="stylesheet" type="text/css" /&gt;'+
+	'&lt;!-- player\'s libraries --&gt;'+
+	'&lt;script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"&gt;&lt;/script&gt;'+
+	'&lt;script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.8/jquery-ui.min.js"&gt;&lt;/script&gt;'+
+	'&lt;script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"&gt;&lt;/script&gt;'+
+	'&lt;!-- social --&gt;'+
+	'&lt;script src="http://static.ak.fbcdn.net/connect.php/js/FB.Share" type="text/javascript"&gt;&lt;/script&gt;'+
+	'&lt;script type="text/javascript" src="http://platform.twitter.com/widgets.js"&gt;&lt;/script&gt;'+
+	'&lt;script type="text/javascript" src="http://www.google.com/buzz/api/button.js"&gt;&lt;/script&gt;'+
+	'&lt;!-- player code --&gt;'+
+	'&lt;script type="text/javascript" src="assets/js/AStoJS.js"&gt;&lt;/script&gt;'+
+	'&lt;script type="text/javascript" src="assets/js/utils.js"&gt;&lt;/script&gt;'+
+	'&lt;script type="text/javascript" src="assets/js/rhapVideo.js"&gt;&lt;/script&gt;'+
+	'</code>'+
+	'</p>'+
+	
+	'<h3>Put this where you want your video to appear in your page</h3>'+
+	'<p>'+
+	'<code class="embedcode">'+
+	'</code>'+
+	'</p>'+
+	'<p>For more information about this video player, please visit <a href="http://labs.rhapsody.com/videoplayer">Rhapsody Video Player</a>.</p>'+
+	//'</textarea>'+
 	'</div>'+
 	'<a href="#" class="rhapVideoEmbedPanelCloseButton">Close</a>'+
 	'</div>'

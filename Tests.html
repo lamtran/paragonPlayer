@@ -9,11 +9,11 @@
 <script type="text/javascript" src="assets/js/qunit.js"></script>
 
 <script type="text/javascript">
-	$(document).ready(function() {
+	function runTests(){
+		console.log('run tests');
 		module("Utilities");
 		
 		module("Video Player");
-		/*
 		test("a basic test example", function() {
 			ok(true, "this test is fine");
 			var value = "hello";
@@ -37,8 +37,7 @@
 			equals(true, false, "failing test");
 			equals(true, true, "passing test");
 		});
-		*/
-	});
+	};
 </script>
 
 </head>

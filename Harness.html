@@ -24,7 +24,7 @@
 	<style>
 	label, input { display:block; }
 	input.text { margin-bottom:12px; width:95%; padding: .4em; }
-	fieldset { padding:0; border:0; margin-top:25px; }
+	fieldset { padding:0; border:0; }
 	h1 { font-size: 1.2em; margin: .6em 0; }
 	div#users-contain { margin: 20px 0; }
 	div#users-contain table { margin: 1em 0; border-collapse: collapse; width: 100%; }
@@ -37,6 +37,12 @@
 	}
 	.ui-state-hover{
 		cursor: pointer;
+	}
+	#loadedVideoConfigName{
+		float:right;
+		position: relative;
+		right: 4px;
+		top: 10px;
 	}
 	</style> 
 </head>
@@ -59,7 +65,7 @@
 			        <source type="video/webm; codecs=&quot;vp8, vorbis&quot;" src="http://video-js.zencoder.com/oceans-clip.webm"></source>
 			        <source type='video/webm; codecs="vp8, vorbis"' src="http://video-js.zencoder.com/oceans-clip.webm"></source>
 				-->
-				<video width="640" height="480" data-preferred-width="640" data-preferred-height="480" poster="http://lamtran.com/oceans-clip.png" title="Oceans Clip" data-forced-size="true" data-forced-flash="true" data-popout="false">
+				<video width="640" height="480" data-preferred-width="640" data-preferred-height="480" poster="http://lamtran.com/oceans-clip.png" title="Oceans Clip" data-forced-size="true" data-forced-flash="false" data-popout="false">
 			        <source src="http://lamtran.com/oceans-clip.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"' />
 			        <source src="http://lamtran.com/oceans-clip.webm" type='video/webm; codecs="vp8, vorbis"' />
 			        <source src="http://lamtran.com/oceans-clip.ogv" type='video/ogg; codecs="theora, vorbis"' />
@@ -128,18 +134,66 @@
 			<button id="edit-video-configuration">Edit Video Configuration</button> 
 			<button id="delete-video-configuration">Delete Video Configuration</button> 
 			<button id="create-new-configuration">New Video Configuration</button> 
-			<div id="dialog-form" title="Create new user">
-				<p class="validateTips">All form fields are required.</p>
-				<form>
-					<fieldset>
-						<label for="name">Name</label>
-						<input type="text" name="name" id="name" class="text ui-widget-content ui-corner-all" />
-						<label for="email">Email</label>
-						<input type="text" name="email" id="email" value="" class="text ui-widget-content ui-corner-all" />
-						<label for="password">Password</label>
-						<input type="password" name="password" id="password" value="" class="text ui-widget-content ui-corner-all" />
-					</fieldset>
-				</form>
+			<div id="dialog-form" title="Create new video configuration">
+				<div id="cfg-tabs">
+					<ul>
+						<li><a href="#cfg-1">Global Configurations</a></li>
+						<li><a href="#cfg-2">Videos</a></li>
+					</ul>
+					<div id="cfg-1">
+						<form>
+							<fieldset>
+								<label for="newConfigInitialWidth">Initial Width</label>
+								<input type="text" name="newConfigInitialWidth" id="newConfigInitialWidth" class="text ui-widget-content ui-corner-all" />
+								<label for="newConfigInitialHeight">Initial Height</label>
+								<input type="text" name="newConfigInitialHeight" id="newConfigInitialHeight" value="" class="text ui-widget-content ui-corner-all" />
+								<label for="newConfigPreferredWidth">Preferred Width</label>
+								<input type="text" name="newConfigPreferredWidth" id="newConfigPreferredWidth" class="text ui-widget-content ui-corner-all" />
+								<label for="newConfigPreferredHeight">Preferred Height</label>
+								<input type="text" name="newConfigPreferredHeight" id="newConfigPreferredHeight" class="text ui-widget-content ui-corner-all" />
+								<label for="newConfigForceFlash">Force Flash</label>
+								<input type="checkbox" name="newConfigForceFlash" id="newConfigForceFlash" class="text ui-widget-content ui-corner-all" />
+								<label for="newConfigPopout">Pop out</label>
+								<input type="checkbox" name="newConfigPopout" id="newConfigPopout" class="text ui-widget-content ui-corner-all" />
+							</fieldset>
+						</form>
+					</div>
+					<div id="cfg-2">
+						<p>Add a video</p>
+					</div>
+				</div>
+			</div>
+			<div id="dialog-form-edit" title="Edit video configuration">
+				<div id="cfg-tabs-edit">
+					<ul>
+						<li><a href="#cfg-1-edit">Global Configurations</a></li>
+						<li><a href="#cfg-2-edit">Videos</a></li>
+					</ul>
+					<div id="cfg-1-edit">
+						<form>
+							<fieldset>
+								<label for="newConfigInitialWidth">Initial Width</label>
+								<input type="text" name="newConfigInitialWidth" id="newConfigInitialWidth" class="text ui-widget-content ui-corner-all" />
+								<label for="newConfigInitialHeight">Initial Height</label>
+								<input type="text" name="newConfigInitialHeight" id="newConfigInitialHeight" value="" class="text ui-widget-content ui-corner-all" />
+								<label for="newConfigPreferredWidth">Preferred Width</label>
+								<input type="text" name="newConfigPreferredWidth" id="newConfigPreferredWidth" class="text ui-widget-content ui-corner-all" />
+								<label for="newConfigPreferredHeight">Preferred Height</label>
+								<input type="text" name="newConfigPreferredHeight" id="newConfigPreferredHeight" class="text ui-widget-content ui-corner-all" />
+								<label for="newConfigForceFlash">Force Flash</label>
+								<input type="checkbox" name="newConfigForceFlash" id="newConfigForceFlash" class="text ui-widget-content ui-corner-all" />
+								<label for="newConfigPopout">Pop out</label>
+								<input type="checkbox" name="newConfigPopout" id="newConfigPopout" class="text ui-widget-content ui-corner-all" />
+							</fieldset>
+						</form>
+					</div>
+					<div id="cfg-2-edit">
+						<p>Add a video</p>
+					</div>
+				</div>
+			</div>
+			<div id="dialog-confirm" title="Delete selected video configuration?">
+				<p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>Are you sure?</p>
 			</div>
 			<br/><br/>
 			<h1>Global Configurations</h1> 

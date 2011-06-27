@@ -350,11 +350,9 @@ var RhapVideo;
 			var scope = this;
 			$(video).bind('timeupdate',jQuery.proxy(this.seekUpdate,this))
 			.bind('durationchange',function(){
-				console.log("DURATION CHANGE: " + video.duration);
 				videoPlay25Percent = Math.round((video.duration/100)*25);
 				videoPlay50Percent = Math.round((video.duration/100)*50);
 				videoPlay75Percent = Math.round((video.duration/100)*75);
-				console.log('25%: ' + videoPlay25Percent + ' 50%: ' + videoPlay50Percent + ' 75%: ' + videoPlay75Percent);
 				seekBar.slider("option","max",video.duration);
 			}).bind('loadstart',function(){
 				scope.toast.css('line-height',parent.height()+'px');

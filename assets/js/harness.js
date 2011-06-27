@@ -2,7 +2,8 @@
  * @author lamtran
  */
 var db;
-var selectedConfig = 0;
+var selectedConfig = 1;
+var loadedConfig = 1;
 
 initIndexedDb();
 initLocalStorage();
@@ -148,54 +149,14 @@ function renderConfigs(savedConfigs){
 				$(this).removeClass('ui-state-hover');
 			}
 			selectedConfig=clickedId;
-			$('#harnessContainer .rhapVideoWrapper').remove();
-			var config = configData[selectedConfig];
-			var videosToRender = config.videos;
-			var firstVideo = videosToRender[0];
-			var sources = '', relatedVideos = '';
-			if(firstVideo.mp4){
-				sources+='<source src="'+firstVideo.mp4+'" type=\'video/mp4; codecs="avc1.42E01E, mp4a.40.2"\' />';
+			/*
+			if(selectedConfig!=loadedConfig){
+				$('#load-video-configuration').button("option", "disabled", false );
+			}else{
+				$('#load-video-configuration').button("option", "disabled", true );
 			}
-			if(firstVideo.webm){
-				sources+='<source src="'+firstVideo.webm+'" type=\'video/webm; codecs="vp8, vorbis"\' />';
-			}
-			if(firstVideo.ogg){
-				sources+='<source src="'+firstVideo.ogg+'" type=\'video/ogg; codecs="theora, vorbis"\' />';
-			}
-			if(firstVideo.flv){
-				sources+='<source data-server="'+firstVideo.flv.server+'" type=\'video/mp4; codecs="vp6"\' data-src="'+firstVideo.flv.src+'"/>';
-			}
-			relatedVideos += '<div class="rhapRelatedVideos">';
-			var relatedVideo, relatedVideoMarkup='';
-			for(var i=1;i<videosToRender.length;i++){
-				relatedVideo = videosToRender[i];
-				relatedVideoMarkup += '<div title="'+relatedVideo.title+'" class="rhapRelatedVideo" data-width="640" data-height="360" data-poster="'+relatedVideo.poster+'">';
-				if(relatedVideo.mp4){
-					relatedVideoMarkup += '<span class="rhapRelatedVideoSource" data-src="'+relatedVideo.mp4+'" data-type=\'video/mp4; codecs="avc1.42E01E, mp4a.40.2"\'></span>';
-				}
-				if(relatedVideo.webm){
-					relatedVideoMarkup += '<span class="rhapRelatedVideoSource" data-src="'+relatedVideo.webm+'" data-type=\'video/webm; codecs="vp8, vorbis"\'></span>';
-				}
-				if(relatedVideo.ogg){
-					relatedVideoMarkup += '<span class="rhapRelatedVideoSource" data-src="'+relatedVideo.ogg+'" data-type=\'video/ogg; codecs="theora, vorbis"\'></span>';
-				}
-				if(relatedVideo.flv){
-					relatedVideoMarkup += '<span class="rhapRelatedVideoSource" data-server="'+relatedVideo.flv.server+'" data-src="'+relatedVideo.flv.src+'" data-type=\'video/mp4; codecs="vp6"\'></span>';
-				}
-				relatedVideoMarkup += '</div>';
-				relatedVideos += relatedVideoMarkup;
-				relatedVideoMarkup = '';
-			}
-			relatedVideos += '</div>';
-			$('#harnessContainer').append(
-				'<video width="'+config.initialWidth+'" height="'+config.initialHeight+'" data-preferred-width="'+config.preferredWidth+'" data-preferred-height="'+config.preferredHeight+'" poster="'+firstVideo.poster+'" title="'+firstVideo.title+'" data-forced-flash="'+config.forcedFlash+'" data-popout="'+config.popout+'">' +
-					sources +
-					relatedVideos +
-				'</video>'
-			);
-			var video = $('#harnessContainer video')[0];
-			videos=[]
-			videos.push(new RhapVideo().init(0,video));
+			*/
+				
 		}
 	});	
 	$('tbody tr:nth-child('+(selectedConfig+1)+')').addClass('ui-state-active');
@@ -216,14 +177,28 @@ function deleteDB() {
 		console.log("Error: " + e.message);
 	}
 }
+function handleTabSelect(event, tab){
+	if(tab.index==0){
+	}
+};
 var configsFromDb=[];
 $(function() {
 	$('#analyticscode').val(localStorage['analyticscode']);
+	/*
 	var name = $( "#name" ),
 	email = $( "#email" ),
 	password = $( "#password" ),
 	allFields = $( [] ).add( name ).add( email ).add( password );
-	$( "#tabs" ).tabs();
+	*/
+	var tabOpts = {
+		select:handleTabSelect
+	};
+	$( "#tabs" ).tabs(tabOpts);
+	$('#cfg-tabs').tabs();
+	$('#cfg-tabs-edit').tabs();
+	$("<span id='loadedVideoConfigName'>").text("Loaded config #2").addClass("status-message ui-corner-all").
+		appendTo($("#tabs"));
+		
 	$( "#create-new-configuration" ).button()
 	.click( function() {
 		$( "#dialog-form" ).dialog( "open" );
@@ -233,17 +208,75 @@ $(function() {
 		localStorage['analyticscode']=$('#analyticscode').val();
 		window.location.reload();
 	});
-	$('#load-video-configuration').button();
-	$('#edit-video-configuration').button();
-	$('#delete-video-configuration').button();
+	$('#load-video-configuration').button().click(function(){
+		loadedConfig=selectedConfig;
+		// $('#load-video-configuration').button("option", "disabled", true );
+		$('#harnessContainer .rhapVideoWrapper').remove();
+		var config = configData[selectedConfig];
+		$('#loadedVideoConfigName').html('Loaded config #'+(selectedConfig+1));
+		var videosToRender = config.videos;
+		var firstVideo = videosToRender[0];
+		var sources = '', relatedVideos = '';
+		if(firstVideo.mp4){
+			sources+='<source src="'+firstVideo.mp4+'" type=\'video/mp4; codecs="avc1.42E01E, mp4a.40.2"\' />';
+		}
+		if(firstVideo.webm){
+			sources+='<source src="'+firstVideo.webm+'" type=\'video/webm; codecs="vp8, vorbis"\' />';
+		}
+		if(firstVideo.ogg){
+			sources+='<source src="'+firstVideo.ogg+'" type=\'video/ogg; codecs="theora, vorbis"\' />';
+		}
+		if(firstVideo.flv){
+			sources+='<source data-server="'+firstVideo.flv.server+'" type=\'video/mp4; codecs="vp6"\' data-src="'+firstVideo.flv.src+'"/>';
+		}
+		relatedVideos += '<div class="rhapRelatedVideos">';
+		var relatedVideo, relatedVideoMarkup='';
+		for(var i=1;i<videosToRender.length;i++){
+			relatedVideo = videosToRender[i];
+			relatedVideoMarkup += '<div title="'+relatedVideo.title+'" class="rhapRelatedVideo" data-width="640" data-height="360" data-poster="'+relatedVideo.poster+'">';
+			if(relatedVideo.mp4){
+				relatedVideoMarkup += '<span class="rhapRelatedVideoSource" data-src="'+relatedVideo.mp4+'" data-type=\'video/mp4; codecs="avc1.42E01E, mp4a.40.2"\'></span>';
+			}
+			if(relatedVideo.webm){
+				relatedVideoMarkup += '<span class="rhapRelatedVideoSource" data-src="'+relatedVideo.webm+'" data-type=\'video/webm; codecs="vp8, vorbis"\'></span>';
+			}
+			if(relatedVideo.ogg){
+				relatedVideoMarkup += '<span class="rhapRelatedVideoSource" data-src="'+relatedVideo.ogg+'" data-type=\'video/ogg; codecs="theora, vorbis"\'></span>';
+			}
+			if(relatedVideo.flv){
+				relatedVideoMarkup += '<span class="rhapRelatedVideoSource" data-server="'+relatedVideo.flv.server+'" data-src="'+relatedVideo.flv.src+'" data-type=\'video/mp4; codecs="vp6"\'></span>';
+			}
+			relatedVideoMarkup += '</div>';
+			relatedVideos += relatedVideoMarkup;
+			relatedVideoMarkup = '';
+		}
+		relatedVideos += '</div>';
+		$('#harnessContainer').append(
+			'<video width="'+config.initialWidth+'" height="'+config.initialHeight+'" data-preferred-width="'+config.preferredWidth+'" data-preferred-height="'+config.preferredHeight+'" poster="'+firstVideo.poster+'" title="'+firstVideo.title+'" data-forced-flash="'+config.forcedFlash+'" data-popout="'+config.popout+'">' +
+				sources +
+				relatedVideos +
+			'</video>'
+		);
+		var video = $('#harnessContainer video')[0];
+		videos=[]
+		videos.push(new RhapVideo().init(0,video));
+	});
+	$('#edit-video-configuration').button().click(function(){
+		$( "#dialog-form-edit" ).dialog( "open" );
+	});
+	$('#delete-video-configuration').button()
+	.click( function() {
+		$( "#dialog-confirm" ).dialog( "open" );
+	});
 	$( "#dialog-form" ).dialog({
 		autoOpen: false,
-		height: 300,
-		width: 350,
+		height: 480,
+		width: 640,
 		modal: true,
 		buttons: {
-			"Create an account": function() {
+			"Create Configuration": function() {
 				var bValid = true;
+				/*
 				allFields.removeClass( "ui-state-error" );
 				if ( bValid ) {
 					$( "#users tbody" ).append( "<tr>" +
@@ -253,13 +286,56 @@ $(function() {
 					"</tr>" );
 					$( this ).dialog( "close" );
 				}
+				*/
 			},
 			Cancel: function() {
 				$( this ).dialog( "close" );
 			}
 		},
 		close: function() {
-			allFields.val( "" ).removeClass( "ui-state-error" );
+			//allFields.val( "" ).removeClass( "ui-state-error" );
+		}
+	});
+	$( "#dialog-form-edit" ).dialog({
+		autoOpen: false,
+		height: 480,
+		width: 640,
+		modal: true,
+		buttons: {
+			"Update Configuration": function() {
+				var bValid = true;
+				/*
+				allFields.removeClass( "ui-state-error" );
+				if ( bValid ) {
+					$( "#users tbody" ).append( "<tr>" +
+					"<td>" + name.val() + "</td>" +
+					"<td>" + email.val() + "</td>" +
+					"<td>" + password.val() + "</td>" +
+					"</tr>" );
+					$( this ).dialog( "close" );
+				}
+				*/
+			},
+			Cancel: function() {
+				$( this ).dialog( "close" );
+			}
+		},
+		close: function() {
+			//allFields.val( "" ).removeClass( "ui-state-error" );
+		}
+	});
+	$( "#dialog-confirm" ).dialog({
+		autoOpen: false,
+		resizable: false,
+		height:200,
+		modal: true,
+		buttons: {
+			"Delete": function() {
+				$( this ).dialog( "close" );
+			},
+			Cancel: function() {
+				$( this ).dialog( "close" );
+			}
 		}
 	});
 	readDb(function(event){

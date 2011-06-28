@@ -5,12 +5,13 @@ var db;
 var selectedConfig = 1;
 var loadedConfig = 1;
 var configsFromDb=[];
+var videosFromDb=[];
 
 initIndexedDb();
 initLocalStorage();
 
 var request = window.indexedDB.open("VideoConfigs");
-var dbVersion = 1;
+var dbVersion = 2;
 request.onsuccess = function(event) {
 	// Do something with request.result!
 	db = this.result;
@@ -30,6 +31,7 @@ request.onsuccess = function(event) {
 		};
 		request.onsuccess = function(event) {
 			if(!oldVersion){
+				console.log('initialize db from scratch');
 				// Set up the database structure here!
 				var objectStore = db.createObjectStore("videoConfigs", {
 					keyPath: "id",
@@ -40,16 +42,26 @@ request.onsuccess = function(event) {
 				for (i in configData) {
 					objectStore.add(configData[i]);
 				}
+				upgradeDbFrom1To2();
 			}else if(oldVersion==1){
 				console.log('upgrade to latest from ' + oldVersion + ' to '+dbVersion);
-			}else if(oldVersion==2){
-				console.log('upgrade to latest from ' + oldVersion + ' to '+dbVersion);
-			}else if(oldVersion==3){
-				
+				upgradeDbFrom1To2();
 			}
 		};
 	}
 };
+function upgradeDbFrom1To2(){
+	// Set up the database structure here!
+	var objectStore = db.createObjectStore("videoStore", {
+		keyPath: "id",
+		autoIncrement:true
+	});
+
+	// Store values in the newly created objectStore.
+	for (i in vids) {
+		objectStore.add(vids[i]);
+	}
+}
 function writeToDb() {
 	var transaction = db.transaction(["customers"], IDBTransaction.READ_WRITE);
 	// Do something when all the data is added to the database.
@@ -68,18 +80,16 @@ function writeToDb() {
 	}
 }
 
-function readDb(onsuccess) {
+function readDb(store,onsuccess) {
 	if(db==null){
 		console.log('wait a little bit and try again');
 		setTimeout(function(){
-			console.log('db is: ' + db);
-			readDb(onsuccess);
+			readDb(store,onsuccess);
 		},500);
 		return;
 	}
-	console.log('db1 is: ' + db);
-	var transaction = db.transaction(["videoConfigs"]);
-	var objectStore = transaction.objectStore("videoConfigs");
+	var transaction = db.transaction([store]);
+	var objectStore = transaction.objectStore(store);
 	// Get everything in the store;
 	var keyRange = IDBKeyRange.lowerBound(0);
 	var cursorRequest = objectStore.openCursor(keyRange);
@@ -88,11 +98,22 @@ function readDb(onsuccess) {
 	cursorRequest.onerror = function(event) {
 		// Handle errors!
 	};
-	//var request = objectStore.getAll();
-	//request.onerror = function(event) {
-		// Handle errors!
-	//};
-	//request.onsuccess = onsuccess;
+}
+function renderVideosFromDb(savedVideos){
+	// console.log(savedVideos);
+	var videosList = $('#store-items');
+	for(var video in savedVideos){
+		videosList.append($('<li><ul>'+
+			'<li><label style="font-weight:bold">title</label><input type="text" value="'+savedVideos[video].title+'" class="text ui-widget-content ui-corner-all"/></li>'+
+			'<li><label>poster</label><input type="text" value="'+savedVideos[video].poster+'" class="text ui-widget-content ui-corner-all"/></li>'+
+			'<li><label>mp4</label><input type="text" value="'+savedVideos[video].mp4+'" class="text ui-widget-content ui-corner-all"/></li>'+
+			'<li><label>webm</label><input type="text" value="'+savedVideos[video].webm+'" class="text ui-widget-content ui-corner-all"/></li>'+
+			'<li><label>ogg</label><input type="text" value="'+savedVideos[video].ogg+'" class="text ui-widget-content ui-corner-all"/></li>'+
+			'<li><label>flv server</label><input type="text" value="'+savedVideos[video].flv.server+'" class="text ui-widget-content ui-corner-all"/></li>'+
+			'<li><label>flv path</label><input type="text" value="'+savedVideos[video].flv.src+'" class="text ui-widget-content ui-corner-all"/></li>'+
+			'</ul></li>'
+		))
+	}
 }
 function renderConfigs(savedConfigs){
 	// Do something with the request.result!
@@ -191,6 +212,21 @@ $(function() {
 	$( "#tabs" ).tabs(tabOpts);
 	$('#cfg-tabs').tabs();
 	$('#cfg-tabs-edit').tabs();
+	$('#video-store').button().click(function(){
+		$( "#dialog-video-store" ).dialog( "open" );
+		if($('#store-items').children().length==0){
+			readDb("videoStore",function(event){
+				var result = event.target.result;
+				if(!!result == false){
+					renderVideosFromDb(videosFromDb);			
+					return;
+				}
+		
+				videosFromDb.push(result.value);
+				result.continue();
+			});
+		}
+	});
 	$("<span id='loadedVideoConfigName'>").text("Loaded config #2").addClass("status-message ui-corner-all").
 		appendTo($("#tabs > .ui-tabs-nav"));
 		
@@ -274,7 +310,7 @@ $(function() {
 		autoOpen: false,
 		height: 500,
 		width: 640,
-		modal: true,
+		modal: false,
 		buttons: {
 			"Create Configuration": function() {
 				var bValid = true;
@@ -302,7 +338,7 @@ $(function() {
 		autoOpen: false,
 		height: 500,
 		width: 640,
-		modal: true,
+		modal: false,
 		buttons: {
 			"Update Configuration": function() {
 				var bValid = true;
@@ -376,7 +412,20 @@ $(function() {
 			}
 		}
 	});
-	readDb(function(event){
+	$('#dialog-video-store').dialog({
+		autoOpen: false,
+		width: 640,
+		height:480,
+		buttons: {
+			"Add Video": function() {
+				$( this ).dialog( "close" );
+			},
+			Cancel: function() {
+				$( this ).dialog( "close" );
+			}
+		}
+	});
+	readDb("videoConfigs",function(event){
 		var result = event.target.result;
 		if(!!result == false){
 			renderConfigs(configsFromDb);			

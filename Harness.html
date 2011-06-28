@@ -48,6 +48,24 @@
 		font-weight: normal;
 		text-decoration: underline;
 	}
+	.configSetting{
+		position: relative;
+	}
+	#video-store{
+		position: absolute;
+		right: 10px;
+		top: 3px;
+	}
+	#store-items{
+		padding-left:0;
+	}
+	#store-items > li{
+		border-bottom: 1px dotted black;
+		padding: 4px;
+	}
+	#store-items li{
+		list-style: none;
+	}
 	</style> 
 </head>
 <body>
@@ -117,7 +135,7 @@
 		</div>
 		<div id="tabs-2">
 			<div id="users-contain" class="ui-widget">
-				<h1>Sample Video Configurations:</h1>
+				<h1 class="configSetting">Sample Video Configurations <button id="video-store">Video Store</button> </h1>
 				<table id="users" class="ui-widget ui-widget-content">
 					<thead>
 						<tr class="ui-widget-header ">
@@ -198,6 +216,9 @@
 			</div>
 			<div id="dialog-confirm" title="Delete selected video configuration?">
 				<p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>Are you sure?</p>
+			</div>
+			<div id="dialog-video-store" title="Video Store">
+				<ul id="store-items"></ul>
 			</div>
 			<br/><br/>
 			<h1>Global Configurations</h1> 

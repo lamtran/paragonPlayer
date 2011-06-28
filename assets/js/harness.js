@@ -4,6 +4,7 @@
 var db;
 var selectedConfig = 1;
 var loadedConfig = 1;
+var configsFromDb=[];
 
 initIndexedDb();
 initLocalStorage();
@@ -69,12 +70,14 @@ function writeToDb() {
 
 function readDb(onsuccess) {
 	if(db==null){
-		// console.log('wait a little bit and try again');
+		console.log('wait a little bit and try again');
 		setTimeout(function(){
+			console.log('db is: ' + db);
 			readDb(onsuccess);
 		},500);
 		return;
 	}
+	console.log('db1 is: ' + db);
 	var transaction = db.transaction(["videoConfigs"]);
 	var objectStore = transaction.objectStore("videoConfigs");
 	// Get everything in the store;
@@ -149,13 +152,6 @@ function renderConfigs(savedConfigs){
 				$(this).removeClass('ui-state-hover');
 			}
 			selectedConfig=clickedId;
-			/*
-			if(selectedConfig!=loadedConfig){
-				$('#load-video-configuration').button("option", "disabled", false );
-			}else{
-				$('#load-video-configuration').button("option", "disabled", true );
-			}
-			*/
 				
 		}
 	});	
@@ -181,7 +177,6 @@ function handleTabSelect(event, tab){
 	if(tab.index==0){
 	}
 };
-var configsFromDb=[];
 $(function() {
 	$('#analyticscode').val(localStorage['analyticscode']);
 	/*
@@ -197,7 +192,7 @@ $(function() {
 	$('#cfg-tabs').tabs();
 	$('#cfg-tabs-edit').tabs();
 	$("<span id='loadedVideoConfigName'>").text("Loaded config #2").addClass("status-message ui-corner-all").
-		appendTo($("#tabs"));
+		appendTo($("#tabs > .ui-tabs-nav"));
 		
 	$( "#create-new-configuration" ).button()
 	.click( function() {
@@ -212,7 +207,7 @@ $(function() {
 		loadedConfig=selectedConfig;
 		// $('#load-video-configuration').button("option", "disabled", true );
 		$('#harnessContainer .rhapVideoWrapper').remove();
-		var config = configData[selectedConfig];
+		var config = configsFromDb[selectedConfig];
 		$('#loadedVideoConfigName').html('Loaded config #'+(selectedConfig+1));
 		var videosToRender = config.videos;
 		var firstVideo = videosToRender[0];
@@ -263,6 +258,13 @@ $(function() {
 	});
 	$('#edit-video-configuration').button().click(function(){
 		$( "#dialog-form-edit" ).dialog( "open" );
+		var config = configsFromDb[selectedConfig];
+		$('#editConfigInitialWidth').val(config.initialWidth);
+		$('#editConfigInitialHeight').val(config.initialHeight);
+		$('#editConfigPreferredWidth').val(config.preferredWidth);
+		$('#editConfigPreferredHeight').val(config.preferredHeight);
+		$('#editConfigForceFlash').attr('checked',config.forcedFlash);
+		$('#editConfigPopout').attr('checked',config.popout);
 	});
 	$('#delete-video-configuration').button()
 	.click( function() {
@@ -270,7 +272,7 @@ $(function() {
 	});
 	$( "#dialog-form" ).dialog({
 		autoOpen: false,
-		height: 480,
+		height: 500,
 		width: 640,
 		modal: true,
 		buttons: {
@@ -298,12 +300,49 @@ $(function() {
 	});
 	$( "#dialog-form-edit" ).dialog({
 		autoOpen: false,
-		height: 480,
+		height: 500,
 		width: 640,
 		modal: true,
 		buttons: {
 			"Update Configuration": function() {
 				var bValid = true;
+				// configsFromDb
+				$( this ).dialog( "close" );
+				var transaction = db.transaction(["videoConfigs"], IDBTransaction.READ_WRITE);
+				// Do something when all the data is added to the database.
+				transaction.oncomplete = function(event) {
+					console.log('DONE');
+				};
+				transaction.onerror = function(event) {
+					// Don't forget to handle errors!
+				};
+				var updatedData = configsFromDb[selectedConfig];
+				console.log(updatedData); 
+				updatedData['initialWidth']=$('#editConfigInitialWidth').val();
+				updatedData['initialHeight']=$('#editConfigInitialHeight').val();
+				updatedData['preferredWidth']=$('#editConfigPreferredWidth').val();
+				updatedData['preferredHeight']=$('#editConfigPreferredHeight').val();
+				updatedData['forcedFlash']=$('#editConfigForceFlash').is(':checked');
+				console.log('forced flash is checked: ' + $('#editConfigForceFlash').is(':checked'));
+				updatedData['popout']=$('#editConfigPopout').is(':checked');
+				console.log(updatedData);
+				var objectStore = transaction.objectStore("videoConfigs");
+				var request = objectStore.put(updatedData);
+				request.onsuccess = function(event) {
+					console.log("Modified id ", event.result);
+				};
+				request.onerror = function() {
+					alert("Could not modify object");
+				};
+				/*
+				for (var i in configData) {
+					var request = objectStore.add(configData[i]);
+					request.onsuccess = function(event) {
+						// event.target.result == configData[i].ssn
+					};
+				}
+				*/
+				
 				/*
 				allFields.removeClass( "ui-state-error" );
 				if ( bValid ) {
@@ -312,7 +351,6 @@ $(function() {
 					"<td>" + email.val() + "</td>" +
 					"<td>" + password.val() + "</td>" +
 					"</tr>" );
-					$( this ).dialog( "close" );
 				}
 				*/
 			},

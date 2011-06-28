@@ -103,17 +103,19 @@ function renderVideosFromDb(savedVideos){
 	// console.log(savedVideos);
 	var videosList = $('#store-items');
 	for(var video in savedVideos){
-		videosList.append($('<li><ul>'+
-			'<li><label style="font-weight:bold">title</label><input type="text" value="'+savedVideos[video].title+'" class="text ui-widget-content ui-corner-all"/></li>'+
-			'<li><label>poster</label><input type="text" value="'+savedVideos[video].poster+'" class="text ui-widget-content ui-corner-all"/></li>'+
-			'<li><label>mp4</label><input type="text" value="'+savedVideos[video].mp4+'" class="text ui-widget-content ui-corner-all"/></li>'+
-			'<li><label>webm</label><input type="text" value="'+savedVideos[video].webm+'" class="text ui-widget-content ui-corner-all"/></li>'+
-			'<li><label>ogg</label><input type="text" value="'+savedVideos[video].ogg+'" class="text ui-widget-content ui-corner-all"/></li>'+
-			'<li><label>flv server</label><input type="text" value="'+savedVideos[video].flv.server+'" class="text ui-widget-content ui-corner-all"/></li>'+
-			'<li><label>flv path</label><input type="text" value="'+savedVideos[video].flv.src+'" class="text ui-widget-content ui-corner-all"/></li>'+
-			'</ul></li>'
-		))
+		renderVideoItemHelper(videosList,savedVideos[video]);
 	}
+}
+function renderVideoItemHelper(parent,data){
+	parent.append($('<li><ul>'+
+			'<li><label style="font-weight:bold">title</label><input type="text" value="'+data.title+'" class="text ui-widget-content ui-corner-all"/></li>'+
+			'<li><label>poster</label><input type="text" value="'+data.poster+'" class="text ui-widget-content ui-corner-all"/></li>'+
+			'<li><label>mp4</label><input type="text" value="'+data.mp4+'" class="text ui-widget-content ui-corner-all"/></li>'+
+			'<li><label>webm</label><input type="text" value="'+data.webm+'" class="text ui-widget-content ui-corner-all"/></li>'+
+			'<li><label>ogg</label><input type="text" value="'+data.ogg+'" class="text ui-widget-content ui-corner-all"/></li>'+
+			'<li><label>flv server</label><input type="text" value="'+data.flv.server+'" class="text ui-widget-content ui-corner-all"/></li>'+
+			'<li><label>flv path</label><input type="text" value="'+data.flv.src+'" class="text ui-widget-content ui-corner-all"/></li>'+
+			'</ul></li>'));
 }
 function renderConfigs(savedConfigs){
 	// Do something with the request.result!
@@ -198,6 +200,17 @@ function handleTabSelect(event, tab){
 	if(tab.index==0){
 	}
 };
+var blankVideoItem = {
+	mp4:'',
+	webm:'',
+	ogg:'',
+	poster:'',
+	title:'',
+	flv: {
+		server:'',
+		src:''
+	}
+};
 $(function() {
 	$('#analyticscode').val(localStorage['analyticscode']);
 	/*
@@ -212,19 +225,25 @@ $(function() {
 	$( "#tabs" ).tabs(tabOpts);
 	$('#cfg-tabs').tabs();
 	$('#cfg-tabs-edit').tabs();
+	$('#add-new-video').button({disabled:true}).click(function(){
+		renderVideoItemHelper($('#store-items'),blankVideoItem);
+	});
 	$('#video-store').button().click(function(){
 		$( "#dialog-video-store" ).dialog( "open" );
 		if($('#store-items').children().length==0){
 			readDb("videoStore",function(event){
 				var result = event.target.result;
 				if(!!result == false){
-					renderVideosFromDb(videosFromDb);			
+					renderVideosFromDb(videosFromDb);	
+					$('#add-new-video').button({disabled:false});		
 					return;
 				}
 		
 				videosFromDb.push(result.value);
 				result.continue();
 			});
+		}else{
+			$('#add-new-video').button({disabled:false});
 		}
 	});
 	$("<span id='loadedVideoConfigName'>").text("Loaded config #2").addClass("status-message ui-corner-all").
@@ -417,7 +436,7 @@ $(function() {
 		width: 640,
 		height:480,
 		buttons: {
-			"Add Video": function() {
+			"Save Videos": function() {
 				$( this ).dialog( "close" );
 			},
 			Cancel: function() {

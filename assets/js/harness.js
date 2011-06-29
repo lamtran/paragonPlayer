@@ -82,7 +82,7 @@ function writeToDb() {
 
 function readDb(store,onsuccess) {
 	if(db==null){
-		console.log('wait a little bit and try again');
+		// console.log('wait a little bit and try again');
 		setTimeout(function(){
 			readDb(store,onsuccess);
 		},500);
@@ -103,11 +103,11 @@ function renderVideosFromDb(savedVideos){
 	// console.log(savedVideos);
 	var videosList = $('#store-items');
 	for(var video in savedVideos){
-		renderVideoItemHelper(videosList,savedVideos[video]);
+		videosList.prepend(renderVideoItemHelper(savedVideos[video]));
 	}
 }
-function renderVideoItemHelper(parent,data){
-	parent.append($('<li><ul>'+
+function renderVideoItemHelper(data){
+	return $('<li><ul>'+
 			'<li><label style="font-weight:bold">title</label><input type="text" value="'+data.title+'" class="text ui-widget-content ui-corner-all"/></li>'+
 			'<li><label>poster</label><input type="text" value="'+data.poster+'" class="text ui-widget-content ui-corner-all"/></li>'+
 			'<li><label>mp4</label><input type="text" value="'+data.mp4+'" class="text ui-widget-content ui-corner-all"/></li>'+
@@ -115,7 +115,7 @@ function renderVideoItemHelper(parent,data){
 			'<li><label>ogg</label><input type="text" value="'+data.ogg+'" class="text ui-widget-content ui-corner-all"/></li>'+
 			'<li><label>flv server</label><input type="text" value="'+data.flv.server+'" class="text ui-widget-content ui-corner-all"/></li>'+
 			'<li><label>flv path</label><input type="text" value="'+data.flv.src+'" class="text ui-widget-content ui-corner-all"/></li>'+
-			'</ul></li>'));
+			'</ul></li>');
 }
 function renderConfigs(savedConfigs){
 	// Do something with the request.result!
@@ -226,7 +226,7 @@ $(function() {
 	$('#cfg-tabs').tabs();
 	$('#cfg-tabs-edit').tabs();
 	$('#add-new-video').button({disabled:true}).click(function(){
-		renderVideoItemHelper($('#store-items'),blankVideoItem);
+		$('#store-items').prepend(renderVideoItemHelper(blankVideoItem));
 	});
 	$('#video-store').button().click(function(){
 		$( "#dialog-video-store" ).dialog( "open" );
@@ -437,6 +437,61 @@ $(function() {
 		height:480,
 		buttons: {
 			"Save Videos": function() {
+				var videoItems = $('#store-items').children();
+				var length = videoItems.length;
+				var videoData;// = videosFromDb[0];
+				var videoDataFromUi;// = videoItems[length-1];
+				for(var i=0;i<videosFromDb.length;i++){
+					videoData=videosFromDb[i];
+					videoDataFromUi=getDataFromVideoListItem(videoItems[length-1-i]);
+					if(!videoDataEquals(videoData,videoDataFromUi)){
+						console.log('video is changed in UI, update DB for video: ' + videoData.title);
+						var transaction = db.transaction(["videoStore"], IDBTransaction.READ_WRITE);
+						// Do something when all the data is added to the database.
+						transaction.oncomplete = function(event) {
+							console.log('DONE');
+						};
+						transaction.onerror = function(event) {
+							// Don't forget to handle errors!
+						};
+						var objectStore = transaction.objectStore("videoStore");
+						videoDataUpdate(videoData,videoDataFromUi);
+						var request = objectStore.put(videoData);
+						request.onsuccess = function(event) {
+							console.log("Modified data");
+						};
+						request.onerror = function() {
+							alert("Could not modify object");
+						};
+					}else{
+						console.log('video is unchanged in UI for video: ' + videoData.title);
+					}
+				}
+				if(length>videosFromDb.length){
+					console.log('we have new items to add');
+					for(var i=0;i<length-videosFromDb.length;i++){
+						videoDataFromUi=getDataFromVideoListItem(videoItems[i]);
+						var transaction = db.transaction(["videoStore"], IDBTransaction.READ_WRITE);
+						// Do something when all the data is added to the database.
+						transaction.oncomplete = function(event) {
+							console.log('DONE');
+						};
+						transaction.onerror = function(event) {
+							// Don't forget to handle errors!
+						};
+						var objectStore = transaction.objectStore("videoStore");
+						videoData={};
+						initFlv(videoData);
+						videoDataUpdate(videoData,videoDataFromUi);
+						var request = objectStore.add(videoData);
+						request.onsuccess = function(event) {
+							console.log("Modified data");
+						};
+						request.onerror = function() {
+							alert("Could not modify object");
+						};
+					}
+				}
 				$( this ).dialog( "close" );
 			},
 			Cancel: function() {
@@ -447,7 +502,7 @@ $(function() {
 	readDb("videoConfigs",function(event){
 		var result = event.target.result;
 		if(!!result == false){
-			renderConfigs(configsFromDb);			
+			renderConfigs(configsFromDb);
 			return;
 		}
 
@@ -463,6 +518,42 @@ $(function() {
 	
 	});
 });
+function getDataFromVideoListItem(listItem){
+	var items = $('ul li',listItem);
+	var data = {};
+	data['title']=$(items[0]).children('input').val();
+	data['poster']=$(items[1]).children('input').val();
+	data['mp4']=$(items[2]).children('input').val();
+	data['webm']=$(items[3]).children('input').val();
+	data['ogg']=$(items[4]).children('input').val();
+	data['flv']={};
+	data.flv['server']=$(items[5]).children('input').val();
+	data.flv['src']=$(items[6]).children('input').val();
+	return data;
+}
+function videoDataEquals(one,two){
+	initFlv(one);
+	initFlv(two);
+	return one.title==two.title && one.poster==two.poster
+		&& one.mp4==two.mp4 && one.webm==two.webm
+		&& one.ogg==two.ogg && one.flv.server==two.flv.server && one.flv.src==two.flv.src;
+}
+function videoDataUpdate(one,two){
+	one.title=two.title;
+	one.mp4=two.mp4;
+	one.webm=two.webm;
+	one.ogg=two.ogg;
+	one.poster=two.poster;
+	one.flv.server=two.flv.server;
+	one.flv.src=two.flv.src;
+}
+function initFlv(o){
+	if(!o.flv){
+		o.flv={};
+		o.flv.server='';
+		o.flv.src='';
+	}
+}
 
 function initIndexedDb() {
 	// Initialising the window.IndexedDB Object

@@ -43,7 +43,7 @@
 		position: relative;
 		right: 4px;
 		top: 10px;
-	}
+	}500
 	body div#users-contain table .ui-state-hover{
 		font-weight: normal;
 		text-decoration: underline;
@@ -63,7 +63,7 @@
 		border-bottom: 1px dotted black;
 		padding: 4px;
 	}
-	#store-items li{
+	#store-items li, #config-video-store-edit li{
 		list-style: none;
 	}
 	#add-new-video{
@@ -141,6 +141,7 @@
 				<table id="users" class="ui-widget ui-widget-content">
 					<thead>
 						<tr class="ui-widget-header ">
+							<th>Id</th>
 							<th>Description</th>
 							<th>Initial Width</th>
 							<th>Initial Height</th>
@@ -170,7 +171,7 @@
 								<label for="newConfigInitialWidth">Initial Width</label>
 								<input type="text" name="newConfigInitialWidth" id="newConfigInitialWidth" class="text ui-widget-content ui-corner-all" />
 								<label for="newConfigInitialHeight">Initial Height</label>
-								<input type="text" name="newConfigInitialHeight" id="newConfigInitialHeight" value="" class="text ui-widget-content ui-corner-all" />
+								<input type="text" na500me="newConfigInitialHeight" id="newConfigInitialHeight" value="" class="text ui-widget-content ui-corner-all" />
 								<label for="newConfigPreferredWidth">Preferred Width</label>
 								<input type="text" name="newConfigPreferredWidth" id="newConfigPreferredWidth" class="text ui-widget-content ui-corner-all" />
 								<label for="newConfigPreferredHeight">Preferred Height</label>
@@ -212,7 +213,8 @@
 						</form>
 					</div>
 					<div id="cfg-2-edit">
-						<p>Add a video</p>
+						<button id="add-new-video-to-config">Add Video</button> 
+						<ul id="config-video-store-edit"></ul>
 					</div>
 				</div>
 			</div>

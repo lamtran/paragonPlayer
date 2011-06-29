@@ -2,8 +2,7 @@
  * @author lamtran
  */
 var db;
-var selectedConfig = 1;
-var loadedConfig = 1;
+var selectedConfig = 2;
 var configsFromDb=[];
 var videosFromDb=[];
 
@@ -117,6 +116,20 @@ function renderVideoItemHelper(data){
 			'<li><label>flv path</label><input type="text" value="'+data.flv.src+'" class="text ui-widget-content ui-corner-all"/></li>'+
 			'</ul></li>');
 }
+function renderVideoItemForConfig(title){
+	var markup = '<li><select style="width: 430px">';
+	var videoFromDb;
+	for(var i=0;i<videosFromDb.length;i++){
+		videoFromDb = videosFromDb[i];
+		markup += '<option data="'+videoFromDb.id+'"';
+		if(title && videoFromDb.title==title){
+			markup += ' selected="selected"';
+		}
+		markup +='>'+videoFromDb.title+'</option>';
+	}
+	markup += '</select><button class="deleteVideoBtn">Delete</button> </li>';
+	return $(markup);
+}
 function renderConfigs(savedConfigs){
 	// Do something with the request.result!
 	// var savedConfigs = event.target.result;
@@ -142,6 +155,7 @@ function renderConfigs(savedConfigs){
 			description += ' inline.'
 		}
 		$( "#users tbody" ).append( "<tr id='id_"+config.id+"'>" +
+		"<td>" + config.id + "</td>" +
 		"<td>" + description + "</td>" +
 		"<td>" + config.initialWidth + "</td>" +
 		"<td>" + config.initialHeight + "</td>" +
@@ -163,8 +177,8 @@ function renderConfigs(savedConfigs){
 		}
 	);
 	$('tbody tr').click(function(event){
-		var clickedId = Number(this.id.split('id_')[1])-1;
-		if(clickedId>1){
+		var clickedId = Number(this.id.split('id_')[1]);
+		if(clickedId>2 && clickedId<7){
 			alert('not yet supported');
 			return;
 		}
@@ -178,7 +192,7 @@ function renderConfigs(savedConfigs){
 				
 		}
 	});	
-	$('tbody tr:nth-child('+(selectedConfig+1)+')').addClass('ui-state-active');
+	$('tbody tr:nth-child('+(selectedConfig)+')').addClass('ui-state-active');
 }
 
 function deleteDB() {
@@ -225,23 +239,28 @@ $(function() {
 	$( "#tabs" ).tabs(tabOpts);
 	$('#cfg-tabs').tabs();
 	$('#cfg-tabs-edit').tabs();
-	$('#add-new-video').button({disabled:true}).click(function(){
+	$('#add-new-video').button().click(function(){
 		$('#store-items').prepend(renderVideoItemHelper(blankVideoItem));
+	});
+	$('#add-new-video-to-config').button().click(function(){
+		$('#config-video-store-edit').prepend(renderVideoItemForConfig());
 	});
 	$('#video-store').button().click(function(){
 		$( "#dialog-video-store" ).dialog( "open" );
 		if($('#store-items').children().length==0){
+			renderVideosFromDb(videosFromDb);
+			/*
 			readDb("videoStore",function(event){
 				var result = event.target.result;
 				if(!!result == false){
 					renderVideosFromDb(videosFromDb);	
-					$('#add-new-video').button({disabled:false});		
 					return;
 				}
 		
 				videosFromDb.push(result.value);
 				result.continue();
 			});
+			*/
 		}else{
 			$('#add-new-video').button({disabled:false});
 		}
@@ -259,67 +278,86 @@ $(function() {
 		window.location.reload();
 	});
 	$('#load-video-configuration').button().click(function(){
-		loadedConfig=selectedConfig;
 		// $('#load-video-configuration').button("option", "disabled", true );
 		$('#harnessContainer .rhapVideoWrapper').remove();
-		var config = configsFromDb[selectedConfig];
-		$('#loadedVideoConfigName').html('Loaded config #'+(selectedConfig+1));
+		console.log('selectedConfig: ' + selectedConfig);
+		var config = getConfigById(selectedConfig);//configsFromDb[selectedConfig];
+		console.log(config);
+		$('#loadedVideoConfigName').html('Loaded config #'+(selectedConfig));
 		var videosToRender = config.videos;
-		var firstVideo = videosToRender[0];
-		var sources = '', relatedVideos = '';
-		if(firstVideo.mp4){
-			sources+='<source src="'+firstVideo.mp4+'" type=\'video/mp4; codecs="avc1.42E01E, mp4a.40.2"\' />';
-		}
-		if(firstVideo.webm){
-			sources+='<source src="'+firstVideo.webm+'" type=\'video/webm; codecs="vp8, vorbis"\' />';
-		}
-		if(firstVideo.ogg){
-			sources+='<source src="'+firstVideo.ogg+'" type=\'video/ogg; codecs="theora, vorbis"\' />';
-		}
-		if(firstVideo.flv){
-			sources+='<source data-server="'+firstVideo.flv.server+'" type=\'video/mp4; codecs="vp6"\' data-src="'+firstVideo.flv.src+'"/>';
-		}
-		relatedVideos += '<div class="rhapRelatedVideos">';
-		var relatedVideo, relatedVideoMarkup='';
-		for(var i=1;i<videosToRender.length;i++){
-			relatedVideo = videosToRender[i];
-			relatedVideoMarkup += '<div title="'+relatedVideo.title+'" class="rhapRelatedVideo" data-width="640" data-height="360" data-poster="'+relatedVideo.poster+'">';
-			if(relatedVideo.mp4){
-				relatedVideoMarkup += '<span class="rhapRelatedVideoSource" data-src="'+relatedVideo.mp4+'" data-type=\'video/mp4; codecs="avc1.42E01E, mp4a.40.2"\'></span>';
+		if(!videosToRender || videosToRender.length==0){
+			alert('please add videos to this configuration before attempting to load it');
+		}else{
+			var firstVideo = videosToRender[0];
+			var sources = '', relatedVideos = '';
+			if(firstVideo.mp4){
+				sources+='<source src="'+firstVideo.mp4+'" type=\'video/mp4; codecs="avc1.42E01E, mp4a.40.2"\' />';
 			}
-			if(relatedVideo.webm){
-				relatedVideoMarkup += '<span class="rhapRelatedVideoSource" data-src="'+relatedVideo.webm+'" data-type=\'video/webm; codecs="vp8, vorbis"\'></span>';
+			if(firstVideo.webm){
+				sources+='<source src="'+firstVideo.webm+'" type=\'video/webm; codecs="vp8, vorbis"\' />';
 			}
-			if(relatedVideo.ogg){
-				relatedVideoMarkup += '<span class="rhapRelatedVideoSource" data-src="'+relatedVideo.ogg+'" data-type=\'video/ogg; codecs="theora, vorbis"\'></span>';
+			if(firstVideo.ogg){
+				sources+='<source src="'+firstVideo.ogg+'" type=\'video/ogg; codecs="theora, vorbis"\' />';
 			}
-			if(relatedVideo.flv){
-				relatedVideoMarkup += '<span class="rhapRelatedVideoSource" data-server="'+relatedVideo.flv.server+'" data-src="'+relatedVideo.flv.src+'" data-type=\'video/mp4; codecs="vp6"\'></span>';
+			if(firstVideo.flv){
+				sources+='<source data-server="'+firstVideo.flv.server+'" type=\'video/mp4; codecs="vp6"\' data-src="'+firstVideo.flv.src+'"/>';
 			}
-			relatedVideoMarkup += '</div>';
-			relatedVideos += relatedVideoMarkup;
-			relatedVideoMarkup = '';
+			relatedVideos += '<div class="rhapRelatedVideos">';
+			var relatedVideo, relatedVideoMarkup='';
+			for(var i=1;i<videosToRender.length;i++){
+				relatedVideo = videosToRender[i];
+				relatedVideoMarkup += '<div title="'+relatedVideo.title+'" class="rhapRelatedVideo" data-width="640" data-height="360" data-poster="'+relatedVideo.poster+'">';
+				if(relatedVideo.mp4){
+					relatedVideoMarkup += '<span class="rhapRelatedVideoSource" data-src="'+relatedVideo.mp4+'" data-type=\'video/mp4; codecs="avc1.42E01E, mp4a.40.2"\'></span>';
+				}
+				if(relatedVideo.webm){
+					relatedVideoMarkup += '<span class="rhapRelatedVideoSource" data-src="'+relatedVideo.webm+'" data-type=\'video/webm; codecs="vp8, vorbis"\'></span>';
+				}
+				if(relatedVideo.ogg){
+					relatedVideoMarkup += '<span class="rhapRelatedVideoSource" data-src="'+relatedVideo.ogg+'" data-type=\'video/ogg; codecs="theora, vorbis"\'></span>';
+				}
+				if(relatedVideo.flv){
+					relatedVideoMarkup += '<span class="rhapRelatedVideoSource" data-server="'+relatedVideo.flv.server+'" data-src="'+relatedVideo.flv.src+'" data-type=\'video/mp4; codecs="vp6"\'></span>';
+				}
+				relatedVideoMarkup += '</div>';
+				relatedVideos += relatedVideoMarkup;
+				relatedVideoMarkup = '';
+			}
+			relatedVideos += '</div>';
+			$('#harnessContainer').append(
+				'<video width="'+config.initialWidth+'" height="'+config.initialHeight+'" data-preferred-width="'+config.preferredWidth+'" data-preferred-height="'+config.preferredHeight+'" poster="'+firstVideo.poster+'" title="'+firstVideo.title+'" data-forced-flash="'+config.forcedFlash+'" data-popout="'+config.popout+'">' +
+					sources +
+					relatedVideos +
+				'</video>'
+			);
+			var video = $('#harnessContainer video')[0];
+			videos=[]
+			videos.push(new RhapVideo().init(0,video));
 		}
-		relatedVideos += '</div>';
-		$('#harnessContainer').append(
-			'<video width="'+config.initialWidth+'" height="'+config.initialHeight+'" data-preferred-width="'+config.preferredWidth+'" data-preferred-height="'+config.preferredHeight+'" poster="'+firstVideo.poster+'" title="'+firstVideo.title+'" data-forced-flash="'+config.forcedFlash+'" data-popout="'+config.popout+'">' +
-				sources +
-				relatedVideos +
-			'</video>'
-		);
-		var video = $('#harnessContainer video')[0];
-		videos=[]
-		videos.push(new RhapVideo().init(0,video));
 	});
 	$('#edit-video-configuration').button().click(function(){
 		$( "#dialog-form-edit" ).dialog( "open" );
-		var config = configsFromDb[selectedConfig];
+		console.log(configsFromDb);
+		var config = getConfigById(selectedConfig);
+		console.log(selectedConfig);
+		console.log(config);
 		$('#editConfigInitialWidth').val(config.initialWidth);
 		$('#editConfigInitialHeight').val(config.initialHeight);
 		$('#editConfigPreferredWidth').val(config.preferredWidth);
 		$('#editConfigPreferredHeight').val(config.preferredHeight);
 		$('#editConfigForceFlash').attr('checked',config.forcedFlash);
 		$('#editConfigPopout').attr('checked',config.popout);
+		
+		var cfgVideo;
+		if($('#config-video-store-edit').children().length==0){
+			console.log('no videos rendered yet');
+			if(config.videos && config.videos.length>0){
+				for(var i=0;i<config.videos.length;i++){
+					cfgVideo = config.videos[i];
+					$('#config-video-store-edit').prepend(renderVideoItemForConfig(cfgVideo.title));
+				}
+			}
+		}
 	});
 	$('#delete-video-configuration').button()
 	.click( function() {
@@ -341,9 +379,36 @@ $(function() {
 					"<td>" + email.val() + "</td>" +
 					"<td>" + password.val() + "</td>" +
 					"</tr>" );
-					$( this ).dialog( "close" );
 				}
 				*/
+				var transaction = db.transaction(["videoConfigs"], IDBTransaction.READ_WRITE);
+				// Do something when all the data is added to the database.
+				transaction.oncomplete = function(event) {
+					console.log('DONE');
+				};
+				transaction.onerror = function(event) {
+					// Don't forget to handle errors!
+				};
+				var updatedData = {};
+				updatedData['initialWidth']=$('#newConfigInitialWidth').val();
+				updatedData['initialHeight']=$('#newConfigInitialHeight').val();
+				updatedData['preferredWidth']=$('#newConfigPreferredWidth').val();
+				updatedData['preferredHeight']=$('#newConfigPreferredHeight').val();
+				updatedData['forcedFlash']=$('#newConfigForceFlash').is(':checked');
+				updatedData['popout']=$('#newConfigPopout').is(':checked');
+				console.log(updatedData);
+				var objectStore = transaction.objectStore("videoConfigs");
+				var request = objectStore.add(updatedData);
+				request.onsuccess = function(event) {
+					console.log("Modified id ", request.result);
+					updatedData['id']=request.result;
+					configsFromDb.push(updatedData);
+				};
+				request.onerror = function() {
+					alert("Could not modify object");
+				};
+				
+				$( this ).dialog( "close" );
 			},
 			Cancel: function() {
 				$( this ).dialog( "close" );
@@ -360,9 +425,7 @@ $(function() {
 		modal: false,
 		buttons: {
 			"Update Configuration": function() {
-				var bValid = true;
 				// configsFromDb
-				$( this ).dialog( "close" );
 				var transaction = db.transaction(["videoConfigs"], IDBTransaction.READ_WRITE);
 				// Do something when all the data is added to the database.
 				transaction.oncomplete = function(event) {
@@ -371,8 +434,7 @@ $(function() {
 				transaction.onerror = function(event) {
 					// Don't forget to handle errors!
 				};
-				var updatedData = configsFromDb[selectedConfig];
-				console.log(updatedData); 
+				var updatedData = getConfigById(selectedConfig);
 				updatedData['initialWidth']=$('#editConfigInitialWidth').val();
 				updatedData['initialHeight']=$('#editConfigInitialHeight').val();
 				updatedData['preferredWidth']=$('#editConfigPreferredWidth').val();
@@ -380,6 +442,17 @@ $(function() {
 				updatedData['forcedFlash']=$('#editConfigForceFlash').is(':checked');
 				console.log('forced flash is checked: ' + $('#editConfigForceFlash').is(':checked'));
 				updatedData['popout']=$('#editConfigPopout').is(':checked');
+				
+				var videoIdToSave,videoToSave,videosToSave=[];
+				$('#config-video-store-edit select').each(function(index,item){
+					console.log('looking at: ' + item);
+					videoIdToSave = $(item.options[item.selectedIndex]).attr('data');
+					console.log('videoIdToSave: ' + videoIdToSave);
+					videosToSave.push(getVideoById(videoIdToSave));
+				});
+				console.log('videosToSave: ', videosToSave);
+				updatedData['videos']=videosToSave;
+				
 				console.log(updatedData);
 				var objectStore = transaction.objectStore("videoConfigs");
 				var request = objectStore.put(updatedData);
@@ -389,7 +462,9 @@ $(function() {
 				request.onerror = function() {
 					alert("Could not modify object");
 				};
+				$( this ).dialog( "close" );
 				/*
+				var bValid = true;
 				for (var i in configData) {
 					var request = objectStore.add(configData[i]);
 					request.onsuccess = function(event) {
@@ -415,6 +490,7 @@ $(function() {
 		},
 		close: function() {
 			//allFields.val( "" ).removeClass( "ui-state-error" );
+			$('#config-video-store-edit').children().remove();
 		}
 	});
 	$( "#dialog-confirm" ).dialog({
@@ -458,7 +534,7 @@ $(function() {
 						videoDataUpdate(videoData,videoDataFromUi);
 						var request = objectStore.put(videoData);
 						request.onsuccess = function(event) {
-							console.log("Modified data");
+							console.log("Modified data "+request.result);
 						};
 						request.onerror = function() {
 							alert("Could not modify object");
@@ -485,7 +561,9 @@ $(function() {
 						videoDataUpdate(videoData,videoDataFromUi);
 						var request = objectStore.add(videoData);
 						request.onsuccess = function(event) {
-							console.log("Modified data");
+							console.log("Modified data ",request.result);
+							videoData['id']=request.result;
+							videosFromDb.push(videoData);
 						};
 						request.onerror = function() {
 							alert("Could not modify object");
@@ -509,6 +587,15 @@ $(function() {
 		configsFromDb.push(result.value);
 		result.continue();
 	});
+	readDb("videoStore",function(event){
+		var result = event.target.result;
+		if(!!result == false){
+			return;
+		}
+
+		videosFromDb.push(result.value);
+		result.continue();
+	});
 	$('#tabs').bind('tabsselect', function(event, ui) {
 
 	    // Objects available in the function context:
@@ -518,6 +605,24 @@ $(function() {
 	
 	});
 });
+function getConfigById(id){
+	var cfg; 
+	for(var each in configsFromDb){
+		cfg = configsFromDb[each];
+		if(cfg.id==id){
+			return cfg;
+		}
+	}
+}
+function getVideoById(id){
+	var cfg; 
+	for(var each in videosFromDb){
+		cfg = videosFromDb[each];
+		if(cfg.id==id){
+			return cfg;
+		}
+	}
+}
 function getDataFromVideoListItem(listItem){
 	var items = $('ul li',listItem);
 	var data = {};

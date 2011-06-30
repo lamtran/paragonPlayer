@@ -81,7 +81,7 @@ function writeToDb() {
 
 function readDb(store,onsuccess) {
 	if(db==null){
-		// console.log('wait a little bit and try again');
+		console.log('wait a little bit and try again');
 		setTimeout(function(){
 			readDb(store,onsuccess);
 		},500);
@@ -648,7 +648,7 @@ function getVideosToSave(parentSelector){
 	var videoIdToSave,videosToSave=[];
 	$(parentSelector +' select').each(function(index,item){
 		videoIdToSave = $(item.options[item.selectedIndex]).attr('data');
-		videosToSave.push(getVideoById(videoIdToSave));
+		videosToSave.unshift(getVideoById(videoIdToSave));
 	});
 	return videosToSave;
 }

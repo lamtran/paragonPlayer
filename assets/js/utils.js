@@ -1,3 +1,4 @@
+var host='http://labs.rhapsody.com/paragon/harness/';
 var analyticsCode = localStorage['analyticscode'] ? localStorage['analyticscode'] : 'UA-5860230-6';
 var _gaq = _gaq || [];
 _gaq.push(['_setAccount', analyticsCode]);
@@ -433,9 +434,9 @@ function drawCommonControlsHelper(parent,video) {
 	'&lt;script type="text/javascript" src="http://platform.twitter.com/widgets.js"&gt;&lt;/script&gt;'+
 	'&lt;script type="text/javascript" src="http://www.google.com/buzz/api/button.js"&gt;&lt;/script&gt;'+
 	'&lt;!-- player code --&gt;'+
-	'&lt;script type="text/javascript" src="assets/js/AStoJS.js"&gt;&lt;/script&gt;'+
-	'&lt;script type="text/javascript" src="assets/js/utils.js"&gt;&lt;/script&gt;'+
-	'&lt;script type="text/javascript" src="assets/js/rhapVideo.js"&gt;&lt;/script&gt;'+
+	'&lt;script type="text/javascript" src="'+host+'assets/js/AStoJS.js"&gt;&lt;/script&gt;'+
+	'&lt;script type="text/javascript" src="'+host+'assets/js/utils.js"&gt;&lt;/script&gt;'+
+	'&lt;script type="text/javascript" src="'+host+'assets/js/rhapVideo.js"&gt;&lt;/script&gt;'+
 	'</code>'+
 	'</p>'+
 	

@@ -384,7 +384,6 @@ var RhapVideo;
 				playPause.children().text('Pause');
 				scope._drawPausedButton(upGradientStops);
 			}).bind('ended',function() {
-				console.log('ended - report 100%');
 				_gaq.push(['_trackEvent', 'VideoPlayer', 'Play', '100%'+document.location+':'+scope.video.src]);
 				videoPlay25Percent=Math.round((scope.video.duration/100)*25);
 				videoPlay50Percent=Math.round((scope.video.duration/100)*50);
@@ -432,15 +431,12 @@ var RhapVideo;
 					seekBar.slider('value', t);
 					var flooredT = Math.floor(t);
 					if(flooredT==videoPlay25Percent){
-						console.log('report 25%');
 						_gaq.push(['_trackEvent', 'VideoPlayer', 'Play', '25%'+document.location+':'+this.video.src]);
 						videoPlay25Percent=-1;
 					}else if(flooredT==videoPlay50Percent){
-						console.log('report 50%');
 						_gaq.push(['_trackEvent', 'VideoPlayer', 'Play', '50%'+document.location+':'+this.video.src]);
 						videoPlay50Percent=-1;
 					}else if(flooredT==videoPlay75Percent){
-						console.log('report 75%');
 						_gaq.push(['_trackEvent', 'VideoPlayer', 'Play', '75%'+document.location+':'+this.video.src]);
 						videoPlay75Percent=-1;
 					}

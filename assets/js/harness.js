@@ -30,7 +30,7 @@ request.onsuccess = function(event) {
 		};
 		request.onsuccess = function(event) {
 			if(!oldVersion){
-				console.log('initialize db from scratch');
+				// console.log('initialize db from scratch');
 				// Set up the database structure here!
 				var objectStore = db.createObjectStore("videoConfigs", {
 					keyPath: "id",
@@ -43,7 +43,7 @@ request.onsuccess = function(event) {
 				}
 				upgradeDbFrom1To2();
 			}else if(oldVersion==1){
-				console.log('upgrade to latest from ' + oldVersion + ' to '+dbVersion);
+				// console.log('upgrade to latest from ' + oldVersion + ' to '+dbVersion);
 				upgradeDbFrom1To2();
 			}
 		};
@@ -130,53 +130,56 @@ function renderVideoItemForConfig(title){
 	markup += '</select><button class="deleteVideoBtn">Delete</button> </li>';
 	return $(markup);
 }
+function addNewConfig(config){
+	var description='';
+	if(config.preferredWidth=='auto' || config.preferredHeight=='auto') {
+		description += 'auto resize to video\'s native dimensions,';
+	} else if(config.initialWidth==config.preferredWidth
+	&& config.initialHeight==config.preferredHeight) {
+		description += 'fixed size,'
+	} else {
+		description += 'auto resize to preferred dimensions,';
+	}
+	if(config.forcedFlash) {
+		description += ' flash only,';
+	} else {
+		description += ' auto detect video support,';
+	}
+	if(config.popout) {
+		description += ' pop out.';
+	} else {
+		description += ' inline.'
+	}
+	$( "#configs tbody" ).append( "<tr id='id_"+config.id+"'>" +
+	"<td>" + config.id + "</td>" +
+	"<td>" + description + "</td>" +
+	"<td>" + config.initialWidth + "</td>" +
+	"<td>" + config.initialHeight + "</td>" +
+	"<td>" + config.preferredWidth + "</td>" +
+	"<td>" + config.preferredHeight + "</td>" +
+	"<td>" + config.forcedFlash + "</td>" +
+	"<td>" + config.popout + "</td>" +
+	"</tr>" );
+}
 function renderConfigs(savedConfigs){
 	// Do something with the request.result!
 	// var savedConfigs = event.target.result;
-	var config, description='';
+	var config;
 	for(var e in savedConfigs){
 		config = savedConfigs[e];
-		if(config.preferredWidth=='auto' || config.preferredHeight=='auto'){
-			description += 'auto resize to video\'s native dimensions,';
-		}else if(config.initialWidth==config.preferredWidth 
-			&& config.initialHeight==config.preferredHeight){
-			description += 'fixed size,'	
-		}else{
-			description += 'auto resize to preferred dimensions,';
-		}
-		if(config.forcedFlash){
-			description += ' flash only,';
-		}else{
-			description += ' auto detect video support,';
-		}
-		if(config.popout){
-			description += ' pop out.';
-		}else{
-			description += ' inline.'
-		}
-		$( "#users tbody" ).append( "<tr id='id_"+config.id+"'>" +
-		"<td>" + config.id + "</td>" +
-		"<td>" + description + "</td>" +
-		"<td>" + config.initialWidth + "</td>" +
-		"<td>" + config.initialHeight + "</td>" +
-		"<td>" + config.preferredWidth + "</td>" +
-		"<td>" + config.preferredHeight + "</td>" +
-		"<td>" + config.forcedFlash + "</td>" +
-		"<td>" + config.popout + "</td>" +
-		"</tr>" );
-		description='';
+		addNewConfig(config);
 	}
-	$('tbody tr').hover(
+	$('tbody tr').live('mouseenter',
 		function(){
 			if(!$(this).hasClass('ui-state-active')){
-				$(this).addClass('ui-state-hover');
+				$(this).addClass('ui-state-hover1');
 			}
-		},
+		}).live('mouseleave',
 		function(){
-			$(this).removeClass('ui-state-hover');
+			$(this).removeClass('ui-state-hover1');
 		}
 	);
-	$('tbody tr').click(function(event){
+	$('tbody tr').live('click',function(event){
 		var clickedId = Number(this.id.split('id_')[1]);
 		if(clickedId>2 && clickedId<7){
 			alert('not yet supported');
@@ -185,8 +188,8 @@ function renderConfigs(savedConfigs){
 		if(clickedId!=selectedConfig){
 			$(this).parent().find('tr.ui-state-active').removeClass('ui-state-active');
 			$(this).addClass('ui-state-active');
-			if($(this).hasClass('ui-state-hover')){
-				$(this).removeClass('ui-state-hover');
+			if($(this).hasClass('ui-state-hover1')){
+				$(this).removeClass('ui-state-hover1');
 			}
 			selectedConfig=clickedId;
 				
@@ -201,13 +204,13 @@ function deleteDB() {
 		var dbreq = window.indexedDB.deleteDatabase(indexedDBName);
 		dbreq.onsuccess = function (event) {
 			var db = event.result;
-			console.log("indexedDB: " + indexedDBName + " deleted");
+			// console.log("indexedDB: " + indexedDBName + " deleted");
 		}
 		dbreq.onerror = function (event) {
-			console.log("indexedDB.delete Error: " + event.message);
+			// console.log("indexedDB.delete Error: " + event.message);
 		}
 	} catch (e) {
-		console.log("Error: " + e.message);
+		// console.log("Error: " + e.message);
 	}
 }
 function handleTabSelect(event, tab){
@@ -239,11 +242,54 @@ $(function() {
 	$( "#tabs" ).tabs(tabOpts);
 	$('#cfg-tabs').tabs();
 	$('#cfg-tabs-edit').tabs();
+	$('.deleteVideoBtn').live('click',function(){
+		var ul = $(this).parent().parent().get(0);
+		if(ul.id=='config-video-store-for-add'){
+			//for add, simply remove the list item since it's not in db yet
+			$(this).parent().remove();
+		}else{
+			//for edit
+			var select = $(this).siblings().get(0);
+			
+			var videoIdToDelete = Number($(select.options[select.selectedIndex]).attr('data'));
+			var videoNameToDelete = select.value;
+			var config = getConfigById(selectedConfig);
+			var configVideos = config.videos;
+			var configVideo;
+			for(var i=0;i<configVideos.length;i++){
+				configVideo = configVideos[i];
+				if(configVideo.title==videoNameToDelete){
+					configVideos.splice(i,1);
+					break;
+				}
+			}
+			var transaction = db.transaction(["videoConfigs"], IDBTransaction.READ_WRITE);
+			// Do something when all the data is added to the database.
+			transaction.oncomplete = function(event) {
+			};
+			transaction.onerror = function(event) {
+				// Don't forget to handle errors!
+			};
+			var objectStore = transaction.objectStore("videoConfigs");
+			var request = objectStore.put(config);
+			var parentLi = $(this).parent();
+			request.onsuccess = function(event) {
+				parentLi.remove();
+			};
+			request.onerror = function() {
+				alert("Could not modify object");
+			};
+		}
+	});
 	$('#add-new-video').button().click(function(){
 		$('#store-items').prepend(renderVideoItemHelper(blankVideoItem));
 	});
 	$('#add-new-video-to-config').button().click(function(){
 		$('#config-video-store-edit').prepend(renderVideoItemForConfig());
+		$('.deleteVideoBtn').button();
+	});
+	$('#add-new-video-to-config-for-add').button().click(function(){
+		$('#config-video-store-for-add').prepend(renderVideoItemForConfig());
 	});
 	$('#video-store').button().click(function(){
 		$( "#dialog-video-store" ).dialog( "open" );
@@ -280,9 +326,7 @@ $(function() {
 	$('#load-video-configuration').button().click(function(){
 		// $('#load-video-configuration').button("option", "disabled", true );
 		$('#harnessContainer .rhapVideoWrapper').remove();
-		console.log('selectedConfig: ' + selectedConfig);
 		var config = getConfigById(selectedConfig);//configsFromDb[selectedConfig];
-		console.log(config);
 		$('#loadedVideoConfigName').html('Loaded config #'+(selectedConfig));
 		var videosToRender = config.videos;
 		if(!videosToRender || videosToRender.length==0){
@@ -337,10 +381,7 @@ $(function() {
 	});
 	$('#edit-video-configuration').button().click(function(){
 		$( "#dialog-form-edit" ).dialog( "open" );
-		console.log(configsFromDb);
 		var config = getConfigById(selectedConfig);
-		console.log(selectedConfig);
-		console.log(config);
 		$('#editConfigInitialWidth').val(config.initialWidth);
 		$('#editConfigInitialHeight').val(config.initialHeight);
 		$('#editConfigPreferredWidth').val(config.preferredWidth);
@@ -350,11 +391,11 @@ $(function() {
 		
 		var cfgVideo;
 		if($('#config-video-store-edit').children().length==0){
-			console.log('no videos rendered yet');
 			if(config.videos && config.videos.length>0){
 				for(var i=0;i<config.videos.length;i++){
 					cfgVideo = config.videos[i];
 					$('#config-video-store-edit').prepend(renderVideoItemForConfig(cfgVideo.title));
+					$('.deleteVideoBtn').button();
 				}
 			}
 		}
@@ -384,7 +425,7 @@ $(function() {
 				var transaction = db.transaction(["videoConfigs"], IDBTransaction.READ_WRITE);
 				// Do something when all the data is added to the database.
 				transaction.oncomplete = function(event) {
-					console.log('DONE');
+					// console.log('DONE');
 				};
 				transaction.onerror = function(event) {
 					// Don't forget to handle errors!
@@ -396,13 +437,14 @@ $(function() {
 				updatedData['preferredHeight']=$('#newConfigPreferredHeight').val();
 				updatedData['forcedFlash']=$('#newConfigForceFlash').is(':checked');
 				updatedData['popout']=$('#newConfigPopout').is(':checked');
-				console.log(updatedData);
+				
+				updatedData['videos']=getVideosToSave('#config-video-store-for-add');
 				var objectStore = transaction.objectStore("videoConfigs");
 				var request = objectStore.add(updatedData);
 				request.onsuccess = function(event) {
-					console.log("Modified id ", request.result);
 					updatedData['id']=request.result;
 					configsFromDb.push(updatedData);
+					addNewConfig(updatedData);
 				};
 				request.onerror = function() {
 					alert("Could not modify object");
@@ -429,7 +471,6 @@ $(function() {
 				var transaction = db.transaction(["videoConfigs"], IDBTransaction.READ_WRITE);
 				// Do something when all the data is added to the database.
 				transaction.oncomplete = function(event) {
-					console.log('DONE');
 				};
 				transaction.onerror = function(event) {
 					// Don't forget to handle errors!
@@ -440,24 +481,13 @@ $(function() {
 				updatedData['preferredWidth']=$('#editConfigPreferredWidth').val();
 				updatedData['preferredHeight']=$('#editConfigPreferredHeight').val();
 				updatedData['forcedFlash']=$('#editConfigForceFlash').is(':checked');
-				console.log('forced flash is checked: ' + $('#editConfigForceFlash').is(':checked'));
 				updatedData['popout']=$('#editConfigPopout').is(':checked');
 				
-				var videoIdToSave,videoToSave,videosToSave=[];
-				$('#config-video-store-edit select').each(function(index,item){
-					console.log('looking at: ' + item);
-					videoIdToSave = $(item.options[item.selectedIndex]).attr('data');
-					console.log('videoIdToSave: ' + videoIdToSave);
-					videosToSave.push(getVideoById(videoIdToSave));
-				});
-				console.log('videosToSave: ', videosToSave);
-				updatedData['videos']=videosToSave;
+				updatedData['videos']=getVideosToSave('#config-video-store-edit');
 				
-				console.log(updatedData);
 				var objectStore = transaction.objectStore("videoConfigs");
 				var request = objectStore.put(updatedData);
 				request.onsuccess = function(event) {
-					console.log("Modified id ", event.result);
 				};
 				request.onerror = function() {
 					alert("Could not modify object");
@@ -500,6 +530,21 @@ $(function() {
 		modal: true,
 		buttons: {
 			"Delete": function() {
+				var transaction = db.transaction(["videoConfigs"], IDBTransaction.READ_WRITE);
+				var objectStore = transaction.objectStore("videoConfigs");
+				var request = objectStore.delete(selectedConfig);
+				request.onsuccess = function(event) {
+					for(var i=0;i<configsFromDb.length;i++){
+						var cfg = configsFromDb[i];
+						if(cfg.id==selectedConfig){
+							configsFromDb.splice(i,1);
+							break;
+						}
+					}
+				};
+				$('#configs tr[id=id_'+selectedConfig+']').remove();
+				request.onerror = function() {
+				};
 				$( this ).dialog( "close" );
 			},
 			Cancel: function() {
@@ -521,11 +566,9 @@ $(function() {
 					videoData=videosFromDb[i];
 					videoDataFromUi=getDataFromVideoListItem(videoItems[length-1-i]);
 					if(!videoDataEquals(videoData,videoDataFromUi)){
-						console.log('video is changed in UI, update DB for video: ' + videoData.title);
 						var transaction = db.transaction(["videoStore"], IDBTransaction.READ_WRITE);
 						// Do something when all the data is added to the database.
 						transaction.oncomplete = function(event) {
-							console.log('DONE');
 						};
 						transaction.onerror = function(event) {
 							// Don't forget to handle errors!
@@ -534,23 +577,20 @@ $(function() {
 						videoDataUpdate(videoData,videoDataFromUi);
 						var request = objectStore.put(videoData);
 						request.onsuccess = function(event) {
-							console.log("Modified data "+request.result);
 						};
 						request.onerror = function() {
 							alert("Could not modify object");
 						};
 					}else{
-						console.log('video is unchanged in UI for video: ' + videoData.title);
+						// console.log('video is unchanged in UI for video: ' + videoData.title);
 					}
 				}
 				if(length>videosFromDb.length){
-					console.log('we have new items to add');
 					for(var i=0;i<length-videosFromDb.length;i++){
 						videoDataFromUi=getDataFromVideoListItem(videoItems[i]);
 						var transaction = db.transaction(["videoStore"], IDBTransaction.READ_WRITE);
 						// Do something when all the data is added to the database.
 						transaction.oncomplete = function(event) {
-							console.log('DONE');
 						};
 						transaction.onerror = function(event) {
 							// Don't forget to handle errors!
@@ -561,7 +601,6 @@ $(function() {
 						videoDataUpdate(videoData,videoDataFromUi);
 						var request = objectStore.add(videoData);
 						request.onsuccess = function(event) {
-							console.log("Modified data ",request.result);
 							videoData['id']=request.result;
 							videosFromDb.push(videoData);
 						};
@@ -605,6 +644,14 @@ $(function() {
 	
 	});
 });
+function getVideosToSave(parentSelector){
+	var videoIdToSave,videosToSave=[];
+	$(parentSelector +' select').each(function(index,item){
+		videoIdToSave = $(item.options[item.selectedIndex]).attr('data');
+		videosToSave.push(getVideoById(videoIdToSave));
+	});
+	return videosToSave;
+}
 function getConfigById(id){
 	var cfg; 
 	for(var each in configsFromDb){

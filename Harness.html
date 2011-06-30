@@ -26,17 +26,19 @@
 	input.text { margin-bottom:12px; width:95%; padding: .4em; }
 	fieldset { padding:0; border:0; }
 	h1 { font-size: 1.2em; margin: .6em 0; }
-	div#users-contain { margin: 20px 0; }
-	div#users-contain table { margin: 1em 0; border-collapse: collapse; width: 100%; }
-	div#users-contain table td, div#users-contain table th { border: 1px solid #eee; padding: .6em 10px; text-align: left; }
+	div#configs-contain { margin: 20px 0; }
+	div#configs-contain table { margin: 1em 0; border-collapse: collapse; width: 100%; }
+	div#configs-contain table td, div#configs-contain table th { border: 1px solid #eee; padding: .6em 10px; text-align: left; }
 	.ui-dialog .ui-state-error { padding: .3em; }
 	.validateTips { border: 1px solid transparent; padding: 0.3em; }
 	
 	.ui-widget {
 	    font-size: 1.0em;
 	}
-	.ui-state-hover{
+	.ui-state-hover1{
 		cursor: pointer;
+		font-weight: normal;
+		text-decoration: underline;
 	}
 	#loadedVideoConfigName{
 		float:right;
@@ -44,9 +46,7 @@
 		right: 4px;
 		top: 10px;
 	}500
-	body div#users-contain table .ui-state-hover{
-		font-weight: normal;
-		text-decoration: underline;
+	table#configs tr.ui-state-hover, .ui-state-hover{
 	}
 	.configSetting{
 		position: relative;
@@ -63,7 +63,7 @@
 		border-bottom: 1px dotted black;
 		padding: 4px;
 	}
-	#store-items li, #config-video-store-edit li{
+	#store-items li, #config-video-store-edit li, #config-video-store-for-add li{
 		list-style: none;
 	}
 	#add-new-video{
@@ -136,9 +136,9 @@
 			</div>
 		</div>
 		<div id="tabs-2">
-			<div id="users-contain" class="ui-widget">
+			<div id="configs-contain" class="ui-widget">
 				<h1 class="configSetting">Sample Video Configurations <button id="video-store">Video Store</button> </h1>
-				<table id="users" class="ui-widget ui-widget-content">
+				<table id="configs" class="ui-widget ui-widget-content">
 					<thead>
 						<tr class="ui-widget-header ">
 							<th>Id</th>
@@ -184,7 +184,8 @@
 						</form>
 					</div>
 					<div id="cfg-2">
-						<p>Add a video</p>
+						<button id="add-new-video-to-config-for-add">Add Video</button> 
+						<ul id="config-video-store-for-add"></ul>
 					</div>
 				</div>
 			</div>

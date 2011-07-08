@@ -1,5 +1,5 @@
 var host='http://labs.rhapsody.com/paragon/harness/';
-var analyticsCode = localStorage['analyticscode'] ? localStorage['analyticscode'] : 'UA-5860230-6';
+var analyticsCode = localStorage['analyticscode'] ? localStorage['analyticscode'] : 'UA-225770-1';//'UA-5860230-6';
 var _gaq = _gaq || [];
 _gaq.push(['_setAccount', analyticsCode]);
 (function() {

@@ -14,9 +14,12 @@ AsyncTestCase("BasicUiTest",{
 		
 	},
 	testHoverPlayer : function(queue){
+		assertFalse($('.rhapVideoControls').is(':visible'));
 		queue.call("hover over the player",function(callbacks){
 			var m = callbacks.add(function(){
-				$('.rhapVideoWrapper .rhapVideoMoreButton').trigger('mouseenter');
+				$('.rhapVideoWrapper').trigger('mouseenter');
+				//verify video controls appeared
+				assertTrue($('.rhapVideoControls').is(':visible'));
 			});
 			window.setTimeout(m, timeout);
 		});

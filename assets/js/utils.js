@@ -433,11 +433,11 @@ function drawCommonControlsHelper(parent,video) {
 	'<p>'+
 	'<code>'+
 	'&lt;!-- player\'s styles --&gt;'+
-	'&lt;link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/themes/flick/jquery-ui.css" media="screen" rel="stylesheet" type="text/css" /&gt;'+
+	'&lt;link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.14/themes/flick/jquery-ui.css" media="screen" rel="stylesheet" type="text/css" /&gt;'+
 	'&lt;link href="assets/css/rhapVideo.css" media="screen" rel="stylesheet" type="text/css" /&gt;'+
 	'&lt;!-- player\'s libraries --&gt;'+
-	'&lt;script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"&gt;&lt;/script&gt;'+
-	'&lt;script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.8/jquery-ui.min.js"&gt;&lt;/script&gt;'+
+	'&lt;script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"&gt;&lt;/script&gt;'+
+	'&lt;script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.14/jquery-ui.min.js"&gt;&lt;/script&gt;'+
 	'&lt;script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"&gt;&lt;/script&gt;'+
 	'&lt;!-- social --&gt;'+
 	'&lt;script src="http://static.ak.fbcdn.net/connect.php/js/FB.Share" type="text/javascript"&gt;&lt;/script&gt;'+

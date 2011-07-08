@@ -168,6 +168,16 @@ function getSupportedVideoSource(v,videoIndex,forcedFlash) {
 	});
 	return match;
 }
+function getMp4Src(v) {
+	var src='';
+	$(v).children('source').each( function(index,source) {
+		if(source.type=='video/mp4; codecs="avc1.42E01E, mp4a.40.2"') {
+			src = $(source).attr('src');
+			return false;
+		}
+	});
+	return src;
+}
 function getSupportedRelatedVideoSource(v,relatedVideo,forcedFlash) {
 	var match = {};
 	$(relatedVideo).children('span').each( function(index,source) {

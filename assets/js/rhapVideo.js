@@ -970,8 +970,35 @@ var RhapVideo;
 		};
 	};
 	$(function(){
-		$('video').each(function(index,video){
-			videos.push(new RhapVideo().init(index,video));
-		});
+		var ua = navigator.userAgent;
+		var checker = {
+			iphone: ua.match(/(iPhone|iPod|iPad)/),
+			blackberry: ua.match(/BlackBerry/),
+			android: ua.match(/Android/)
+		};
+		if (checker.android || checker.iphone || checker.blackberry) {
+			$('video').each(function(index,video){
+				video.controls=true;
+				$(video).click(function(e){
+					var v = e.target;
+					if(supportsVideo(v)){
+						if(!v.ended && !v.paused){
+							// alert('palaying');
+						}else{
+							v.src=getMp4Src(v);
+							v.load();
+							v.play();
+						}
+					}else{
+						document.location = getMp4Src(v);
+					}
+				});
+			});
+		} else {
+			$('video').each(function(index,video){
+				videos.push(new RhapVideo().init(index,video));
+			});
+		}
+
 	});
 })(jQuery);

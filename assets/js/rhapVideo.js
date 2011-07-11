@@ -16,7 +16,7 @@ var RhapVideo;
 	 */
 	RhapVideo = function(){
 		// constants
-		var swfLocation = 'http://blog.rhapsody.com/video/SlimVideoPlayer.swf';
+		var swfLocation = host+'SlimVideoPlayer.swf';
 		this.video;
 		var videoPlay25Percent, videoPlay50Percent, videoPlay75Percent;
 		var stringLimit = 17;
@@ -156,7 +156,7 @@ var RhapVideo;
 						flashvars['imageurl']=video.poster;
 					}
 					parent.append($('<div id="replaceMe"><p><a href="http://www.adobe.com/go/getflashplayer"><img src="http://www.adobe.com/images/shared/download_buttons/get_flash_player.gif" alt="Get Adobe Flash player" /></a></p></div>'));
-					swfobject.embedSWF("SlimVideoPlayer.swf", 'replaceMe', video.width, video.height, "9.0.0", false, flashvars, params, attributes);
+					swfobject.embedSWF(swfLocation, 'replaceMe', video.width, video.height, "9.0.0", false, flashvars, params, attributes);
 					$(video).remove();
 					var scope = this;
 					onFlashVideoPlayerLoaded = function(){

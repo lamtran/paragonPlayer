@@ -1,5 +1,5 @@
 //expose the RhapVideo class so it can be used outside of jQuery's scope
-
+jQuery.noConflict();
 var RhapVideo;
 (function($) {
 	/**
@@ -324,12 +324,20 @@ var RhapVideo;
 			var scope = this;
 			$(bigPlayButton).click(function(e){
 				e.preventDefault();
-				// $(scope.video).hide();
-				//video.play();
+				if(scope.video.readyState>scope.video.HAVE_CURRENT_DATA){
+					scope._play(scope.video,{
+						width: video.width,
+						height: video.height
+					});
+				}else{
+					alert('problem fetching video stream...'+scope.video.readyState+' vs ' + scope.video.HAVE_CURRENT_DATA);
+				}
+				/*
 				scope._play(video,{
 					width: video.width,
 					height: video.height
 				});
+				*/
 			});
 		};
 		this._hideVideoArea = function(video){

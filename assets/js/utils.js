@@ -1,3 +1,4 @@
+jQuery.noConflict();
 var host='http://labs.rhapsody.com/paragon/harness/';
 var analyticsCode = localStorage['analyticscode'] ? localStorage['analyticscode'] : 'UA-225770-1';//'UA-5860230-6';
 var _gaq = _gaq || [];
@@ -24,14 +25,14 @@ function endsWith(str,endsWithThis) {
 	return (str.match(endsWithThis+"$")==endsWithThis);
 }
 
-$.generateId = function() {
+jQuery.generateId = function() {
 	return arguments.callee.prefix + arguments.callee.count++;
 };
-$.generateId.prefix = 'jq$';
-$.generateId.count = 0;
-$.fn.generateId = function() {
+jQuery.generateId.prefix = 'jq$';
+jQuery.generateId.count = 0;
+jQuery.fn.generateId = function() {
 	return this.each( function() {
-		this.id = $.generateId();
+		this.id = jQuery.generateId();
 	});
 };
 jQuery.fn.aPosition = function() {
@@ -103,7 +104,7 @@ function supportsH264Codec(v) {
 	if (!supportsVideo(v)) {
 		return false;
 	}
-	return $(v).has('source[type=\'video/mp4; codecs="avc1.42E01E, mp4a.40.2"\']').length>0 && v.canPlayType('video/mp4; codecs="avc1.42E01E, mp4a.40.2"');
+	return jQuery(v).has('source[type=\'video/mp4; codecs="avc1.42E01E, mp4a.40.2"\']').length>0 && v.canPlayType('video/mp4; codecs="avc1.42E01E, mp4a.40.2"');
 }
 
 /**
@@ -114,7 +115,7 @@ function supportsVp8Codec(v) {
 	if (!supportsVideo(v)) {
 		return false;
 	}
-	return $(v).has('source[type=\'video/webm; codecs="vp8, vorbis"\']').length>0 && v.canPlayType('video/webm; codecs="vp8, vorbis"');
+	return jQuery(v).has('source[type=\'video/webm; codecs="vp8, vorbis"\']').length>0 && v.canPlayType('video/webm; codecs="vp8, vorbis"');
 }
 
 /**
@@ -125,7 +126,7 @@ function supportsTheoraCodec(v) {
 	if (!supportsVideo(v)) {
 		return false;
 	}
-	return $(v).has('source[type=\'video/ogg; codecs="theora, vorbis"\']').length>0 && v.canPlayType('video/ogg; codecs="theora, vorbis"');
+	return jQuery(v).has('source[type=\'video/ogg; codecs="theora, vorbis"\']').length>0 && v.canPlayType('video/ogg; codecs="theora, vorbis"');
 }
 
 function supportsWebStorage(){
@@ -134,12 +135,12 @@ function supportsWebStorage(){
 
 function getSupportedVideoSource(v,videoIndex,forcedFlash) {
 	var match = {};
-	$($('.rhapRelatedVideos')[videoIndex]).siblings('source').each( function(index,source) {
+	jQuery(jQuery('.rhapRelatedVideos')[videoIndex]).siblings('source').each( function(index,source) {
 		if(!renderHtml5Video(v) || forcedFlash){
 			if(source.type=='video/mp4; codecs="vp6"') {
-				match['server'] = $(source).attr('data-server');
+				match['server'] = jQuery(source).attr('data-server');
 				match['type'] = source.type;
-				match['src'] = $(source).attr('data-src');
+				match['src'] = jQuery(source).attr('data-src');
 				return false;
 			}
 		}else{
@@ -170,9 +171,9 @@ function getSupportedVideoSource(v,videoIndex,forcedFlash) {
 }
 function getMp4Src(v) {
 	var src='';
-	$(v).children('source').each( function(index,source) {
+	jQuery(v).children('source').each( function(index,source) {
 		if(source.type=='video/mp4; codecs="avc1.42E01E, mp4a.40.2"') {
-			src = $(source).attr('src');
+			src = jQuery(source).attr('src');
 			return false;
 		}
 	});
@@ -180,33 +181,33 @@ function getMp4Src(v) {
 }
 function getSupportedRelatedVideoSource(v,relatedVideo,forcedFlash) {
 	var match = {};
-	$(relatedVideo).children('span').each( function(index,source) {
+	jQuery(relatedVideo).children('span').each( function(index,source) {
 		if(!renderHtml5Video(v) || forcedFlash){
-			if($(source).attr('data-type')=='video/mp4; codecs="vp6"') {
-				match['server'] = $(source).attr('data-server');
-				match['type'] = $(source).attr('data-type');
-				match['src'] = $(source).attr('data-src');
+			if(jQuery(source).attr('data-type')=='video/mp4; codecs="vp6"') {
+				match['server'] = jQuery(source).attr('data-server');
+				match['type'] = jQuery(source).attr('data-type');
+				match['src'] = jQuery(source).attr('data-src');
 				return false;
 			}
 		}else{
 			if(supportsH264Codec(v)) {
-				if($(source).attr('data-type')=='video/mp4; codecs="avc1.42E01E, mp4a.40.2"') {
-					match['src'] = $(source).attr('data-src');
-					match['type'] = $(source).attr('data-type');
+				if(jQuery(source).attr('data-type')=='video/mp4; codecs="avc1.42E01E, mp4a.40.2"') {
+					match['src'] = jQuery(source).attr('data-src');
+					match['type'] = jQuery(source).attr('data-type');
 					return false;
 				}
 			}
 			if(supportsVp8Codec(v)) {
-				if($(source).attr('data-type')=='video/webm; codecs="vp8, vorbis"') {
-					match['src'] = $(source).attr('data-src');
-					match['type'] = $(source).attr('data-type');
+				if(jQuery(source).attr('data-type')=='video/webm; codecs="vp8, vorbis"') {
+					match['src'] = jQuery(source).attr('data-src');
+					match['type'] = jQuery(source).attr('data-type');
 					return false;
 				}
 			}
 			if(supportsTheoraCodec(v)) {
-				if($(source).attr('data-type')=='video/ogg; codecs="theora, vorbis"') {
-					match['src'] = $(source).attr('data-src');
-					match['type'] = $(source).attr('data-type');
+				if(jQuery(source).attr('data-type')=='video/ogg; codecs="theora, vorbis"') {
+					match['src'] = jQuery(source).attr('data-src');
+					match['type'] = jQuery(source).attr('data-type');
 					return false;
 				}
 			}
@@ -399,7 +400,7 @@ toggleMoreBtn = function(canvas,direction) {
 	context.stroke();
 };
 function drawCommonControlsHelper(parent,video) {
-	parent.append($(
+	parent.append(jQuery(
 	'<div class="rhapVideoMoreControls">'+
 	'<ul>'+
 	'<li><a href="#" class="rhapVideoRelatedBtn">related</a></li>'+
@@ -410,7 +411,7 @@ function drawCommonControlsHelper(parent,video) {
 	'</div>'
 	));
 
-	parent.append($(
+	parent.append(jQuery(
 	'<div class="rhapVideoSharePanel">'+
 	'<h2 class="panelHeader">Share</h2>'+
 	'<div class="rhapVideoSharePanelContent">'+
@@ -424,7 +425,7 @@ function drawCommonControlsHelper(parent,video) {
 	'<a href="#" class="rhapVideoSharePanelCloseButton">Close</a>'+
 	'</div>'
 	));
-	parent.append($(
+	parent.append(jQuery(
 	'<div class="rhapVideoEmbedPanel">'+
 	'<h2 class="panelHeader">Embed</h2>'+
 	'<div class="rhapVideoSharePanelContent">'+
@@ -461,7 +462,7 @@ function drawCommonControlsHelper(parent,video) {
 	'<a href="#" class="rhapVideoEmbedPanelCloseButton">Close</a>'+
 	'</div>'
 	));
-	parent.append($(
+	parent.append(jQuery(
 	'<div class="toast">'+
 	'<span class="toastMessage">loading...</span>'+
 	'</div>'
@@ -477,7 +478,7 @@ function drawRelatedVideosHelper(parent,relatedVideos,video) {
 		relatedVideoHtml+='<li><a href="'+v.src+'" '+serverStr+' data-width="'+v.width+'" data-height="'+v.height+'" data-type="'+v.type+'"><img src="'+v.poster+'"/></a>' +
 		'<a href="'+v.src+'" data-width="'+v.width+'" data-height="'+v.height+'" data-type="'+v.type+'" class="relatedVideoTitle">'+v.title+'</a></li>';
 	}
-	parent.append($(
+	parent.append(jQuery(
 	'<div class="rhapVideoRelatedPanel">'+
 	'<h2 class="panelHeader">Related Videos</h2>'+
 	'<div class="rhapVideoSharePanelContent">'+

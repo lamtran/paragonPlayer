@@ -169,10 +169,10 @@ function getSupportedVideoSource(v,videoIndex,forcedFlash) {
 	});
 	return match;
 }
-function getMp4Src(v) {
+function getMp4MobileSrc(v) {
 	var src='';
 	jQuery(v).children('source').each( function(index,source) {
-		if(source.type=='video/mp4; codecs="avc1.42E01E, mp4a.40.2"') {
+		if(jQuery(source).attr('data-mobile')=='true') {
 			src = jQuery(source).attr('src');
 			return false;
 		}
@@ -435,7 +435,7 @@ function drawCommonControlsHelper(parent,video) {
 	'<code>'+
 	'&lt;!-- player\'s styles --&gt;'+
 	'&lt;link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.14/themes/flick/jquery-ui.css" media="screen" rel="stylesheet" type="text/css" /&gt;'+
-	'&lt;link href="assets/css/rhapVideo.css" media="screen" rel="stylesheet" type="text/css" /&gt;'+
+	'&lt;link href="'+host+'assets/css/rhapVideo.css" media="screen" rel="stylesheet" type="text/css" /&gt;'+
 	'&lt;!-- player\'s libraries --&gt;'+
 	'&lt;script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"&gt;&lt;/script&gt;'+
 	'&lt;script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.14/jquery-ui.min.js"&gt;&lt;/script&gt;'+

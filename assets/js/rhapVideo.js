@@ -993,7 +993,7 @@ var RhapVideo;
 						if(!v.ended && !v.paused){
 							// alert('palaying');
 						}else{
-							v.src=getMp4Src(v);
+							v.src=getMp4MobileSrc(v);
 							v.load();
 							v.play();
 						}

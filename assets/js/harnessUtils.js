@@ -8,6 +8,9 @@ function buildVideoPlayer(config,container){
 		if(firstVideo.mp4){
 			sources+='<source src="'+firstVideo.mp4+'" type=\'video/mp4; codecs="avc1.42E01E, mp4a.40.2"\' />';
 		}
+		if(firstVideo['mp4mobile']){
+			sources+='<source src="'+firstVideo['mp4mobile']+'" type=\'video/mp4; codecs="avc1.42E01E, mp4a.40.2"\' data-mobile="true"/>';
+		}
 		if(firstVideo.webm){
 			sources+='<source src="'+firstVideo.webm+'" type=\'video/webm; codecs="vp8, vorbis"\' />';
 		}
@@ -24,6 +27,9 @@ function buildVideoPlayer(config,container){
 			relatedVideoMarkup += '<div title="'+relatedVideo.title+'" class="rhapRelatedVideo" data-width="640" data-height="360" data-poster="'+relatedVideo.poster+'">';
 			if(relatedVideo.mp4){
 				relatedVideoMarkup += '<span class="rhapRelatedVideoSource" data-src="'+relatedVideo.mp4+'" data-type=\'video/mp4; codecs="avc1.42E01E, mp4a.40.2"\'></span>';
+			}
+			if(relatedVideo['mp4mobile']){
+				relatedVideoMarkup += '<span class="rhapRelatedVideoSource" data-src="'+relatedVideo['mp4mobile']+'" data-type=\'video/mp4; codecs="avc1.42E01E, mp4a.40.2"\' data-mobile="true"></span>';
 			}
 			if(relatedVideo.webm){
 				relatedVideoMarkup += '<span class="rhapRelatedVideoSource" data-src="'+relatedVideo.webm+'" data-type=\'video/webm; codecs="vp8, vorbis"\'></span>';
@@ -62,6 +68,9 @@ function upgradeDbFrom1To2(){
 	for (i in vids) {
 		objectStore.add(vids[i]);
 	}
+}
+function upgradeFrom2To3(){
+	
 }
 function writeToDb() {
 	var transaction = db.transaction(["customers"], IDBTransaction.READ_WRITE);
@@ -108,10 +117,14 @@ function renderVideosFromDb(savedVideos){
 	}
 }
 function renderVideoItemHelper(data){
+	if(!data['mp4mobile']){
+		data['mp4mobile']='';
+	}
 	return jQuery('<li><ul>'+
 			'<li><label style="font-weight:bold">title</label><input type="text" value="'+data.title+'" class="text ui-widget-content ui-corner-all"/></li>'+
 			'<li><label>poster</label><input type="text" value="'+data.poster+'" class="text ui-widget-content ui-corner-all"/></li>'+
 			'<li><label>mp4</label><input type="text" value="'+data.mp4+'" class="text ui-widget-content ui-corner-all"/></li>'+
+			'<li><label>mp4mobile</label><input type="text" value="'+data['mp4mobile']+'" class="text ui-widget-content ui-corner-all"/></li>'+
 			'<li><label>webm</label><input type="text" value="'+data.webm+'" class="text ui-widget-content ui-corner-all"/></li>'+
 			'<li><label>ogg</label><input type="text" value="'+data.ogg+'" class="text ui-widget-content ui-corner-all"/></li>'+
 			'<li><label>flv server</label><input type="text" value="'+data.flv.server+'" class="text ui-widget-content ui-corner-all"/></li>'+
@@ -262,23 +275,26 @@ function getDataFromVideoListItem(listItem){
 	data['title']=jQuery(items[0]).children('input').val();
 	data['poster']=jQuery(items[1]).children('input').val();
 	data['mp4']=jQuery(items[2]).children('input').val();
-	data['webm']=jQuery(items[3]).children('input').val();
-	data['ogg']=jQuery(items[4]).children('input').val();
+	data['mp4mobile']=jQuery(items[3]).children('input').val();
+	data['webm']=jQuery(items[4]).children('input').val();
+	data['ogg']=jQuery(items[5]).children('input').val();
 	data['flv']={};
-	data.flv['server']=jQuery(items[5]).children('input').val();
-	data.flv['src']=jQuery(items[6]).children('input').val();
+	data.flv['server']=jQuery(items[6]).children('input').val();
+	data.flv['src']=jQuery(items[7]).children('input').val();
 	return data;
 }
 function videoDataEquals(one,two){
 	initFlv(one);
 	initFlv(two);
 	return one.title==two.title && one.poster==two.poster
+		&& one['mp4mobile']==two['mp4mobile']
 		&& one.mp4==two.mp4 && one.webm==two.webm
 		&& one.ogg==two.ogg && one.flv.server==two.flv.server && one.flv.src==two.flv.src;
 }
 function videoDataUpdate(one,two){
 	one.title=two.title;
 	one.mp4=two.mp4;
+	one['mp4mobile']=two['mp4mobile'];
 	one.webm=two.webm;
 	one.ogg=two.ogg;
 	one.poster=two.poster;

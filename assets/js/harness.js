@@ -42,9 +42,12 @@ request.onsuccess = function(event) {
 					objectStore.add(configData[i]);
 				}
 				upgradeDbFrom1To2();
+				upgradeDbFrom2To3();
 			}else if(oldVersion==1){
 				// console.log('upgrade to latest from ' + oldVersion + ' to '+dbVersion);
 				upgradeDbFrom1To2();
+			}else if(oldVersion==2){
+				upgradeDbFrom2To3();
 			}
 		};
 	}

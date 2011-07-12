@@ -1,256 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="utf-8" />
-<title>Rhapsody Video Player</title>
-<script type="text/javascript">this.window.name = "rhapsody";
-var rhapsodyURL = "http://www.rhapsody.com";
-var rhapsodyBID = "856791910";
-var staticPath = "http://static.rhap.com/rotw/";
-var signUpURL = "http://rhapsodytracking.real.com/account/signup";
-var shopURL = "http://shop.rhapsody.com";
-var upsellURL = "http://www.rhapsody.com/upgradesAndTrialsNoCC.html";
-var cartUrl = "http://mp3.rhapsody.com/viewcart.html";
-var storeUrl = "http://mp3.rhapsody.com";
-</script> 
-<script language="javascript" type="text/javascript"> 
-function get_random()
-{
-    var AdRanNum = Math.floor(Math.random()*10000000000);
-    return AdRanNum;
-}
-</script> 
-<link title="Rhapsody Online" rel="search" type="application/opensearchdescription+xml" href="http://www.rhapsody.com/-search/browsersearch.xml?bid=856791910"></link> 
-<link rel="icon" type="image/x-icon" href="http://static.rhap.com/rotw/images/favicon.ico?bid=856791910"></link> 
-<link rel="shortcut icon" type="image/x-icon" href="http://static.rhap.com/rotw/images/favicon.ico?bid=856791910"></link> 
-<!--
-<link rel="stylesheet" type="text/css" href="http://static.rhap.com/rotw/css/rotw.css?bid=856791910"></link>
-<link rel="stylesheet" type="text/css" href="http://www.rhapsody.com/css/parsedCss.css?bid=856791910"></link>
---> 
-<script src="http://static.rhap.com/rotw/js/prototype.js?bid=856791910" type="text/javascript"></script> 
-<script src="http://static.rhap.com/rotw/js/playlistManager.js?bid=856791910" type="text/javascript"></script> 
-<script src="http://static.rhap.com/rotw/js/artistSearchManager.js?bid=856791910" type="text/javascript"></script> 
-<script src="http://static.rhap.com/rotw/js/playlist.js?bid=856791910" type="text/javascript"></script> 
-<script src="http://static.rhap.com/rotw/js/libraryManager.js?bid=856791910" type="text/javascript"></script> 
-<script src="http://static.rhap.com/rotw/js/ratingsManager.js?bid=856791910" type="text/javascript"></script> 
-<script src="http://static.rhap.com/rotw/js/cookie.js?bid=856791910" type="text/javascript"></script> 
-<script src="http://www.rhapsody.com/simple.js?bid=856791910" type="text/javascript"></script> 
-<script src="http://playback.rhapsody.com/-static/players/popout/popout.js?bid=856791910" type="text/javascript"></script> 
-<script src="http://static.rhap.com/rotw/js/global.js?bid=856791910" type="text/javascript"></script> 
-<script src="http://static.rhap.com/rotw/js/dui.js?bid=856791910" type="text/javascript"></script> 
-<script src="http://static.rhap.com/rotw/js/shoppingCartManager.js?bid=856791910" type="text/javascript"></script> 
-<script type="text/javascript"> 
-var attempedPersonalization = false;
-function writePersonalizationAndCustomization( defaultToCanned, doCustomization ){
-var rhapAuthGuid = CookieManager.getCookie("RhapWeb.RhapAuth",CookieManager.PERMANENT_USER);
-var rhapSubType = 'nst';
-try{ rhapSubType = CookieManager.getCookieMemberByName( "RhapWeb.RhapUser", "subtype", CookieManager.PERMANENT_USER ) } catch(e){};
-var rhapMemberEntitlementCode = CookieManager.getCookieMemberByName( "RhapWeb.RhapMember", "entitlement-code", CookieManager.PERMANENT_USER );
-var rhapMemberUsersPartner = null;
-try{ rhapMemberUsersPartner = rhapsodyMember.getMemberAttribute( "usersPartner" ); }catch(e){}
-var rhapMemberUsersPartnerKey = rhapMemberUsersPartner?rhapMemberUsersPartner:"default";
-var cobrandPartnerPcode = CookieManager.getCookieMemberByName("cobrandpartner", "pcode");
-var cobrandPartnerPcodeKey = cobrandPartnerPcode?cobrandPartnerPcode:"default";
-var hasRhapX = CookieManager.getCookie( "rhapwebPluginInstalled", CookieManager.PERMANENT );
-var fileName = doCustomization?'customization':'personalization';
-var cacheKey ='ecode='+rhapMemberEntitlementCode+"_"+rhapSubType+'&'+
-rhapAuthGuid+
-'&bid=856791910'+
-'&userspartner='+rhapMemberUsersPartnerKey+
-'&pcode='+cobrandPartnerPcodeKey;
-cacheKey = cacheKey.replace( /09/g, "0_9_" );
-var docWriteTheScript = function(){
-document.write('<scr'+'ipt type="text/javascript" src="'+rhapsodyURL+'/js/'+fileName+'.js?'+ cacheKey +'">');
-document.write('<\/scr'+'ipt>');
-if( !doCustomization ) attempedPersonalization = true;
-}
-if( rhapMemberEntitlementCode == null || typeof rhapMemberEntitlementCode == 'undefined' ) rhapMemberEntitlementCode = 0;
-if( ( rhapAuthGuid == null || ( typeof rhapAuthGuid == 'undefined' ) || rhapAuthGuid == "" || defaultToCanned ) && !doCustomization ){
-rhapsodyMember = new Member();
-with( rhapsodyMember ){
-setMemberAttribute( "entitlementCode", 0 );
-setMemberAttribute( "guid", "0" );
-setMemberAttribute( "isLoggedIn", false );
-setMemberAttribute( "isAnonymousUser", false );
-setMemberAttribute( "isPremiumUser", false );
-setMemberAttribute( "isRadioPremiumUser", false );
-setMemberAttribute( "isShowNoAds", false );
-setMemberAttribute( "isRhapsodyToGo", false );
-setMemberAttribute( "payment", "n" );
-setMemberAttribute( "hasRhapX", CookieManager.getCookie( "rhapwebPluginInstalled", CookieManager.PERMANENT )? CookieManager.getCookie( "rhapwebPluginInstalled", CookieManager.PERMANENT ): false );
-setMemberAttribute( "rhapXVersion", CookieManager.getCookie( "rhapwebPluginVersion", CookieManager.PERMANENT )?CookieManager.getCookie( "rhapwebPluginVersion", CookieManager.PERMANENT ):null );
-setMemberAttribute( "hasRhapF", ( CookieManager.getCookie( "rhapwebFlashInstalled", CookieManager.PERMANENT ) ) ?true:false );
-setMemberAttribute( "rhapFVersion", ( CookieManager.getCookie( "rhapwebFlashInstalled", CookieManager.PERMANENT ) ) ?CookieManager.getCookie( "rhapwebFlashInstalled", CookieManager.PERMANENT ):null );
-setMemberAttribute( "hasDlm", ( CookieManager.getCookie( "RhapDLInstalled" ) && CookieManager.getCookie( "RhapDLInstalled" ) != 0
-) ?true:false );
-setMemberAttribute( "dlmVersion", ( CookieManager.getCookie( "RhapDLInstalled" ) && CookieManager.getCookie( "RhapDLInstalled" ) != 0
-) ?CookieManager.getCookie( "RhapDLInstalled" ):null );
-setMemberAttribute( "hasPurchasedMusic", CookieManager.hasCookie( "hasPurchasedMusic", CookieManager.PERMANENT )?CookieManager.hasCookie( "hasPurchasedMusic", CookieManager.PERMANENT ):false );
-setMemberAttribute( "isUS", null );
-setMemberAttribute( "cobrandPartner", CookieManager.getCookieMemberByName( "cobrandpartner", "pcode" )? CookieManager.getCookieMemberByName( "cobrandpartner", "pcode" ): "" );
-setMemberAttribute( "cpath", CookieManager.getCookieMemberByName( "cobrandpartner", "cpath" )? CookieManager.getCookieMemberByName( "cobrandpartner", "cpath" ): "" );
-setMemberAttribute( "ocode", CookieManager.getCookieMemberByName( "cobrandpartner", "ocode" )?CookieManager.getCookieMemberByName( "cobrandpartner", "ocode" ):"" );
-setMemberAttribute( "rsrc", CookieManager.getCookieMemberByName( "cobrandpartner", "rsrc") ? CookieManager.getCookieMemberByName( "cobrandpartner", "rsrc" ): "" );
-setMemberAttribute( "lsrc", CookieManager.getCookieMemberByName( "rntrack", "lsrc" )? CookieManager.getCookieMemberByName( "rntrack", "lsrc" ): "" );
-setMemberAttribute( "Browser.os", RhapsodyUtility.getBrowserOs() );
-setMemberAttribute( "isCanned", true );
-setMemberAttribute( "objectBornOn", new Date( 1231432691837 ) );
-}
-RhapsodyPersonalization = {
-TopNavBar: {
-accountMessage: "Create a New Account",
-signoutTitle: "",
-signinTitle: "Sign In"
-},
-ArtistPageDiscography: {
-doHideArt: CookieManager.getCookieMemberByName('RhapWeb.RhapPrefs', 'hideart', CookieManager.PERMANENT ) == 'true',
-sortBy: CookieManager.getCookieMemberByName('RhapWeb.RhapPrefs', 'sortby', CookieManager.PERMANENT ),
-doShowAvailableOnly: function(){
-var availableOnly = CookieManager.getCookieMemberByName('RhapWeb.RhapPrefs', 'avail', CookieManager.PERMANENT );
-if( ( availableOnly == 'true' ) || ( availableOnly == null ) ){
-return true;
-} else return false;
-}
-},
-AdvertisingValues: {
-dartKeyValuesString: "",
-dartKeyValuesObjectArray: new Array,
-dartKeyValuesHash: new Array,
-_buildDartKeyValuesString: function(){
-var delimiter = ";";
-for( var i=0; i < this.dartKeyValuesObjectArray.length; i++ ){
-var kvName = this.dartKeyValuesObjectArray[i].kvName;
-var kvValue = this.dartKeyValuesObjectArray[i].kvValue;
-if( kvValue != null && kvValue !== '' ){
-this.dartKeyValuesString += ( kvName + "=" + kvValue + delimiter );
-this._appendToDartKeyValuesHash( kvName, kvValue );
-}
-}
-},
-_appendToDartKeyValuesHash: function( kvName, kvValue ){
-this.dartKeyValuesHash[ kvName ] = kvValue;
-},
-init: function( kvArray ){
-this.dartKeyValuesObjectArray = kvArray;
-this._buildDartKeyValuesString();
-return this.dartKeyValuesString;
-}
-}
-}
-RhapsodyPlayer.setTrackingCodes( rhapsodyMember.getMemberAttribute( "cobrandPartner" ), rhapsodyMember.getMemberAttribute( "cpath" ), rhapsodyMember.getMemberAttribute( "ocode" ) );
-RhapsodyPersonalization.AdvertisingValues.init(
-new Array(
-{ kvName: "subplan", kvValue: rhapsodyMember.getMemberAttribute( "entitlementCode" ) },
-{ kvName: "pmt", kvValue: rhapsodyMember.getMemberAttribute( "payment" ) },
-{ kvName: "login", kvValue: rhapsodyMember.getMemberAttribute( "isLoggedIn" ) },
-{ kvName: "rhapx", kvValue: rhapsodyMember.getMemberAttribute( "hasRhapX" ) },
-{ kvName: "pluginversion", kvValue: rhapsodyMember.getMemberAttribute( "rhapXVersion" ) },
-{ kvName: "anon", kvValue: rhapsodyMember.getMemberAttribute( "isAnonymousUser" ) },
-{ kvName: "g", kvValue: rhapsodyMember.getMemberAttribute( "genderAsNumeric" ) },
-{ kvName: "by", kvValue: rhapsodyMember.getMemberAttribute( "birthYear" ) },
-{ kvName: "initial", kvValue: rhapsodyMember.getMemberAttribute( "initialLetter" ) },
-{ kvName: "pcode", kvValue: (rhapsodyMember.getMemberAttribute( "cobrandPartner" )) ? rhapsodyMember.getMemberAttribute( "cobrandPartner" ) : "false" }
-)
-);
-RhapsodyUtility.addLoadEvent( function(){
-var memberCookieGroup = new CookieGroup("RhapWeb");
-memberCookieGroup.appendToCookie("RhapMember", new Array(
-{ cookieName:"cpath", cookieValue: rhapsodyMember.getMemberAttribute( "cpath" ) },
-{ cookieName:"opage", cookieValue: "" },
-{ cookieName:"rsrc", cookieValue: rhapsodyMember.getMemberAttribute( "rsrc" ) },
-{ cookieName:"pcode", cookieValue: rhapsodyMember.getMemberAttribute( "cobrandPartner" ) },
-{ cookieName:"lsrc", cookieValue: rhapsodyMember.getMemberAttribute( "lsrc" ) },
-{ cookieName:"entitlement-code", cookieValue: "0" },
-{ cookieName:"logged-in", cookieValue: "false" },
-{ cookieName:"is-anon", cookieValue: "false" },
-{ cookieName:"username", cookieValue: "null" },
-{ cookieName:"premium-user", cookieValue: "false" },
-{ cookieName:"radio-premium-user", cookieValue: "false" }
-), null, CookieManager.PERMANENT_USER
-);
-});
-} else {
-docWriteTheScript();
-}
-}
-writePersonalizationAndCustomization( false );
-</script> 
-<script type="text/javascript"> 
-if( ( typeof rhapsodyMember == 'undefined' ) && attempedPersonalization ) writePersonalizationAndCustomization( true );
-</script> 
-<script type="text/javascript"> 
-/* */
-writePersonalizationAndCustomization( false, true );
-</script> 
-<script type="text/javascript"> 
-/* */
-try{
-if( RhapsodyCustomization && RhapsodyCustomization.addOverrideCssFile )
-if( RhapsodyUtility.isArray( RhapsodyCustomization.addOverrideCssFile ) ){
-for( var i=0; i < RhapsodyCustomization.addOverrideCssFile.length; i++ ){
-document.write( '<link rel="stylesheet" type="text/css" href="'+staticPath+'css/partner/'+RhapsodyCustomization.addOverrideCssFile[i]+'.css?bid=856791910"\/>' );
-}
-} else document.write( '<link rel="stylesheet" type="text/css" href="'+staticPath+'css/partner/'+RhapsodyCustomization.PARTNER_KEY+'.css?bid=856791910"\/>' );
-} catch(e){}
-</script> 
-<script type="text/javascript"> 
-RhapsodyAdvertisement.forceAdsPremium = true;
-</script> 
-<script type="text/javascript"> 
-with( RhapsodyTracking ){
-setAccountId( "realrhapsodypr" );
-setCategory( "Common" );
-setPageName( "Common: Shared Header" );
-setEnvironment( "production" );
-setSiteCode( "rotw" );
-if( ( typeof rhapsodyMember != 'undefined' ) && rhapsodyMember ){
-setRhapsodyMember( rhapsodyMember );
-setCustomMetric( "lsrc", rhapsodyMember.getMemberAttribute( "lsrc" ) );
-};
-setCustomMetric( "defaultClientName", "rhapx" );
-setCustomMetric( "pageId", "rotw.shared.head-tags-module-with-reporting-pagename" );
-executeRegisteredInitCallbacks();
-}
-</script> 
-<!-- End Rhapsody Header --> 
- 
-		<link rel="prev bookmark" href="http://blog.rhapsody.com/2008/07/curtis-of-arabia.html" title="Curtis of Arabia" /> 
-		<link rel="next bookmark" href="http://blog.rhapsody.com/2008/07/rhapsody-song-of-the-day-122.html" title="Rhapsody Song of the Day" /> 
-	<!-- player's styles -->
-	<link href="assets/css/jquery-ui.css" media="screen" rel="stylesheet" type="text/css" />
-	<link href="assets/css/rhapVideo.css" media="screen" rel="stylesheet" type="text/css" />
-	<!-- player's libraries -->
-	<script type="text/javascript" src="assets/js/jquery.1.6.2.min.js"></script>
-	<script type="text/javascript" src="assets/js/jquery-ui.1.8.14.min.js"></script>
-	<script type="text/javascript" src="assets/js/swfobject.2.2.js"></script>
-	<!-- social -->
-	<script type="text/javascript" src="assets/js/FB.Share.js" ></script>
-	<script type="text/javascript" src="assets/js/twitter.widgets.js"></script>
-	<script type="text/javascript" src="assets/js/buzz.button.js"></script>
-	<!-- player code -->
-	<script type="text/javascript" src="assets/js/AStoJS.js"></script>
-	<script type="text/javascript" src="assets/js/utils.js"></script>
-	<script type="text/javascript" src="assets/js/rhapVideo.js"></script>
-	
-</head>
-<body>
-<h1 class="header"><!--<img alt="logo" src="assets/images/header_logo.jpg"/>--><span></span></h1>
-			<div id="harnessContainer" style="margin: 0 auto;width:640px">
-				<!-- // BEGIN VIDEO PLAYER MARKUP /// -->
-				<!--  width="640" height="264" -->
-				<!--  width="320" height="240" -->
-				<!-- <source src="rtmp://flashplay.rbn.com/a41/d1/rstone/rstone/" type='video/mp4; codecs="vp6"' title="download/flash/RSGG/KnuxFinal"/> 
-				
-			        <source type="video/webm" src="http://videos-cdn.mozilla.net/brand/Mozilla_Firefox_Manifesto_v0.2_640.webm"></source>
-			        <source type="video/webm; codecs=&quot;vp8, vorbis&quot;" src="http://video-js.zencoder.com/oceans-clip.webm"></source>
-			        <source type='video/webm; codecs="vp8, vorbis"' src="http://video-js.zencoder.com/oceans-clip.webm"></source>
-				-->
-				<video width="640" height="480" data-preferred-width="640" data-preferred-height="480" poster="videos/oceans-clip.png" title="Oceans Clip" data-forced-size="true" data-forced-flash="false" data-popout="false">
-			        <source src="videos/oceans-clip.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"' />
-			        <source src="videos/oceans-clip.iphone.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"' data-mobile="true" />
-			        <source src="videos/oceans-clip.webm" type='video/webm; codecs="vp8, vorbis"' />
-			        <source src="videos/oceans-clip.ogv" type='video/ogg; codecs="theora, vorbis"' />
-			        <source data-server="rtmp://lamtran.com:1935/vod/" type='video/mp4; codecs="vp6"' data-src="oceans-clip"/>
+	<head>
+		<meta charset="utf-8" />
+		<title>Rhapsody Video Player</title>
+		<!-- player's styles -->
+		<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.14/themes/flick/jquery-ui.css" media="screen" rel="stylesheet" type="text/css" />
+		<link href="http://labs.rhapsody.com/paragon/harness/assets/css/rhapVideo.css" media="screen" rel="stylesheet" type="text/css" />
+		<!-- player's libraries -->
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.14/jquery-ui.min.js"></script>
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"></script>
+		<!-- social -->
+		<script src="http://static.ak.fbcdn.net/connect.php/js/FB.Share" type="text/javascript"></script>
+		<script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>
+		<script type="text/javascript" src="http://www.google.com/buzz/api/button.js"></script>
+		<!-- player code -->
+		<script type="text/javascript" src="http://labs.rhapsody.com/paragon/harness/assets/js/AStoJS.js"></script>
+		<script type="text/javascript" src="http://labs.rhapsody.com/paragon/harness/assets/js/utils.js"></script>
+		<script type="text/javascript" src="http://labs.rhapsody.com/paragon/harness/assets/js/rhapVideo.js"></script>
+	</head>
+	<body>
+		<h1 class="header">
+		<!--<img alt="logo" src="assets/images/header_logo.jpg"/>-->
+		<span></span>
+		</h1>
+		<div id="harnessContainer" style="margin: 0 auto;width:640px">
+			<!-- // BEGIN VIDEO PLAYER MARKUP /// -->
+			<!--  width="640" height="264" -->
+			<!--  width="320" height="240" -->
+			<!-- <source src="rtmp://flashplay.rbn.com/a41/d1/rstone/rstone/" type='video/mp4; codecs="vp6"' title="download/flash/RSGG/KnuxFinal"/>
+
+			<source type="video/webm" src="http://videos-cdn.mozilla.net/brand/Mozilla_Firefox_Manifesto_v0.2_640.webm"></source>
+			<source type="video/webm; codecs=&quot;vp8, vorbis&quot;" src="http://video-js.zencoder.com/oceans-clip.webm"></source>
+			<source type='video/webm; codecs="vp8, vorbis"' src="http://video-js.zencoder.com/oceans-clip.webm"></source>
+			<video width="560" height="315" data-preferred-width="560" data-preferred-height="315" poster="http://blog.rhapsody.com/Rhapsody_Radar_Kreayshawn_Interview_560x315.jpg" title="Rhapsody Radar: Kreayshawn " data-forced-flash="true" data-popout="true">
+			<source data-server="rtmp://rhapsodyev-001.fcod.llnwd.net/a4376/v1/rhapsodytv/" type='video/mp4; codecs="vp6"' data-src="OnTheRecord/On_the_Record_Ximena_Sarinana_Talks_John_Lennon"/>
+			<div class="rhapRelatedVideos">
+	        	<div title="Cutting Edge" class="rhapRelatedVideo" data-width="640" data-height="360" data-poster="videos/Cutting-Edge-640.jpg">
+	        		<span class="rhapRelatedVideoSource" data-src="videos/Cutting-Edge-640.mp4" data-type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'></span>
+	        		<span class="rhapRelatedVideoSource" data-src="videos/Cutting-Edge-640.webm" data-type='video/webm; codecs="vp8, vorbis"'></span>
+	        		<span class="rhapRelatedVideoSource" data-src="videos/Cutting-Edge-640.ogv" data-type='video/ogg; codecs="theora, vorbis"'></span>
+	        		<span class="rhapRelatedVideoSource" data-server="rtmp://lamtran.com:1935/vod/" data-src="Cutting-Edge-640" data-type='video/mp4; codecs="vp6"'></span>
+	        	</div>
+	        	<div title="Features" class="rhapRelatedVideo" data-width="640" data-height="360" data-poster="videos/FF4_Jess3Features_VO_1.jpg">
+	        		<span class="rhapRelatedVideoSource" data-src="videos/FF4_Jess3Features_VO_1.mp4" data-type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'></span>
+	        		<span class="rhapRelatedVideoSource" data-src="videos/FF4_Jess3Features_VO_1.webm" data-type='video/webm; codecs="vp8, vorbis"'></span>
+	        		<span class="rhapRelatedVideoSource" data-src="videos/FF4_Jess3Features_VO_1.ogv" data-type='video/ogg; codecs="theora, vorbis"'></span>
+	        		<span class="rhapRelatedVideoSource" data-server="rtmp://lamtran.com:1935/vod/" data-src="FF4_Jess3Features_VO_1" data-type='video/mp4; codecs="vp6"'></span>
+	        	</div>
+	        	<div title="Mobile Addons" class="rhapRelatedVideo" data-width="640" data-height="360" data-poster="videos/Mobile-Addons-640.jpg">
+	        		<span class="rhapRelatedVideoSource" data-src="videos/Mobile-Addons-640.mp4" data-type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'></span>
+	        		<span class="rhapRelatedVideoSource" data-src="videos/Mobile-Addons-640.webm" data-type='video/webm; codecs="vp8, vorbis"'></span>
+	        		<span class="rhapRelatedVideoSource" data-src="videos/Mobile-Addons-640.ogv" data-type='video/ogg; codecs="theora, vorbis"'></span>
+	        		<span class="rhapRelatedVideoSource" data-server="rtmp://lamtran.com:1935/vod/" data-src="Mobile-Addons-640" data-type='video/mp4; codecs="vp6"'></span>
+	        	</div>
+	        	<div title="Manifesto" class="rhapRelatedVideo" data-width="640" data-height="360" data-poster="videos/Mozilla_Firefox_Manifesto_v0.2_640.jpg">
+	        		<span class="rhapRelatedVideoSource" data-src="videos/Mozilla_Firefox_Manifesto_v0.2_640.mp4" data-type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'></span>
+	        		<span class="rhapRelatedVideoSource" data-src="videos/Mozilla_Firefox_Manifesto_v0.2_640.webm" data-type='video/webm; codecs="vp8, vorbis"'></span>
+	        		<span class="rhapRelatedVideoSource" data-src="videos/Mozilla_Firefox_Manifesto_v0.2_640.ogv" data-type='video/ogg; codecs="theora, vorbis"'></span>
+	        		<span class="rhapRelatedVideoSource" data-server="rtmp://lamtran.com:1935/vod/" data-src="Mozilla_Firefox_Manifesto_v0.2_640" data-type='video/mp4; codecs="vp6"'></span>
+	        	</div>
+	        	<div title="Meet The Cubs" class="rhapRelatedVideo" data-width="640" data-height="360" data-poster="videos/meetthecubs.jpg">
+	        		<span class="rhapRelatedVideoSource" data-src="videos/meetthecubs.mp4video.mp4" data-type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'></span>
+	        		<span class="rhapRelatedVideoSource" data-src="videos/meetthecubs.webm" data-type='video/webm; codecs="vp8, vorbis"'></span>
+	        		<span class="rhapRelatedVideoSource" data-src="videos/meetthecubs.ogv" data-type='video/ogg; codecs="theora, vorbis"'></span>
+	        		<span class="rhapRelatedVideoSource" data-server="rtmp://lamtran.com:1935/vod/" data-src="meetthecubs" data-type='video/mp4; codecs="vp6"'></span>
+	        	</div>
+	        	<div title="Dart Moor" class="rhapRelatedVideo" data-width="640" data-height="360" data-poster="videos/dartmoor.jpg">
+	        		<span class="rhapRelatedVideoSource" data-src="videos/dartmoor.mp4" data-type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'></span>
+	        		<span class="rhapRelatedVideoSource" data-src="videos/dartmoor.webmvp8.webm" data-type='video/webm; codecs="vp8, vorbis"'></span>
+	        		<span class="rhapRelatedVideoSource" data-src="videos/dartmoor.ogv" data-type='video/ogg; codecs="theora, vorbis"'></span>
+	        		<span class="rhapRelatedVideoSource" data-server="rtmp://lamtran.com:1935/vod/" data-src="dartmoor" data-type='video/mp4; codecs="vp6"'></span>
+	        	</div>
+	        </div>
+			</video>
+			-->
+			<video width="640" height="480" data-preferred-width="640" data-preferred-height="480" poster="http://lamtran.com/oceans-clip.png" title="Oceans Clip" data-forced-size="true" data-forced-flash="false" data-popout="false">
+			        <source src="http://lamtran.com/oceans-clip.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"' />
+			        <source src="http://lamtran.com/oceans-clip.iphone.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"' data-mobile="true" />
+			        <source src="http://lamtran.com/oceans-clip.webm" type='video/webm; codecs="vp8, vorbis"' />
+			        <source src="http://lamtran.com/oceans-clip.ogv" type='video/ogg; codecs="theora, vorbis"' />
+			        <source data-server="rtmp://rhapsodyev-001.fcod.llnwd.net/a4376/v1/rhapsodytv/" type='video/mp4; codecs="vp6"' data-src="OnTheRecord/On_the_Record_Ximena_Sarinana_Talks_John_Lennon"/>
 			        <div class="rhapRelatedVideos">
 			        	<div title="Cutting Edge" class="rhapRelatedVideo" data-width="640" data-height="360" data-poster="videos/Cutting-Edge-640.jpg">
 			        		<span class="rhapRelatedVideoSource" data-src="videos/Cutting-Edge-640.mp4" data-type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"'></span>
@@ -290,7 +120,46 @@ executeRegisteredInitCallbacks();
 			        	</div>
 			        </div>
 			   </video>
-			</div>
-   <!-- /////////////////// END VIDEO PLAYER MARK UP // -->
-</body>
+			   <object width="640" height="480" id="flashid_1310422622965" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" reportPlay='function () { 
+     return eval(instance.CallFunction("<invoke name=\""+name+"\" returntype=\"javascript\">" + __flash__argumentsToXML(arguments,0) + "</invoke>"));
+   }' loadVideo='function () { 
+     return eval(instance.CallFunction("<invoke name=\""+name+"\" returntype=\"javascript\">" + __flash__argumentsToXML(arguments,0) + "</invoke>"));
+   }' toggleMoreBtn='function () { 
+     return eval(instance.CallFunction("<invoke name=\""+name+"\" returntype=\"javascript\">" + __flash__argumentsToXML(arguments,0) + "</invoke>"));
+   }' pause='function () { 
+     return eval(instance.CallFunction("<invoke name=\""+name+"\" returntype=\"javascript\">" + __flash__argumentsToXML(arguments,0) + "</invoke>"));
+   }' isPaused='function () { 
+     return eval(instance.CallFunction("<invoke name=\""+name+"\" returntype=\"javascript\">" + __flash__argumentsToXML(arguments,0) + "</invoke>"));
+   }'><param name="scale" value="noscale" /><param name="menu" value="false" /><param name="allowscriptaccess" value="always" /><param name="allowFullScreen" value="true" /><param name="analyticstrackcode" value="UA-5860230-6" /><param name="wmode" value="opaque" /><param name="flashvars" value="width=640&height=480&server=rtmp://rhapsodyev-001.fcod.llnwd.net/a4376/v1/rhapsodytv/&path=OnTheRecord/On_the_Record_Ximena_Sarinana_Talks_John_Lennon&videoIndex=0&analyticstrackcode=UA-5860230-6&imageurl=http://lamtran.com/oceans-clip.png" /><param name="movie" value="http://labs.rhapsody.com/paragon/harness/SlimVideoPlayer.swf" /></object>
+			<object width="560" height="315" id="flashid_1310421909357" classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" reportPlay='function () {
+			return eval(instance.CallFunction("<invoke name=\""+name+"\" returntype=\"javascript\">" + __flash__argumentsToXML(arguments,0) + "</invoke>"));
+			}' loadVideo='function () {
+			return eval(instance.CallFunction("<invoke name=\""+name+"\" returntype=\"javascript\">" + __flash__argumentsToXML(arguments,0) + "</invoke>"));
+			}' toggleMoreBtn='function () {
+			return eval(instance.CallFunction("<invoke name=\""+name+"\" returntype=\"javascript\">" + __flash__argumentsToXML(arguments,0) + "</invoke>"));
+			}' pause='function () {
+			return eval(instance.CallFunction("<invoke name=\""+name+"\" returntype=\"javascript\">" + __flash__argumentsToXML(arguments,0) + "</invoke>"));
+			}' isPaused='function () {
+			return eval(instance.CallFunction("<invoke name=\""+name+"\" returntype=\"javascript\">" + __flash__argumentsToXML(arguments,0) + "</invoke>"));
+			}'>
+				<param name="scale" value="noscale" />
+				<param name="menu" value="false" />
+				<param name="allowscriptaccess" value="always" />
+				<param name="allowFullScreen" value="true" />
+				<param name="analyticstrackcode" value="UA-5860230-6" />
+				<param name="wmode" value="opaque" />
+				<param name="flashvars" value="width=560&height=315&server=rtmp://rhapsodyev-001.fcod.llnwd.net/a4376/v1/rhapsodytv/&path=OnTheRecord/On_the_Record_Ximena_Sarinana_Talks_John_Lennon&videoIndex=0&analyticstrackcode=UA-5860230-6&imageurl=http://blog.rhapsody.com/Rhapsody_Radar_Kreayshawn_Interview_560x315.jpg" />
+				<param name="movie" value="http://labs.rhapsody.com/paragon/harness/SlimVideoPlayer.swf" />
+			</object>
+			<object name="SlimVideoPlayer" width="640" height="480" align="middle" id="SlimVideoPlayer" classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" type="application/x-shockwave-flash">
+				<param name="movie" value="SlimVideoPlayer.swf" />
+				<param name="quality" value="high" />
+				<param name="bgcolor" value="#869ca7" />
+				<param name="allowScriptAccess" value="sameDomain" />
+				<param name="allowFullScreen" value="true" />
+				<param name="flashvars" value="width=640&height=480&analyticstrackcode=UA-5860230-6&server=rtmp://rhapsodyev-001.fcod.llnwd.net/a4376/v1/rhapsodytv/&path=RhapsodyRadar/Rhapsody_Radar_Kreayshawn_interview_2011" />
+			</object>
+		</div>
+		<!-- /////////////////// END VIDEO PLAYER MARK UP // -->
+	</body>
 </html>

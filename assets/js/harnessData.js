@@ -3,6 +3,7 @@ var vids = [
 	title:"Oceans Clip",
 	poster:"http://lamtran.com/oceans-clip.png",
 	mp4:"http://lamtran.com/oceans-clip.mp4",
+	mp4mobile:"http://lamtran.com/oceans-clip.iphone.mp4",
 	webm:"http://lamtran.com/oceans-clip.webm",
 	ogg:"http://lamtran.com/oceans-clip.ogv",
 	flv:{
@@ -13,6 +14,7 @@ var vids = [
 	title:"Cutting Edge",
 	poster:"http://lamtran.com/Cutting-Edge-640.jpg",
 	mp4:"http://lamtran.com/Cutting-Edge-640.mp4",
+	mp4mobile:"http://lamtran.com/Cutting-Edge-640.iphone.mp4",
 	webm:"http://lamtran.com/Cutting-Edge-640.webm",
 	ogg:"http://lamtran.com/Cutting-Edge-640.ogv",
 	flv:{
@@ -23,6 +25,7 @@ var vids = [
 	title:"Features",
 	poster:"http://lamtran.com/FF4_Jess3Features_VO_1.jpg",
 	mp4:"http://lamtran.com/FF4_Jess3Features_VO_1.mp4",
+	mp4mobile:"http://lamtran.com/FF4_Jess3Features_VO_1.iphone.mp4",
 	webm:"http://lamtran.com/FF4_Jess3Features_VO_1.webm",
 	ogg:"http://lamtran.com/FF4_Jess3Features_VO_1.ogv",
 	flv:{
@@ -33,6 +36,7 @@ var vids = [
 	title:"Mobile Addons",
 	poster:"http://lamtran.com/Mobile-Addons-640.jpg",
 	mp4:"http://lamtran.com/Mobile-Addons-640.mp4",
+	mp4mobile:"http://lamtran.com/Mobile-Addons-640.iphone.mp4",
 	webm:"http://lamtran.com/Mobile-Addons-640.webm",
 	ogg:"http://lamtran.com/Mobile-Addons-640.ogv",
 	flv:{
@@ -43,6 +47,7 @@ var vids = [
 	title:"Manifesto",
 	poster:"http://lamtran.com/Mozilla_Firefox_Manifesto_v0.2_640.jpg",
 	mp4:"http://lamtran.com/Mozilla_Firefox_Manifesto_v0.2_640.mp4",
+	mp4mobile:"http://lamtran.com/Mozilla_Firefox_Manifesto_v0.2_640.iphone.mp4",
 	webm:"http://lamtran.com/Mozilla_Firefox_Manifesto_v0.2_640.webm",
 	ogg:"http://lamtran.com/Mozilla_Firefox_Manifesto_v0.2_640.ogv",
 	flv:{
@@ -53,6 +58,7 @@ var vids = [
 	title:"Meet the cubs",
 	poster:"http://lamtran.com/meetthecubs.jpg",
 	mp4:"http://lamtran.com/meetthecubs.mp4video.mp4",
+	mp4mobile:"http://lamtran.com/meetthecubs.mp4video.iphone.mp4",
 	webm:"http://lamtran.com/meetthecubs.webm",
 	ogg:"http://lamtran.com/meetthecubs.ogv",
 	flv:{
@@ -63,6 +69,7 @@ var vids = [
 	title:"Dart Moor",
 	poster:"http://lamtran.com/dartmoor.jpg",
 	mp4:"http://lamtran.com/dartmoor.mp4",
+	mp4mobile:"http://lamtran.com/dartmoor.iphone.mp4",
 	webm:"http://lamtran.com/dartmoor.webmvp8.webm",
 	ogg:"http://lamtran.com/dartmoor.ogv",
 	flv:{

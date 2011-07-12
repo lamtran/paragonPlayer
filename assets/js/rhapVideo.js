@@ -16,7 +16,7 @@ var rhapVideoPlayerSetUp = function(){
 		/*******************************
 		 * set up html5 video for mobile devices
 		 **************************************/
-		$('video').each(function(index,video){
+		jQuery('video').each(function(index,video){
 			video.controls=true;
 			jQuery(video).click(function(e){
 				var v = e.target;

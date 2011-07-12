@@ -1,6 +1,88 @@
-//expose the RhapVideo class so it can be used outside of jQuery's scope
 jQuery.noConflict();
+
+var videos=[];
 var RhapVideo;
+var rhapVideoPlayerSetUp = function(){
+	/***************
+	 * sniff browser
+	 * **************/
+	var ua = navigator.userAgent;
+	var checker = {
+		iphone: ua.match(/(iPhone|iPod|iPad)/),
+		blackberry: ua.match(/BlackBerry/),
+		android: ua.match(/Android/)
+	};
+	if (checker.android || checker.iphone || checker.blackberry) {
+		/*******************************
+		 * set up html5 video for mobile devices
+		 **************************************/
+		$('video').each(function(index,video){
+			video.controls=true;
+			jQuery(video).click(function(e){
+				var v = e.target;
+				if(rhapVideoSupportsVideo(v)){
+					if(!v.ended && !v.paused){
+						// alert('playing');
+					}else{
+						v.src=rhapVideoGetMp4MobileSrc(v);
+						v.load();
+						v.play();
+					}
+				}else{
+					document.location = rhapVideoGetMp4MobileSrc(v);
+				}
+			});
+		});
+	} else {
+		/************************************
+		 * set up video player for browsers
+		 ************************************/
+		jQuery('video').each(function(index,video){
+			videos.push(new RhapVideo().init(index,video));
+		});
+	}
+}
+/**
+ * @description method to detect video element support in current browser
+ * @static
+ */
+var rhapVideoSupportsVideo = function(v) {
+	return !!v.canPlayType;
+}
+var rhapVideoGetMp4MobileSrc = function(v) {
+	var src='';
+	$(v).children('source').each( function(index,source) {
+		if($(source).attr('data-mobile')=='true') {
+			src = $(source).attr('src');
+			return false;
+		}
+	});
+	return src;
+}
+/**
+ * methods exposed to Flash
+ */
+function rhapVideoShowMore(videoIndex){
+	videos[videoIndex].showMoreControls();
+}
+function rhapVideoShowLess(videoIndex){
+	videos[videoIndex].hideMoreControls();
+}
+function rhapVideoOnFlashVideoPlayerLoaded(){
+	//overwrite this
+	//console.log('onflashvideoplayerloaded!');
+}
+function rhapVideoOnFlashLog(msg){
+	//console.log('fromFlash: ' + msg);
+}
+function rhapVideoHideMoreControls(videoIndex){
+	var vid = videos[videoIndex];
+	if(vid.isShowMore){
+		vid.showLess();
+	}
+}
+
+//video player definitions
 (function($) {
 	/**
 	 * Convention:
@@ -356,7 +438,7 @@ var RhapVideo;
 		}
 		this.bindVideoEvents = function(video){
 			var scope = this;
-			$(video).bind('timeupdate',jQuery.proxy(this.seekUpdate,this))
+			$(video).bind('timeupdate',$.proxy(this.seekUpdate,this))
 			.bind('durationchange',function(){
 				videoPlay25Percent = Math.round((video.duration/100)*25);
 				videoPlay50Percent = Math.round((video.duration/100)*50);
@@ -977,36 +1059,609 @@ var RhapVideo;
 			context.fill();
 		};
 	};
-	$(function(){
-		var ua = navigator.userAgent;
-		var checker = {
-			iphone: ua.match(/(iPhone|iPod|iPad)/),
-			blackberry: ua.match(/BlackBerry/),
-			android: ua.match(/Android/)
-		};
-		if (checker.android || checker.iphone || checker.blackberry) {
-			$('video').each(function(index,video){
-				video.controls=true;
-				$(video).click(function(e){
-					var v = e.target;
-					if(supportsVideo(v)){
-						if(!v.ended && !v.paused){
-							// alert('palaying');
-						}else{
-							v.src=getMp4MobileSrc(v);
-							v.load();
-							v.play();
-						}
-					}else{
-						document.location = getMp4Src(v);
-					}
-				});
-			});
-		} else {
-			$('video').each(function(index,video){
-				videos.push(new RhapVideo().init(index,video));
-			});
+	
+	/** utils
+	 * ***********************************************************/
+	var host='http://labs.rhapsody.com/paragon/harness/';
+	var analyticsCode = localStorage['analyticscode'] ? localStorage['analyticscode'] : 'UA-225770-1';//'UA-5860230-6';
+	/**
+	 * @description method to check if a string starts with another string
+	 * @static
+	 */
+	var startsWith = function(str,startsWithThis) {
+		return (str.match("^"+startsWithThis)==startsWithThis);
+	}
+	
+	var endsWith = function(str,endsWithThis) {
+		return (str.match(endsWithThis+"$")==endsWithThis);
+	}
+	
+	var printTimeRanges = function(tr) {
+		if (tr == null)
+			return "undefined";
+		s= tr.length + ": ";
+		for (i=0; i<tr.length; i++) {
+			s += tr.start(i) + " - " + tr.end(i) + "; ";
 		}
-
+		return s;
+	}
+	
+	/**
+	 * @description catch-all method to allow logging on all browsers
+	 * @static
+	 * @param event
+	 */
+	var log = function(event) {
+		if (!event) {
+			return;
+		}
+		if (typeof event == "string") {
+			event = {
+				type: event
+			};
+		}
+		if (event.type) {
+			this.history.push(event.type);
+		}
+		if (this.history.length >= 50) {
+			this.history.shift();
+		}
+		try {
+			console.log(event.type);
+		} catch(e) {
+			try {
+				opera.postError(event.type);
+			} catch(e) {
+			}
+		}
+	}
+	
+	/** feature detection
+	 * ************************************************************/
+	/**
+	 * @description method to detect h264 codec support in current browser
+	 * @static
+	 */
+	var supportsH264Codec = function(v) {
+		if (!rhapVideoSupportsVideo(v)) {
+			return false;
+		}
+		return $(v).has('source[type=\'video/mp4; codecs="avc1.42E01E, mp4a.40.2"\']').length>0 && v.canPlayType('video/mp4; codecs="avc1.42E01E, mp4a.40.2"');
+	}
+	
+	/**
+	 * @description method to detect vp8 support in current browser
+	 * @static
+	 */
+	var supportsVp8Codec = function(v) {
+		if (!rhapVideoSupportsVideo(v)) {
+			return false;
+		}
+		return $(v).has('source[type=\'video/webm; codecs="vp8, vorbis"\']').length>0 && v.canPlayType('video/webm; codecs="vp8, vorbis"');
+	}
+	
+	/**
+	 * @description method to detect theora codec support in current browser
+	 * @static
+	 */
+	var supportsTheoraCodec = function(v) {
+		if (!rhapVideoSupportsVideo(v)) {
+			return false;
+		}
+		return $(v).has('source[type=\'video/ogg; codecs="theora, vorbis"\']').length>0 && v.canPlayType('video/ogg; codecs="theora, vorbis"');
+	}
+	
+	var supportsWebStorage = function(){
+		return window.localStorage;
+	}
+	
+	var getSupportedVideoSource = function(v,videoIndex,forcedFlash) {
+		var match = {};
+		$($('.rhapRelatedVideos')[videoIndex]).siblings('source').each( function(index,source) {
+			if(!renderHtml5Video(v) || forcedFlash){
+				if(source.type=='video/mp4; codecs="vp6"') {
+					match['server'] = $(source).attr('data-server');
+					match['type'] = source.type;
+					match['src'] = $(source).attr('data-src');
+					return false;
+				}
+			}else{
+				if(supportsH264Codec(v)) {
+					if(source.type=='video/mp4; codecs="avc1.42E01E, mp4a.40.2"') {
+						match['src'] = source.src;
+						match['type'] = source.type;
+						return false;
+					}
+				}
+				if(supportsVp8Codec(v)) {
+					if(source.type=='video/webm; codecs="vp8, vorbis"') {
+						match['src'] = source.src;
+						match['type'] = source.type;
+						return false;
+					}
+				}
+				if(supportsTheoraCodec(v)) {
+					if(source.type=='video/ogg; codecs="theora, vorbis"') {
+						match['src'] = source.src;
+						match['type'] = source.type;
+						return false;
+					}
+				}
+			}
+		});
+		return match;
+	}
+	var getSupportedRelatedVideoSource = function(v,relatedVideo,forcedFlash) {
+		var match = {};
+		$(relatedVideo).children('span').each( function(index,source) {
+			if(!renderHtml5Video(v) || forcedFlash){
+				if($(source).attr('data-type')=='video/mp4; codecs="vp6"') {
+					match['server'] = $(source).attr('data-server');
+					match['type'] = $(source).attr('data-type');
+					match['src'] = $(source).attr('data-src');
+					return false;
+				}
+			}else{
+				if(supportsH264Codec(v)) {
+					if($(source).attr('data-type')=='video/mp4; codecs="avc1.42E01E, mp4a.40.2"') {
+						match['src'] = $(source).attr('data-src');
+						match['type'] = $(source).attr('data-type');
+						return false;
+					}
+				}
+				if(supportsVp8Codec(v)) {
+					if($(source).attr('data-type')=='video/webm; codecs="vp8, vorbis"') {
+						match['src'] = $(source).attr('data-src');
+						match['type'] = $(source).attr('data-type');
+						return false;
+					}
+				}
+				if(supportsTheoraCodec(v)) {
+					if($(source).attr('data-type')=='video/ogg; codecs="theora, vorbis"') {
+						match['src'] = $(source).attr('data-src');
+						match['type'] = $(source).attr('data-type');
+						return false;
+					}
+				}
+			}
+		});
+		return match;
+	}
+	
+	/**
+	 * @description method to detect canvas element support in current browser
+	 * @static
+	 */
+	var supportsCanvas = function() {
+		return !!document.createElement('canvas').getContext;
+	}
+	
+	/**
+	 * @description A utility function to convert from degrees to radians
+	 */
+	var rads = function(x) {
+		return Math.PI*x/180;
+	}
+	
+	/**
+	 * @description method to check whether to render an html5 <video> element
+	 * @private
+	 */
+	var renderHtml5Video = function(v) {
+		return rhapVideoSupportsVideo(v) &&
+		(supportsH264Codec(v) || supportsVp8Codec(v)  || supportsTheoraCodec(v));
+	};
+	/**
+	 * DRAW UTILS
+	 */
+	/**
+	 * @description helper to draw a triangle
+	 * @param context
+	 * @param width
+	 * @param height
+	 * @param padding
+	 * @returns {___anonymous3214_3277}
+	 */
+	var drawTriangle = function(context,width,height,padding) {
+		var x1 = padding/2 + 1.3*width/4;
+		var y1 = height/4 + padding;
+		var x2 = -padding + 3.2*width/4;
+		var y2 = height/2;
+		var x3 = padding/2 + 1.3*width/4;
+		var y3 = 3*height/4 - padding;
+		context.beginPath();
+		context.moveTo(x1, y1);
+		context.lineTo(x2, y2 );
+		context.lineTo(x3, y3);
+		context.closePath();
+		return {
+			x1:x1,
+			y1:y1,
+			x2:x2,
+			y2:y2,
+			x3:x3,
+			y3:y3
+		};
+	}
+	
+	/**
+	 * @description helper to draw a large, less flattened triangle
+	 * @param context
+	 * @param width
+	 * @param height
+	 * @param padding
+	 * @returns {___anonymous3889_3952}
+	 */
+	var drawLargeTriangle = function(context,width,height,padding) {
+	
+		var x1 = padding/2 + 1.5*width/4;
+		var y1 = height/4 + padding;
+		var x2 = -padding + 3*width/4;
+		var y2 = height/2;
+		var x3 = padding/2 + 1.5*width/4;
+		var y3 = 3*height/4 - padding;
+		context.beginPath();
+		context.moveTo(x1, y1);
+		context.lineTo(x2, y2 );
+		context.lineTo(x3, y3);
+		context.closePath();
+		return {
+			x1:x1,
+			y1:y1,
+			x2:x2,
+			y2:y2,
+			x3:x3,
+			y3:y3
+		};
+	}
+	
+	var drawPauseLeftBar = function(context, width,height) {
+		var barWidth = width/6;
+		var barHeight = 14;
+		var xOffset = 1.2;
+		var yOffset = 1;
+		var x1 = width/4+xOffset;
+		var y1 = height/4+xOffset+yOffset;
+		var x2 = width/4+xOffset+barWidth;
+		var y2 = height/4+xOffset+yOffset;
+		var x3 = width/4+xOffset+barWidth;
+		var y3 = height/4+xOffset+barHeight-yOffset;
+		var x4 = width/4+xOffset;
+		var y4 = height/4+xOffset+barHeight-yOffset;
+		context.beginPath();
+		context.moveTo(x1, y1);
+		context.lineTo(x2, y2 );
+		context.lineTo(x3, y3);
+		context.lineTo(x4, y4);
+		context.closePath();
+		return {
+			x1:x1,
+			y1:y1,
+			x2:x2,
+			y2:y2,
+			x3:x2,
+			y3:y3
+		};
+	}
+	
+	var drawRoundRect = function(ctx, x, y, width, height, radius) {
+		ctx.beginPath();
+		ctx.moveTo(x + radius, y);
+		ctx.lineTo(x + width - radius, y);
+		ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+		ctx.lineTo(x + width, y + height - radius);
+		ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+		ctx.lineTo(x + radius, y + height);
+		ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+		ctx.lineTo(x, y + radius);
+		ctx.quadraticCurveTo(x, y, x + radius, y);
+		ctx.closePath();
+	}
+	
+	var drawPauseRightBar = function(context, width,height) {
+		var barWidth = width/6;
+		var barHeight = 14;
+		var xOffset = 1.2;
+		var yOffset = 1;
+		var x1 = width/4+xOffset+barWidth+3;
+		var y1 = height/4+xOffset+yOffset;
+		var x2 = width/4+xOffset+barWidth+barWidth+3;
+		var y2 = height/4+xOffset+yOffset;
+		var x3 = width/4+xOffset+barWidth+barWidth+3;
+		var y3 = height/4+xOffset+barHeight-yOffset;
+		var x4 = width/4+xOffset+barWidth+3;
+		var y4 = height/4+xOffset+barHeight-yOffset;
+		context.beginPath();
+		context.moveTo(x1, y1);
+		context.lineTo(x2, y2 );
+		context.lineTo(x3, y3);
+		context.lineTo(x4, y4);
+		context.closePath();
+		return {
+			x1:x1,
+			y1:y1,
+			x2:x2,
+			y2:y2,
+			x3:x2,
+			y3:y3
+		};
+	}
+	
+	var toggleMoreBtn = function(canvas,direction) {
+		if(direction==null) {
+			direction = 'up';
+		}
+		var context = canvas.getContext('2d');
+		var width = 18;
+		var height = 18;
+		var directionOffset = direction=='up' ? height/3 +1: 2*height/3-1;
+		var yOffset = direction=='up' ? height/2 + 1: height/2 - 1;
+		context.fillStyle='#29ABE2';
+		context.lineWidth = 1;
+		context.beginPath();
+		context.arc(width/2, height/2, 8, 0, Math.PI * 2, true);
+		context.fill();
+		context.closePath();
+	
+		context.lineWidth = 3;
+		context.strokeStyle= '#0C303F';
+		context.beginPath();
+		context.moveTo(width/4,yOffset);
+		context.lineTo(width/2,directionOffset);
+		context.lineTo(3*width/4,yOffset);
+		context.stroke();
+	};
+	var drawCommonControlsHelper = function(parent,video) {
+		parent.append($(
+		'<div class="rhapVideoMoreControls">'+
+		'<ul>'+
+		'<li><a href="#" class="rhapVideoRelatedBtn">related</a></li>'+
+		//'<li><a href="#">cc</a></li>'+
+		'<li><a href="#" class="rhapVideoEmbedBtn">embed</a></li>'+
+		'<li><a href="#" class="rhapVideoShareBtn">share</a></li>'+
+		'</ul>'+
+		'</div>'
+		));
+	
+		parent.append($(
+		'<div class="rhapVideoSharePanel">'+
+		'<h2 class="panelHeader">Share</h2>'+
+		'<div class="rhapVideoSharePanelContent">'+
+		'<span>Get URL:&nbsp;</span><input type="text" class="rhapVideoShareUrl"/>'+
+		'<ul>'+
+		'<li><a name="fb_share" type="button_count">Share</a><script src="http://static.ak.fbcdn.net/connect.php/js/FB.Share" type="text/javascript"></script></li>'+
+		'<li><a href="http://twitter.com/share" class="twitter-share-button" data-count="none">Tweet</a><script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script></li>'+
+		'<li><a title="Post to Google Buzz" class="google-buzz-button" href="http://www.google.com/buzz/post" data-button-style="small-button"></a><script type="text/javascript" src="http://www.google.com/buzz/api/button.js"></script></li>'+
+		'</ul>'+
+		'</div>'+
+		'<a href="#" class="rhapVideoSharePanelCloseButton">Close</a>'+
+		'</div>'
+		));
+		parent.append($(
+		'<div class="rhapVideoEmbedPanel">'+
+		'<h2 class="panelHeader">Embed</h2>'+
+		'<div class="rhapVideoSharePanelContent">'+
+		//'<textarea class="rhapVideoEmbedCode">'+
+		'<h3>Put these in the &lt;head&gt; section of your webpage</h3>'+
+		'<p>'+
+		'<code>'+
+		'&lt;!-- player\'s styles --&gt;'+
+		'&lt;link href="http://ajax.googleapis.com/ajax/libs/$ui/1.8.14/themes/flick/$-ui.css" media="screen" rel="stylesheet" type="text/css" /&gt;'+
+		'&lt;link href="'+host+'assets/css/rhapVideo.css" media="screen" rel="stylesheet" type="text/css" /&gt;'+
+		'&lt;!-- player\'s libraries --&gt;'+
+		'&lt;script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/$/1.6.2/$.min.js"&gt;&lt;/script&gt;'+
+		'&lt;script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/$ui/1.8.14/$-ui.min.js"&gt;&lt;/script&gt;'+
+		'&lt;script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/swfobject/2.2/swfobject.js"&gt;&lt;/script&gt;'+
+		'&lt;!-- social --&gt;'+
+		'&lt;script src="http://static.ak.fbcdn.net/connect.php/js/FB.Share" type="text/javascript"&gt;&lt;/script&gt;'+
+		'&lt;script type="text/javascript" src="http://platform.twitter.com/widgets.js"&gt;&lt;/script&gt;'+
+		'&lt;script type="text/javascript" src="http://www.google.com/buzz/api/button.js"&gt;&lt;/script&gt;'+
+		'&lt;!-- player code --&gt;'+
+		'&lt;script type="text/javascript" src="'+host+'assets/js/AStoJS.js"&gt;&lt;/script&gt;'+
+		'&lt;script type="text/javascript" src="'+host+'assets/js/utils.js"&gt;&lt;/script&gt;'+
+		'&lt;script type="text/javascript" src="'+host+'assets/js/rhapVideo.js"&gt;&lt;/script&gt;'+
+		'</code>'+
+		'</p>'+
+		
+		'<h3>Put this where you want your video to appear in your page</h3>'+
+		'<p>'+
+		'<code class="embedcode">'+
+		'</code>'+
+		'</p>'+
+		'<p>For more information about this video player, please visit <a href="http://labs.rhapsody.com/videoplayer">Rhapsody Video Player</a>.</p>'+
+		//'</textarea>'+
+		'</div>'+
+		'<a href="#" class="rhapVideoEmbedPanelCloseButton">Close</a>'+
+		'</div>'
+		));
+		parent.append($(
+		'<div class="toast">'+
+		'<span class="toastMessage">loading...</span>'+
+		'</div>'
+		));
+	}
+	
+	var drawRelatedVideosHelper = function(parent,relatedVideos,video) {
+		var relatedVideoHtml = '';
+		var v,serverStr;
+		for(var i=0;i<relatedVideos.length;i++) {
+			v = relatedVideos[i];
+			serverStr = v['server'] ? 'data-server="'+v['server']+'"':'';
+			relatedVideoHtml+='<li><a href="'+v.src+'" '+serverStr+' data-width="'+v.width+'" data-height="'+v.height+'" data-type="'+v.type+'"><img src="'+v.poster+'"/></a>' +
+			'<a href="'+v.src+'" data-width="'+v.width+'" data-height="'+v.height+'" data-type="'+v.type+'" class="relatedVideoTitle">'+v.title+'</a></li>';
+		}
+		parent.append($(
+		'<div class="rhapVideoRelatedPanel">'+
+		'<h2 class="panelHeader">Related Videos</h2>'+
+		'<div class="rhapVideoSharePanelContent">'+
+		'<ul id="relatedVideosList" class="horizontalList">'+
+		relatedVideoHtml +
+		'</ul>'+
+		'</div>'+
+		'<a href="#" class="rhapVideoRelatedPanelCloseButton">Close</a>'+
+		'</div>'
+		));
+	}
+	
+	var drawFullScreenBtn = function(canvas) {
+		var context = canvas.getContext('2d');
+		var width = 20;
+		var height = 15;
+		var radius = 5;
+		var sides = 5;
+		context.fillStyle='#29ABE2';
+		context.lineWidth = 1;
+		drawRoundRect(context,width/4+0,height/4+1,width/2-0,height/2-2,2);
+		context.fill();
+	
+		context.beginPath();
+		context.moveTo(radius, 0);
+		context.lineTo(sides, 0);
+		context.lineTo(0, sides);
+		context.lineTo(0, radius);
+		context.quadraticCurveTo(0, 0, radius,0);
+		context.closePath();
+		context.fill();
+	
+		context.beginPath();
+		context.moveTo(width-radius, 0);
+		context.lineTo(width-sides, 0);
+		context.lineTo(width, sides);
+		context.lineTo(width, radius);
+		context.quadraticCurveTo(width, 0, width-radius,0);
+		context.closePath();
+		context.fill();
+	
+		context.beginPath();
+		context.moveTo(width, height-radius);
+		context.lineTo(width, height-sides);
+		context.lineTo(width-sides, height);
+		context.lineTo(width-radius, height);
+		context.quadraticCurveTo(width, height, width,height-radius);
+		context.closePath();
+		context.fill();
+	
+		context.beginPath();
+		context.moveTo(0, height-radius);
+		context.lineTo(0, height-sides);
+		context.lineTo(sides, height);
+		context.lineTo(radius, height);
+		context.quadraticCurveTo(0, height, 0,height-radius);
+		context.closePath();
+		context.fill();
+	};
+	var drawVolumeBtn = function(canvas) {
+		var context = canvas.getContext('2d');
+		var width = 10;
+		var height = 15;
+		context.beginPath();
+		context.moveTo(width,0);
+		context.lineTo(width-1,0);
+		context.lineTo(width/2,height/4);
+		context.lineTo(0,height/4);
+		context.lineTo(0,3*height/4);
+		context.lineTo(width/2,3*height/4);
+		context.lineTo(width-1,height);
+		context.lineTo(width,height);
+		context.closePath();
+	
+		context.fillStyle='#29ABE2';
+		context.lineWidth = 1;
+		context.fill();
+	
+		context.lineWidth = 1;
+		context.moveTo(width+2,3);
+		context.quadraticCurveTo(width+4,height/2,width+2,height-3);
+		context.fill();
+	
+		context.moveTo(width+4, 1);
+		context.quadraticCurveTo(width+9,height/2,width+4,height-1);
+		context.fill();
+	};
+	
+	var drawTimerLabel = function(timer, width, boxHeight,text) {
+		var canvas = timer[0];
+		var height = boxHeight-6;
+		var context = canvas.getContext('2d');
+		var x1 = 0;
+		var y1 = 0;
+		var x2 = width;
+		var y2 = 0;
+		var x3 = width;
+		var y3 = height;
+		var x4 = width/2+6;
+		var y4 = height;
+		var x5 = width/2;
+		var y5 = height+6;
+		var x6 = width/2-6;
+		var y6 = height;
+		var x7 = 0;
+		var y7 = height;
+		context.beginPath();
+		context.moveTo(x1, y1);
+		context.lineTo(x2, y2 );
+		context.lineTo(x3, y3);
+		context.lineTo(x4, y4);
+		context.lineTo(x5, y5);
+		context.lineTo(x6, y6);
+		context.lineTo(x7, y7);
+		context.closePath();
+	
+		var grad = context.createLinearGradient(x7,y7,x1,y1);
+		grad.addColorStop(0, '#5F6367');
+		grad.addColorStop(1, '#1D1E25');
+		context.fillStyle=grad;
+		context.lineWidth = 1;
+		context.strokeStyle= '#424242';
+		context.fill();
+		context.stroke();
+	
+		context.font = "10pt Arial";
+		context.fillStyle='#ffffff';//grad;
+		context.fillText(text,5,16);
+		context.stroke();
+	};
+	var drawPlayPauseButtonBackground = function(context,buttonCenterX,buttonCenterY){
+		context.beginPath();
+		context.arc(buttonCenterX,buttonCenterY,16,0,rads(360),false); 
+		context.closePath();
+		var lingrad = context.createLinearGradient(0,0,0,15);
+		lingrad.addColorStop(0, '#253036');
+		lingrad.addColorStop(1, '#8896A7');
+		context.fillStyle=lingrad;
+		context.lineWidth = 1; 
+		context.fill(); 
+		
+		context.beginPath();
+		context.arc(buttonCenterX,buttonCenterY,14, 0,rads(360),false); 
+		context.closePath();
+		var lingrad = context.createLinearGradient(0,0,0,15);
+		lingrad.addColorStop(0, '#F2F2F2');
+		lingrad.addColorStop(.52, '#C9C9C9');
+		lingrad.addColorStop(1, '#A6A6A6');
+		context.fillStyle=lingrad;
+		context.lineWidth = 2; 
+		context.strokeStyle= '#424242';
+		context.fill(); 
+		context.stroke(); 
+	};
+	
+	var _gaq = _gaq || [];
+	_gaq.push(['_setAccount', analyticsCode]);
+	//run on page loaded
+	$(function(){
+		/**********************
+		 * set up videos
+		 ********************/
+		rhapVideoPlayerSetUp();
+		/********************************
+		 * set up analytics
+		 ************************/
+		var ga = document.createElement('script');
+		ga.type = 'text/javascript';
+		ga.async = true;
+		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		var s = document.getElementsByTagName('script')[0];
+		s.parentNode.insertBefore(ga, s);
 	});
 })(jQuery);

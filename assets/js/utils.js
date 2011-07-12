@@ -1,9 +1,10 @@
 jQuery.noConflict();
+
 var host='http://labs.rhapsody.com/paragon/harness/';
 var analyticsCode = localStorage['analyticscode'] ? localStorage['analyticscode'] : 'UA-225770-1';//'UA-5860230-6';
-var _gaq = _gaq || [];
-_gaq.push(['_setAccount', analyticsCode]);
 (function() {
+	var _gaq = _gaq || [];
+	_gaq.push(['_setAccount', analyticsCode]);
 	var ga = document.createElement('script');
 	ga.type = 'text/javascript';
 	ga.async = true;
@@ -25,27 +26,6 @@ function endsWith(str,endsWithThis) {
 	return (str.match(endsWithThis+"$")==endsWithThis);
 }
 
-jQuery.generateId = function() {
-	return arguments.callee.prefix + arguments.callee.count++;
-};
-jQuery.generateId.prefix = 'jq$';
-jQuery.generateId.count = 0;
-jQuery.fn.generateId = function() {
-	return this.each( function() {
-		this.id = jQuery.generateId();
-	});
-};
-jQuery.fn.aPosition = function() {
-	thisLeft = this.offset().left;
-	thisTop = this.offset().top;
-	thisParent = this.parent();
-	parentLeft = thisParent.offset().left;
-	parentTop = thisParent.offset().top;
-	return {
-		left: thisLeft-parentLeft,
-		top: thisTop-parentTop
-	};
-};
 function printTimeRanges(tr) {
 	if (tr == null)
 		return "undefined";

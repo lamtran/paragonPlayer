@@ -1,4 +1,6 @@
 jQuery.noConflict();
+//whether this is on production or not
+var rhapVideoProd = false;
 
 var videos=[];
 var RhapVideo;
@@ -98,7 +100,7 @@ function rhapVideoHideMoreControls(videoIndex){
 	 */
 	RhapVideo = function(){
 		// constants
-		var swfLocation = host+'SlimVideoPlayer.swf';
+		var swfLocation = host+'SlimVideoPlayer.swf?t=' + new Date().getTime();
 		this.video;
 		var videoPlay25Percent, videoPlay50Percent, videoPlay75Percent;
 		var stringLimit = 17;
@@ -110,6 +112,7 @@ function rhapVideoHideMoreControls(videoIndex){
 		var rhapVideoMoreControls, rhapVideoSharePanel, rhapVideoShareBtn, rhapVideoShareUrl, rhapVideoSharePanelCloseButton;
 		var rhapVideoDuration, rhapVideoEmbedPanel, rhapVideoEmbedBtn, rhapVideoEmbedPanelCloseButton;
 		var rhapVideoRelatedBtn, rhapVideoRelatedPanel, rhapVideoRelatedPanelCloseButton;
+		var relatedCanvas;
 		this.toast;
 		var seekBarLeftOffset = 38;
 		var seekBarRightMargin = 132;//172;
@@ -201,6 +204,7 @@ function rhapVideoHideMoreControls(videoIndex){
 			if(!forcedFlash && renderHtml5Video(video)){
 				flashId=null;
 				this._drawLargePlayButton(video);
+				this._drawRelatedCanvas(video);
 				this._drawControls(video);
 				this._wireHtml5Events(video);
 			}else{
@@ -241,7 +245,7 @@ function rhapVideoHideMoreControls(videoIndex){
 					swfobject.embedSWF(swfLocation, 'replaceMe', video.width, video.height, "9.0.0", false, flashvars, params, attributes);
 					$(video).remove();
 					var scope = this;
-					onFlashVideoPlayerLoaded = function(){
+					rhapVideoOnFlashVideoPlayerLoaded = function(){
 						scope._drawCommonControls(scope.video,parent,relatedVideos);
 						scope._wireCommonEvents(scope.video);
 					};
@@ -706,11 +710,21 @@ function rhapVideoHideMoreControls(videoIndex){
 				if(!scope.isVideoPaused()){
 					scope.getVideo().pause();
 				}
+				$(controls).hide();
+				$(bigPlayButton).hide();
+				scope.showLess();
+				console.log(relatedCanvas);
+				var ctx = relatedCanvas.getContext('2d');
+				console.log(scope.getVideo().width+' h: ' + scope.getVideo().height);
+				console.log(scope.getVideo());
+				ctx.drawImage(scope.getVideo(),0,0,scope.getVideo().width,scope.getVideo().height);
+				/*
 				scope._hideVideoArea(scope.video);
 				rhapVideoRelatedPanel.slideDown('slow',function(){
 					rhapVideoRelatedPanelCloseButton.show();
 				});
-				scope.showLess();
+				*/
+				
 			});
 			$(rhapVideoRelatedPanelCloseButton).click(function(e){
 				e.preventDefault();
@@ -997,6 +1011,11 @@ function rhapVideoHideMoreControls(videoIndex){
 			context.fill(); 
 			context.stroke(); 
 		};
+		this._drawRelatedCanvas = function(video){
+			console.log('drawing related canas with: ' + video.width + ' - ' + video.height);
+			$(video).after($('<canvas class="relatedCanvas" width="'+video.width+'" height="'+video.height+'"></canvas>'));
+			relatedCanvas = $(video).next()[0];
+		};
 		/**
 		 * @description method to draw the large play button for html5 video player
 		 * @private
@@ -1015,14 +1034,13 @@ function rhapVideoHideMoreControls(videoIndex){
 				$(video).after($('<canvas class="bigPlayButton" width="'+bigButtonWidth+'px" height="'+bigButtonHeight+'px"></canvas>'));
 				bigPlayButton = $(video).next()[0];
 			}else{
-				bigPlayButton = $(video).next()[0];
+				bigPlayButton = parent.find('.bigPlayButton')[0];
 				bigPlayButton.width = bigButtonWidth;
 				bigPlayButton.height = bigButtonHeight;
 				$(bigPlayButton).show();
 			}
 			var bigButtonX = videoWidth/2-bigButtonWidth/2;
 			var bigButtonY = videoHeight/2-bigButtonHeight/2;
-			bigPlayButton = $(video).next()[0];
 			$(bigPlayButton).css({
 				'left':bigButtonX+'px',
 				'top':bigButtonY+'px',
@@ -1062,8 +1080,8 @@ function rhapVideoHideMoreControls(videoIndex){
 	
 	/** utils
 	 * ***********************************************************/
-	var host='http://labs.rhapsody.com/paragon/harness/';
-	var analyticsCode = localStorage['analyticscode'] ? localStorage['analyticscode'] : 'UA-225770-1';//'UA-5860230-6';
+	var host = rhapVideoProd ? 'http://labs.rhapsody.com/paragon/harness/' : '';
+	var analyticsCode = localStorage['analyticscode'] ? localStorage['analyticscode'] : rhapVideoProd ? 'UA-225770-1' : 'UA-5860230-6';//'UA-225770-1';
 	/**
 	 * @description method to check if a string starts with another string
 	 * @static

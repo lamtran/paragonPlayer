@@ -449,7 +449,11 @@ body .rhapVideoMoreControls a {
 	    color-stop(1, #0074A5)
 	);
 }
-
+.relatedCanvas{
+	position: absolute;
+	top:0;	
+	left:0;
+}
 /** overwrite jquery ui style */
 .ui-button-text{
 	font-size: 12px;	
